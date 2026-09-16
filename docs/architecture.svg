@@ -1,0 +1,113 @@
+<svg width="1200" height="1100" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+  </marker>
+  <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="1200" height="1100" fill="#ffffff"/>
+<rect x="1" y="1" width="1198" height="1098" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="600.0" y="34" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#0f172a" text-anchor="middle" >ConvFusion for Claude Code -- Architecture</text>
+<text x="600.0" y="53" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="middle" font-style="italic" >A plugin made of plain-text Skills and file conventions -- nothing here is a server, a database, or a hidden model call.</text>
+<rect x="40" y="72" width="1120" height="66" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.6"/>
+<text x="60" y="100" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1d4ed8" text-anchor="start" >Your Claude Code session</text>
+<text x="60" y="120" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e3a8a" text-anchor="start" >You: /research &lt;topic&gt;   |   Claude: reads this plugin and calls its own tools -- same session, no separate account or API key</text>
+<line x1="600" y1="138" x2="600" y2="154" stroke="#64748b" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="30" y="154" width="1140" height="348" rx="18" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1.6"/>
+<text x="46" y="174" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9" text-anchor="start" >ConvFusion plugin  --  skills/ + reference/ + hooks/</text>
+<rect x="40" y="188" width="340" height="300" rx="12" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.6"/>
+<text x="58" y="218" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#5b21b6" text-anchor="start" >Entry point</text>
+<text x="58" y="235" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#64748b" text-anchor="start" font-style="italic" >skills/research/SKILL.md</text>
+<line x1="58" y1="249" x2="374" y2="249" stroke="#e2e8f0" stroke-width="1"/>
+<text x="58" y="269" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  /research &lt;topic&gt; -&gt; bootstrap a new</text>
+<text x="58" y="289.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   research project in this directory</text>
+<text x="58" y="310.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  /research (blank) -&gt; status + what's</text>
+<text x="58" y="330.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   needed next</text>
+<text x="58" y="351.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  /research export methods -&gt; writes</text>
+<text x="58" y="371.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   research/methods-export.md</text>
+<text x="58" y="392.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  /research &lt;anything else&gt; -&gt; continue,</text>
+<text x="58" y="412.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   pulling in whichever skills apply</text>
+<text x="58" y="433.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Ends a turn with a Research Progress</text>
+<text x="58" y="453.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   Snapshot when files changed</text>
+<rect x="410" y="188" width="380" height="300" rx="12" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.6"/>
+<text x="428" y="218" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#5b21b6" text-anchor="start" >53 methodology skills</text>
+<text x="428" y="235" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#64748b" text-anchor="start" font-style="italic" >auto-triggered by description, or invoked by name</text>
+<line x1="428" y1="249" x2="784" y2="249" stroke="#e2e8f0" stroke-width="1"/>
+<text x="428" y="269" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Research Understanding (5)</text>
+<text x="428" y="289.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Literature (6)</text>
+<text x="428" y="310.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Innovation (5)</text>
+<text x="428" y="330.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Methodology (1)</text>
+<text x="428" y="351.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Experiment (7)</text>
+<text x="428" y="371.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Analysis (3)</text>
+<text x="428" y="392.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Research Decision (9)</text>
+<text x="428" y="412.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Academic Writing (12) -- incl. peer</text>
+<text x="428" y="433.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   review &amp; pre-submission audit</text>
+<text x="428" y="453.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  Research Management (5)</text>
+<rect x="820" y="188" width="340" height="300" rx="12" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.6"/>
+<text x="838" y="218" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#5b21b6" text-anchor="start" >Reference conventions</text>
+<text x="838" y="235" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#64748b" text-anchor="start" font-style="italic" >exact file schemas the skills follow</text>
+<line x1="838" y1="249" x2="1154" y2="249" stroke="#e2e8f0" stroke-width="1"/>
+<text x="838" y="269" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  workspace-layout.md</text>
+<text x="838" y="288" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  research-assets.md</text>
+<text x="838" y="307" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  plans.md</text>
+<text x="838" y="326" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  papers.md  (paper, evolution, gaps)</text>
+<text x="838" y="345" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  outputs.md  (patents, reports, slides)</text>
+<text x="838" y="364" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  latex.md  (paper.md -&gt; PDF)</text>
+<text x="838" y="383" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  literature-search.md  (OpenAlex)</text>
+<text x="838" y="402" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  paper-fulltext-download.md</text>
+<text x="838" y="421" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  research-context.md, progress-</text>
+<text x="838" y="440" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   snapshot.md</text>
+<line x1="600" y1="502" x2="600" y2="542" stroke="#64748b" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="40" y="542" width="1120" height="64" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.6"/>
+<text x="60" y="564" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#92400e" text-anchor="start" >Claude Code's own built-in tools</text>
+<text x="60" y="582" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#92400e" text-anchor="start" font-style="italic" >No MCP server. No custom API. No API key.</text>
+<rect x="484" y="558" width="118" height="32" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="543.0" y="579" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#78350f" text-anchor="middle" >Read</text>
+<rect x="616" y="558" width="118" height="32" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="675.0" y="579" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#78350f" text-anchor="middle" >Write / Edit</text>
+<rect x="748" y="558" width="118" height="32" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="807.0" y="579" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#78350f" text-anchor="middle" >Glob / Grep</text>
+<rect x="880" y="558" width="118" height="32" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="939.0" y="579" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#78350f" text-anchor="middle" >Bash</text>
+<rect x="1012" y="558" width="118" height="32" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="1071.0" y="579" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#78350f" text-anchor="middle" >WebFetch</text>
+<line x1="600" y1="606" x2="600" y2="640" stroke="#64748b" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="40" y="644" width="700" height="365" rx="12" fill="#f0fdf4" stroke="#86efac" stroke-width="1.6"/>
+<text x="58" y="674" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#15803d" text-anchor="start" >Your workspace</text>
+<text x="58" y="691" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#166534" text-anchor="start" font-style="italic" >plain Markdown/JSON files -- read them, edit them, put them in git</text>
+<line x1="58" y1="705" x2="716" y2="705" stroke="#bbf7d0" stroke-width="1"/>
+<text x="58" y="726" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >project.md              research-state.md</text>
+<text x="58" y="746" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >plans/*.md</text>
+<text x="58" y="766" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >research/</text>
+<text x="58" y="786" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  |-- evidence/E001.md, E002.md, ...</text>
+<text x="58" y="806" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  |-- claims/C001.md, ...</text>
+<text x="58" y="826" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  |-- decisions/D001.md, ...</text>
+<text x="58" y="846" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  `-- state-history/, state-proposals/</text>
+<text x="58" y="866" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >papers/&lt;id&gt;/</text>
+<text x="58" y="886" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  |-- paper.md   -&gt;   evolution.json, gaps.md</text>
+<text x="58" y="906" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  |-- latex/main.tex   -&gt;   main.pdf</text>
+<text x="58" y="926" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  `-- figures/</text>
+<text x="58" y="946" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >outputs/</text>
+<text x="58" y="966" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="400" fill="#14532d" text-anchor="start" >  |-- patents/    |-- reports/    `-- slides/</text>
+<rect x="790" y="644" width="370" height="365" rx="12" fill="#fff7ed" stroke="#fdba74" stroke-width="1.6"/>
+<text x="808" y="674" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#9a3412" text-anchor="start" >External services -- all keyless</text>
+<line x1="808" y1="688" x2="1154" y2="688" stroke="#e2e8f0" stroke-width="1"/>
+<text x="808" y="708" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  OpenAlex API</text>
+<text x="808" y="728.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   literature search, public pool</text>
+<text x="808" y="749.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  arXiv / ACL Anthology / open access</text>
+<text x="808" y="769.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   full-text paper download</text>
+<text x="808" y="790.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  tectonic (or latexmk / pdflatex)</text>
+<text x="808" y="810.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   local LaTeX -&gt; PDF compile</text>
+<text x="808" y="831.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" ></text>
+<text x="808" y="851.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  No accounts. No API keys.</text>
+<text x="808" y="872.0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >•  No data leaves your machine except</text>
+<text x="808" y="892.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#334155" text-anchor="start" >   the plain HTTP GETs above.</text>
+<line x1="390.0" y1="640" x2="390.0" y2="644" stroke="#64748b" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="939.0,606 939.0,631 975.0,631 975.0,644" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow2)"/>
+<rect x="40" y="1029" width="1120" height="44" rx="12" fill="#0f172a" stroke="#0f172a" stroke-width="1.6"/>
+<text x="600" y="1056" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle" >No API key  *  No server  *  No database  --  it's all files you can read, edit, and put in version control.</text>
+</svg>

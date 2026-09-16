@@ -1,0 +1,41 @@
+Hitchhiker's Guide to Autonomous Research — 2026
+AI Agents for the Science of Science — 2026
+Scientific Agent Skills — 2026
+AI Scientist / End-to-End Automation — 2026
+AI Scientist-v2 — 2025
+Robin / Multi-Agent Scientific Discovery — 2026
+ERA — 2026
+Google AI Co-Scientist — 2025
+Agent Laboratory — 2025
+AI-Researcher / Scientist-Bench — 2025
+Data-to-Paper — 2025 issue
+ResearchTown — ICML 2025
+ResearchAgent — NAACL 2025
+ResearchBench — 2025/2026
+ResearchArena — EMNLP 2025
+AutoResearchBench — 2026
+OpenScholar / ScholarQABench — 2026
+PaperBench — ICML 2025
+Paper2Code / PaperCoder — 2025
+PaperOrchestra — 2026
+Can LLMs Generate Novel Research Ideas? — ICLR 2025
+LiveIdeaBench — Nature Communications 2026
+SCI-IDEA — Machine Learning 2026
+Literature-Grounded Novelty Assessment — ACL SDP 2025
+MOOSE-Chem — ICLR 2025
+MOOSE-Chem2 — 2025
+Breaking the Reviewer — EMNLP 2025
+Where Do LLMs Go Wrong? — CIKM 2025
+REMOR — 2025
+PRISM — 2026
+Reviewer Guideline Design — ACL 2026
+LLM-Based Scientific Peer Review survey — 2026
+Can AI Evaluate AI Scientists? — 2026
+Fluency Without Fidelity — 2026
+Fabricated-reference audit / follow-up — 2026
+How to Write a Scientific Paper in Fifteen Steps — PLOS 2025
+Writing Is Thinking — 2025
+Multi-Agent AI Systems Need Transparency — 2026
+Using AI Responsibly in Scientific Publishing — 2026
+Rejected Papers in Academic Publishing — 2025
+Fit, Scope and the Shifting Baseline — 2025.

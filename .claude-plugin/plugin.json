@@ -1,0 +1,9 @@
+{
+  "name": "convfusion",
+  "displayName": "ConvFusion",
+  "description": "Research operating system for Claude Code: 53 research-methodology skills (topic understanding through systematic literature synthesis, experiment design, analysis, academic writing, peer review and journal-audit simulation, patents/reports/slides), a /research entry point, a UserPromptSubmit hook that auto-injects per-turn research status (harness-style, no model call), and plain-file conventions for tracking evidence, claims, decisions, plans and papers in your workspace. No API key, no server — runs entirely on Claude Code's own Read/Write/Bash/WebFetch tools plus one local Python script.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": { "name": "waqar", "email": "waqar.uestc@yahoo.com" },
+  "keywords": ["research", "academic-writing", "literature-review", "peer-review", "experiment-design", "paper-writing"]
+}
