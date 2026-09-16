@@ -1,6 +1,6 @@
 <div align="center">
 
-# ConvFusion for Claude Code
+# ResearchLedger for Claude Code
 
 **A research operating system for Claude Code — 53 peer-reviewed-style research skills, one `/research` entry point, zero API keys.**
 
