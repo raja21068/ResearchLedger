@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0",
+  "run_id": "R0001",
+  "status": "completed",
+  "started_at": "2026-09-01T09:14:22Z",
+  "finished_at": "2026-09-01T09:16:41Z",
+  "command": "python train.py --seed 42 --config configs/base.yaml",
+  "command_argv": ["python", "train.py", "--seed", "42", "--config", "configs/base.yaml"],
+  "working_directory": ".",
+  "git": { "commit": "8da09bc123456789abcdef0123456789abcdef0", "dirty": false },
+  "randomness": { "seed": 42 },
+  "targets": { "claims": ["C001"], "plan": null },
+  "environment": "environment.json",
+  "environment_digest": "sha256:62ed96b49d2f5697158d2159b2d7979d43da0f521f97b418ca9d4a14923bb4d6",
+  "hardware": {
+    "cpu": "x86_64",
+    "cpu_count": 16,
+    "total_memory_bytes": 34359738368,
+    "gpus": [],
+    "gpu_driver_version": null,
+    "cuda_version": null
+  },
+  "env_vars": {},
+  "metrics": "metrics.json",
+  "inputs": [],
+  "artifacts": [
+    { "path": "artifacts/results.csv", "sha256": "345e5180ae85878fe60b1cea72f8ab7bd9e1c8b39e8f6115ce0e00f9e8c83b72" }
+  ],
+  "timeout": null,
+  "attempts": [{ "attempt": 1, "exit_code": 0, "timed_out": false }],
+  "exit_code": 0,
+  "previous_run_hash": null
+}

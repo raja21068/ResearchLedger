@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://researchledger.dev/schemas/evidence.schema.json",
+  "title": "ResearchLedger Evidence frontmatter (v2)",
+  "description": "The YAML frontmatter block of research/evidence/E<NNN>.md. v2 canonical form uses real YAML arrays for list-valued fields, not comma/pipe-delimited strings — see reference/research-assets.md and reference/run-ledger.md. Files still in the v1 flat-string form fail this schema until migrated with `researchledger migrate`.",
+  "type": "object",
+  "required": ["schema_version", "name", "type", "status", "source_kind"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^2\\." },
+    "name": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "pattern": "^[a-z-]+-evidence$" },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "observed", "checked", "verified", "contradicted", "invalidated", "superseded"],
+      "description": "v2 evidence states — see reference/run-ledger.md#status-vocabulary."
+    },
+    "source_kind": {
+      "type": "string",
+      "enum": ["literature", "experiment", "computation", "observation", "dataset", "implementation", "analysis", "user-judgment", "external"]
+    },
+    "supports": { "type": "array", "items": { "type": "string", "pattern": "^C[0-9]{3}$" } },
+    "contradicts": { "type": "array", "items": { "type": "string", "pattern": "^C[0-9]{3}$" } },
+    "supersedes": { "type": "string", "pattern": "^E[0-9]{3}$" },
+    "superseded_by": { "type": "string", "pattern": "^E[0-9]{3}$" },
+    "plan": { "type": "string" },
+    "paper": { "type": "string" },
+    "raw_artifacts": { "type": "array", "items": { "type": "string" }, "description": "File paths, relative to the workspace root." },
+    "runs": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^R[0-9]{4}$" },
+      "description": "Run ids that produced this evidence."
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

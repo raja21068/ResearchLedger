@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://researchledger.dev/schemas/run.schema.json",
+  "title": "ResearchLedger Run Manifest",
+  "description": "research/runs/R<NNNN>/manifest.json, written by `researchledger run`. Immutable once written.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "status", "started_at", "command", "command_argv", "exit_code"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string", "pattern": "^R[0-9]{4}$" },
+    "status": { "type": "string", "enum": ["completed", "failed", "timeout"] },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "command": { "type": "string", "description": "Shell-quoted form of command_argv, for display." },
+    "command_argv": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "working_directory": { "type": "string" },
+    "git": {
+      "type": "object",
+      "properties": {
+        "commit": { "type": ["string", "null"] },
+        "dirty": { "type": ["boolean", "null"] }
+      }
+    },
+    "randomness": {
+      "type": "object",
+      "properties": { "seed": { "type": ["integer", "null"] } }
+    },
+    "targets": {
+      "type": "object",
+      "properties": {
+        "claims": { "type": "array", "items": { "type": "string", "pattern": "^C[0-9]{3}$" } },
+        "plan": { "type": ["string", "null"] }
+      }
+    },
+    "environment": {
+      "type": ["string", "null"],
+      "description": "Relative path to this run's environment.json, or null."
+    },
+    "environment_digest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "SHA-256 of environment.json's canonical bytes, so drift is detectable without opening it."
+    },
+    "hardware": {
+      "type": "object",
+      "description": "Best-effort, non-sensitive machine info (CPU model/count, total RAM, GPU names/driver, CUDA version).",
+      "properties": {
+        "cpu": { "type": ["string", "null"] },
+        "cpu_count": { "type": ["integer", "null"] },
+        "total_memory_bytes": { "type": ["integer", "null"] },
+        "gpus": { "type": "array", "items": { "type": "string" } },
+        "gpu_driver_version": { "type": ["string", "null"] },
+        "cuda_version": { "type": ["string", "null"] }
+      }
+    },
+    "env_vars": {
+      "type": "object",
+      "description": "Allowlisted environment variables only (see --env-allow) — never a full env dump.",
+      "additionalProperties": { "type": "string" }
+    },
+    "metrics": {
+      "type": ["string", "null"],
+      "description": "Relative path to this run's metrics.json, or null if the command produced none."
+    },
+    "metrics_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of metrics.json's exact bytes at seal time — the run's scientific result is otherwise the one file nothing checks the hash of. Null iff metrics is null."
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "description": "Input datasets hashed via --data (file or directory; a directory's hash covers every file's relative path and content). Order-independent.",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "timeout": { "type": ["integer", "null"] },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attempt": { "type": "integer" },
+          "exit_code": { "type": "integer" },
+          "timed_out": { "type": "boolean" }
+        }
+      }
+    },
+    "exit_code": { "type": "integer" },
+    "previous_run_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "SHA-256 of the immediately preceding run's manifest.json at the time this run was created — null only for the very first run in the ledger. Absent entirely on runs recorded before this field existed (schema_version < the one that added it); those are 'legacy unchained' runs, not broken ones."
+    }
+  }
+}

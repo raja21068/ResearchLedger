@@ -1,6 +1,6 @@
 # Workspace Layout
 
-ConvFusion's research root is **the directory Claude Code is running in** (the project directory
+ResearchLedger's research root is **the directory Claude Code is running in** (the project directory
 the user opened). There is no separate "session workspace vs. research root" split — pick the
 simple, single-tier layout: everything below lives directly under the current working directory.
 
@@ -8,6 +8,10 @@ simple, single-tier layout: everything below lives directly under the current wo
 <project root>/
 ├── project.md              # Research Definition — what the research is (core, at root)
 ├── research-state.md        # current research state + maturity (core, at root)
+├── .researchledger/          # cached graph summary — see run-ledger.md#the-cached-index
+│   └── index.json             #   the UserPromptSubmit hook's fast path; rebuilt by the CLI
+├── migration-report.json     # only after `researchledger migrate` — see run-ledger.md
+├── backup/v1-<timestamp>/    # only after `researchledger migrate` — pre-migration snapshot
 ├── attachments/             # optional — raw input materials, never silently modified
 │   ├── papers/
 │   ├── datasets/
@@ -22,6 +26,9 @@ simple, single-tier layout: everything below lives directly under the current wo
 │   │   └── .history/E<NNN>.<timestamp>.md
 │   ├── claims/C<NNN>.md
 │   ├── decisions/D<NNN>.md
+│   ├── runs/R<NNNN>/          # immutable execution records — see run-ledger.md
+│   │   └── {manifest.json, environment.json, command.txt, stdout.log,
+│   │        stderr.log, metrics.json, artifacts/}
 │   ├── state-history/v<N>.md
 │   ├── state-proposals/S<NNN>.json
 │   │   └── applied.json
@@ -39,15 +46,17 @@ simple, single-tier layout: everything below lives directly under the current wo
 1. **Directories are created on demand.** Never pre-create `experiments/`, `attachments/`,
    `papers/`, or `outputs/` just because the workspace was initialized — an empty directory implies
    "you should put something here," which is misleading before there's anything to put there. Only
-   `plans/` and `research/{evidence,claims,decisions,state-history}` count as **core** and should
-   exist once a project is underway (create them the first time something needs to be written into
-   them, not eagerly).
+   `plans/` and `research/{evidence,claims,decisions,runs,state-history}` count as **core** and
+   should exist once a project is underway (create them the first time something needs to be
+   written into them, not eagerly). `research/runs/` is created by `researchledger init` or the
+   first `researchledger run`, whichever happens first — see
+   [`run-ledger.md`](run-ledger.md).
 2. **`project.md` and `research-state.md` are the only content files at the root.** Everything else
    structured lives under `plans/`, `research/`, `papers/`, `outputs/`.
 3. **Never invent a stage/step-numbered layout.** Plan ids, experiment names, etc. are named by
    capability/topic, never `step1`/`module3`-style sequence numbers (see `plans.md`).
 4. A directory not in this list (e.g. a user's own `src/`, `data/`, `.git/`, `README.md`) is none of
-   ConvFusion's business — never move, rename, or "clean up" anything not listed above.
+   ResearchLedger's business — never move, rename, or "clean up" anything not listed above.
 
 ## Bootstrapping a fresh workspace
 
@@ -59,6 +68,11 @@ should not be pre-created either.
 
 ## Is this a research workspace?
 
-A directory counts as an active ConvFusion research workspace if either `project.md` or
-`research-state.md` exists at its root. If neither exists, treat `/research <topic>` as the trigger
-to bootstrap a new one there.
+For the skills layer, a directory counts as an active ResearchLedger research workspace if either
+`project.md` or `research-state.md` exists at its root. If neither exists, treat `/research <topic>`
+as the trigger to bootstrap a new one there.
+
+The `researchledger` CLI (see [`run-ledger.md`](run-ledger.md)) recognizes a workspace slightly more
+broadly — `project.md`, `research-state.md`, a `research/` directory, or a `.researchledger/`
+directory, any one of which is enough — so `researchledger init` can bootstrap the run ledger on its
+own in a directory that hasn't been touched by the `/research` skill yet.

@@ -28,6 +28,8 @@ Use this skill when:
 5. **Stress-test the design by pre-run simulation.** Predict expected values and their plausible spread from published numbers and the baselines, then judge whether the predicted effect is large enough to be distinguishable from run-to-run variation. If it is not, revise the design rather than proceeding.
 6. **Record the refinement as a versioned design.** When simulation or review changes the design, keep the change, the reason and the resulting version. The design handed to implementation must be the refined one, and predicted values must stay labelled as predictions.
 
+Once the design is fixed, hand it to `reproducible-implementation-spec` to turn it into an execution contract — the actual runs happen through `researchledger run --claim C<NNN> -- <command>` (tagging which claim the run is meant to speak to), never a bare, untracked script invocation. See [run-ledger.md](../../reference/run-ledger.md).
+
 ## Reasoning Guidance
 
 <!-- 迁移自旧模块提示词；具体推理要点见下方逐字来源。 -->

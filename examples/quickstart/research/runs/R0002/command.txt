@@ -1,0 +1,1 @@
+python train.py --seed 43 --config configs/base.yaml

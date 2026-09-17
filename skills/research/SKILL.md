@@ -1,12 +1,12 @@
 ---
 name: research
-description: "Open, inspect, or continue the ConvFusion research project in the current workspace. Use when the user runs /research, asks what stage their research/paper is at, wants to start a new research project, asks to continue or advance their research, or asks to export/review the research-methods library. This is the single entry point for ConvFusion's research-operating-system workflow (project definition, evidence/claims/decisions, plans, papers, outputs)."
+description: "Open, inspect, or continue the ResearchLedger research project in the current workspace. Use when the user runs /research, asks what stage their research/paper is at, wants to start a new research project, asks to continue or advance their research, or asks to export/review the research-methods library. This is the single entry point for ResearchLedger's research-operating-system workflow (project definition, evidence/claims/decisions, plans, papers, outputs)."
 argument-hint: "[research topic, question, or blank for status]"
 ---
 
 # Research
 
-ConvFusion's single entry point: open, inspect, or continue a long-running research project that
+ResearchLedger's single entry point: open, inspect, or continue a long-running research project that
 lives as plain files in the current workspace (the directory Claude Code is running in — see
 [workspace-layout.md](../../reference/workspace-layout.md)). There is no fixed pipeline and no other
 command — natural language plus the 53 methodology skills in this plugin cover everything from
@@ -45,7 +45,9 @@ Otherwise report, reading straight from disk (never from memory of earlier turns
   what you want to do and one will be drafted." If any plan is `draft`/`reviewed`, note that editing
   the file (or just continuing) will move it forward.
 - Skill count (53 built in, spanning topic understanding through paper writing and submission audit — plus any the user added).
-- Evidence/claim/decision counts from `research/`.
+- Evidence/claim/decision/run counts and integrity status — run `Bash researchledger report` (if
+  `research/runs/` exists) rather than re-deriving these by reading files by hand; it's the
+  mechanically checked source, not an approximation. Surface any errors/warnings it reports.
 - Current research stage and what's needed next — see
   [progress-snapshot.md](../../reference/progress-snapshot.md) §A/§C, or just the `research-process`
   skill if a full snapshot isn't warranted for a plain status check.
@@ -75,7 +77,11 @@ separate override-file mechanism to know about.
 1. Create the core directories: `plans/`, `research/evidence/`, `research/claims/`,
    `research/decisions/`, `research/state-history/` (see
    [workspace-layout.md](../../reference/workspace-layout.md) — don't create `papers/`, `outputs/`,
-   `experiments/`, or `attachments/` yet, they're created on demand).
+   `experiments/`, or `attachments/` yet, they're created on demand). Also run
+   `Bash researchledger init` so the run ledger (`research/runs/`, `.researchledger/index.json`) is
+   ready before any experiment happens — see [run-ledger.md](../../reference/run-ledger.md). If the
+   command isn't found, the CLI hasn't been installed yet (`pip install -e .` from the plugin root);
+   note that to the user rather than silently skipping it.
 2. Write `project.md` with the given text as the topic (see
    [research-assets.md](../../reference/research-assets.md) for the exact schema). Don't create
    `research-state.md` yet — wait until there's a real first dimension to write into it.
@@ -99,7 +105,10 @@ separate override-file mechanism to know about.
 3. Decide what the request needs and do it, pulling in whichever of the 53 skills apply — read a
    skill's `SKILL.md` before following its method, don't wing it from the title alone. If the work
    needs real execution, write or update a plan under `plans/` first so the user can refine it before
-   it runs.
+   it runs; when it does run, execute it via `Bash researchledger run -- <command>`, not a bare
+   shell command — see [run-ledger.md](../../reference/run-ledger.md) and the
+   `reproducible-implementation-spec` / `evidence-assessment` skills for what that buys you (an
+   immutable, hashed, re-verifiable record instead of a claim you'd otherwise have to take on faith).
 4. If anything in `plans/*.md` looks like it changed since you last saw it and wasn't snapshotted,
    snapshot it now (see [plans.md](../../reference/plans.md)) before editing further.
 
@@ -122,10 +131,13 @@ native settings UI, neither of which exist in Claude Code. Rather than half-port
 simplified to what Claude Code can actually do on its own:
 
 - **Per-turn context injection is lightweight, not deep.** The plugin's `UserPromptSubmit` hook
-  (`hooks/inject_research_context.py`) auto-prints a compact status line every turn — topic, stage,
-  evidence/claim/plan counts — with no model call involved. It is intentionally terse. This skill is
-  what does the *deep* read (full plan list, gaps, paper status, skill suggestions) — invoke it when
-  the lightweight hook line isn't enough context to act on.
+  (`hooks/inject_research_context.py`) auto-prints a compact status block every turn — topic,
+  evidence/claim counts by status, run count, open integrity issues — with no model call involved
+  and no prescribed "current stage" (a fixed stage table would contradict this skill's own "no
+  fixed pipeline" design; see [run-ledger.md](../../reference/run-ledger.md#the-cached-index)). It
+  is intentionally terse. This skill is what does the *deep* read (full plan list, gaps, paper
+  status, skill suggestions) — invoke it when the lightweight hook line isn't enough context to act
+  on.
 - **No cross-turn auto-continuation.** Self-continuing within one response (capped at ~3 steps, see
   `progress-snapshot.md`) is fine; silently injecting a whole new turn the user never asked for is
   not attempted.

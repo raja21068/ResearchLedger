@@ -45,7 +45,12 @@ The required sections for gap-checking purposes (never enforced on write, only u
 missing one): `Abstract, Introduction, Related Work, Method, Experiments, Results, Discussion,
 Conclusion` (compare titles with any leading `N.`/`N、`/`N)` stripped).
 
-Claims are referenced in body text as `C001`; evidence as `E001`.
+Claims are referenced in body text as `C001`; evidence as `E001`. A quantitative statement can
+optionally carry an invisible provenance marker right after it, e.g. `<!-- rl:claim=C014 -->` (the
+evidence is already reachable from the claim, so naming it explicitly, `evidence=E031,E034`, is
+optional) — `researchledger validate`/`trace`/`validate-paper` use it to check and follow the chain
+from that sentence down to the run and artifact that produced it. See
+[`run-ledger.md`](run-ledger.md). Optional: a paper with no markers is unaffected.
 
 ## `metadata.md` frontmatter
 

@@ -1,12 +1,13 @@
 <div align="center">
 
-# ConvFusion for Claude Code
+# ResearchLedger for Claude Code
 
 **A research operating system for Claude Code — 53 peer-reviewed-style research skills, one `/research` entry point, zero API keys.**
 
 [![Runs on Claude Code](https://img.shields.io/badge/runs%20on-Claude%20Code-5A32FB)](https://claude.com/claude-code)
 [![API Key](https://img.shields.io/badge/API%20key-not%20required-brightgreen)]()
 [![Skills](https://img.shields.io/badge/skills-53-blue)]()
+[![Run Ledger](https://img.shields.io/badge/run%20ledger-v2-orange)]()
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 </div>
@@ -20,13 +21,13 @@ claim tracking, and all the way to a submitted paper (or a patent, technical rep
 built-in tools. There is no server, no database, and no separate API key: it runs entirely inside
 the Claude Code session you're already using.
 
-This is a from-scratch port of the original [ResearchLedger](https://github.com/ResearchLedger/ResearchLedger-dsh)
+This is a from-scratch port of the original [ConvFusion](https://github.com/ConvFusion/ConvFusion-dsh)
 plugin (built for the DeepSeek Harness agent runtime) onto Claude Code's plugin model — see
-[*What changed from the original*](#what-changed-from-the-original-ResearchLedger) below.
+[*What changed from the original*](#what-changed-from-the-original-convfusion) below.
 
 ## Architecture
 
-![ResearchLedger for Claude Code — architecture diagram](docs/architecture.png)
+![ResearchLedger — architecture diagram](docs/architecture.png)
 
 Everything below the top band is **just files**: the plugin ships 53 Skills (markdown instructions),
 a `reference/` folder of file-format conventions, and one small Python hook (see next section).
@@ -36,7 +37,7 @@ account or API key beyond the Claude Code session itself.
 
 ## "Harness style" per-turn context — how it actually works here
 
-The original DeepSeek-Harness ResearchLedger re-evaluated a *Research Context* block on **every single
+The original DeepSeek-Harness ConvFusion re-evaluated a *Research Context* block on **every single
 model turn**, injected straight into the system prompt by the Harness runtime itself. Claude Code
 has no plugin API that does that automatically — but it does have **hooks**, and this plugin uses
 one to get the same effect:
@@ -45,10 +46,13 @@ one to get the same effect:
   **before every single turn**, no exceptions.
 - That hook is [`hooks/inject_research_context.py`](hooks/inject_research_context.py): a small,
   dependency-free Python script. Claude Code hands it the current working directory on stdin; it
-  checks whether that directory is a ResearchLedger research workspace (`project.md` or
-  `research-state.md` present); if so, it reads `project.md`, `research-state.md`,
-  `research/evidence/`, `research/claims/`, `research/decisions/`, and `plans/` directly off disk,
-  works out the current research stage, and prints a compact status block.
+  checks whether that directory is a ResearchLedger research workspace (`project.md`,
+  `research-state.md`, `research/`, or `.researchledger/` present). If `.researchledger/index.json`
+  exists (kept fresh by the `researchledger` CLI — see [Run Ledger](#run-ledger) below), it reads
+  that one small cached file; otherwise it falls back to a light scan of `research/evidence/`,
+  `research/claims/`, `research/decisions/`, and `research/runs/`. Either way it reports current
+  **state** — counts by status, open integrity issues — never a prescribed "current stage": a fixed
+  pipeline stage would contradict this plugin's own "no fixed pipeline" design (see below).
 - **No model is called and no API key is involved** — this is plain file I/O, done once per turn, in
   well under a second. Claude Code takes that script's stdout and adds it to Claude's context for
   that turn automatically. If the directory isn't a research workspace, or anything goes wrong, the
@@ -97,17 +101,24 @@ ResearchLedger/
 ├── skills/
 │   ├── research/SKILL.md          # the single entry point — /research, or auto-invoked
 │   └── <53 methodology skills>/SKILL.md  [+ reference.md for the more detailed ones]
-└── reference/                     # exact file-format schemas the skills read/write against
-    ├── workspace-layout.md         # the directory layout ResearchLedger uses in your project
-    ├── research-assets.md          # project.md, research-state.md, evidence/claims/decisions
-    ├── plans.md                    # the plans/ lifecycle (draft -> ready -> executing -> ...)
-    ├── papers.md                   # the paper entity: evolution, revision proposals, gaps, maturity
-    ├── outputs.md                  # patents, technical reports, slide decks
-    ├── latex.md                    # paper.md -> main.tex -> compiled PDF
-    ├── literature-search.md        # OpenAlex search, keyless
-    ├── paper-fulltext-download.md  # arXiv / ACL / open-access full-text download, keyless
-    ├── research-context.md         # how /research rebuilds its situational summary on invocation
-    └── progress-snapshot.md        # the end-of-turn "what changed, what's next" report
+├── reference/                     # exact file-format schemas the skills read/write against
+│   ├── workspace-layout.md         # the directory layout ResearchLedger uses in your project
+│   ├── research-assets.md          # project.md, research-state.md, evidence/claims/decisions
+│   ├── run-ledger.md               # v2: researchledger CLI, run manifests, validator, tracing
+│   ├── plans.md                    # the plans/ lifecycle (draft -> ready -> executing -> ...)
+│   ├── papers.md                   # the paper entity: evolution, revision proposals, gaps, maturity
+│   ├── outputs.md                  # patents, technical reports, slide decks
+│   ├── latex.md                    # paper.md -> main.tex -> compiled PDF
+│   ├── literature-search.md        # OpenAlex search, keyless
+│   ├── paper-fulltext-download.md  # arXiv / ACL / open-access full-text download, keyless
+│   ├── research-context.md         # how /research rebuilds its situational summary on invocation
+│   └── progress-snapshot.md        # the end-of-turn "what changed, what's next" report
+├── researchledger/                # v2: the run-ledger CLI package (see "Run Ledger" below)
+├── schemas/                        # JSON Schemas for run/evidence/claim/decision frontmatter
+├── examples/quickstart/            # a real workspace that `validate --strict` passes clean
+├── tests/                           # pytest suite for researchledger/ (168 tests, 97% coverage)
+├── .github/workflows/ci.yml        # lint + type-check + test + CLI smoke test, 3 OSes x 4 Pythons
+└── pyproject.toml                  # packages researchledger/ as the `researchledger` command
 ```
 
 ## Features
@@ -129,6 +140,47 @@ ResearchLedger/
   (`tectonic`, falling back to `latexmk` or plain `pdflatex`+`bibtex`).
 - **Plain files, real version control.** Every research asset is a Markdown or JSON file you can
   read, diff, edit by hand, and commit to git — there's no database and nothing hidden.
+- **Run ledger (v2).** Every executed experiment is an immutable, numbered record — command, git
+  commit, environment, timestamps, exit status, metrics, and SHA-256'd artifacts — and a
+  deterministic validator/tracer makes the whole claim → evidence → run → artifact chain
+  mechanically checkable, not just documented. See below.
+
+## Run Ledger
+
+`researchledger` is a standalone, typed, tested Python package (`researchledger/`, `pip install -e
+.` from this repo) that makes **paper statement → claim → evidence → run → metrics → raw
+artifact** a mechanically checked chain instead of a documented convention:
+
+```bash
+researchledger init
+researchledger run --seed 42 --data data/imagenet-c -- python train.py --config configs/base.yaml
+researchledger evidence create --from-run R0001 --supports C001   # graph-consistent by construction
+researchledger validate --strict     # CI-friendly: RL-coded errors, exits non-zero on any
+researchledger trace C001            # paper.md -> C001 -> E001 -> R0001 -> metrics.json -> SHA-256 ✓
+researchledger reproduce R0001 --repeat 5   # isolated worktree, compared against the observed spread
+researchledger report                # integrity summary: cross-references, run-backed evidence, ...
+```
+
+Try it now without setting anything up: `cd examples/quickstart && researchledger validate
+--strict` — a real, shipped workspace that passes clean, 100% on every metric.
+
+Full command reference (`init`, `run`, `validate`, `report`, `trace`, `inspect`, `reproduce`,
+`index`, `migrate`, `evidence create`, `validate-paper`), the run-manifest schema, the full
+RL-coded validator rule catalog (including the tamper-evident run chain), the evidence/claim
+status vocabulary, and the manuscript provenance-marker syntax are all in
+[`reference/run-ledger.md`](reference/run-ledger.md).
+
+Quality, as actually run in this repo: 168 tests / 97% statement coverage
+(`pytest --cov=researchledger`), clean `ruff` and `mypy`, zero known vulnerabilities in its two
+runtime dependencies (`pip-audit`), a shipped example workspace that validates clean (checked by
+`tests/test_examples.py`, not just by hand), and a 3-OS × 4-Python CI matrix
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) that also runs an `init` → `run` →
+`validate --strict` → `report` smoke test plus the shipped example's own validation.
+
+It borrows a few mature engineering ideas from
+[AutoResearch](https://github.com/raja21068/AutoResearch)'s sandbox runner (execution capture,
+environment recording, resource controls, metric collection) without pulling in its multi-agent
+orchestrator — this stays a plain, typed CLI, not a service.
 
 ## Skills catalog
 
@@ -270,7 +322,8 @@ plans/*.md                              plans for this research (draft -> ready 
 research/
 ├── evidence/E001.md, ...               confirmed scientific evidence, cross-referenced to claims
 ├── claims/C001.md, ...                 scientific claims, cross-referenced to evidence
-└── decisions/D001.md, ...              research decisions and why they were made
+├── decisions/D001.md, ...              research decisions and why they were made
+└── runs/R0001/, ...                    immutable run records (v2) — see run-ledger.md
 papers/<id>/
 ├── paper.md                            the manuscript (the only required file)
 ├── latex/main.tex -> main.pdf           compiled via tectonic / latexmk / pdflatex
@@ -285,9 +338,9 @@ There's no override file or settings UI to learn — edit a skill's `SKILL.md` (
 `reference.md`) directly, in this plugin's own directory or in a fork. The change takes effect on
 the next invocation.
 
-## What changed from the original ResearchLedger
+## What changed from the original ConvFusion
 
-The original [ResearchLedger](https://github.com/ResearchLedger/ResearchLedger-dsh) is built on DeepSeek Harness's own plugin APIs: per-turn
+The original [ConvFusion](https://github.com/ConvFusion/ConvFusion-dsh) is built on DeepSeek Harness's own plugin APIs: per-turn
 system-prompt injection, a native skill-provider registry, custom tool definitions, a settings UI,
 and RPC routes. None of that exists in Claude Code, so this port:
 
@@ -313,6 +366,81 @@ construct-level adversarial peer review), **`pre-submission-editorial-audit`** (
 editorial/integrity pre-submission screen), and **`systematic-literature-synthesis`** (building a
 40-100 paper literature universe into structured, comparable evidence and a gap inventory that
 survives a deliberate "kill fake gaps" validation before any gap is trusted).
+
+## What's new in v2: production-grade provenance, not more features
+
+v1 tracked evidence as Markdown files with a `raw_artifacts` path string — trustworthy only in
+that nobody had reason to doubt it, evidence/claim status was five loose words shared between two
+different kinds of thing, and the per-turn hook re-scanned the whole workspace and prescribed a
+fixed "current stage." v2's guiding rule was **stricter, not bigger**:
+
+- **Typed, schema-validated entities.** Evidence/claims/decisions carry `schema_version`, real
+  YAML arrays instead of comma-strings, and are checked against JSON Schemas
+  (`schemas/*.schema.json`, via the `jsonschema` package) — a malformed record fails validation
+  (`RL003`) instead of being silently accepted.
+- **A disjoint status vocabulary that can't lie about verification.** Evidence:
+  `proposed → observed → checked → verified`, or `contradicted`/`invalidated`/`superseded`. Claims:
+  `hypothesis → provisional → supported`, or `mixed`/`contradicted`/`withdrawn` — deliberately
+  different words, so a claim can never inherit "verified" from one experiment completing.
+  `recompute_claim_status` derives a claim's status from its evidence deterministically; the
+  validator flags disagreement (`RL310`) and `--strict` fails the build on it.
+- **An immutable run ledger with graph-shape constraints enforced, not just tracked.** Every run
+  records command, git commit + dirty state, environment + a digest of it, hardware, an
+  explicit-allowlist-only slice of env vars, seed, timing, exit code, and SHA-256'd artifacts —
+  written entirely by `researchledger run`'s own code, never by an LLM. `RL111` fails validation if
+  experimental evidence has no run; `RL211` fails it if the run evidence relies on didn't exit 0.
+- **An RL-coded validator with real severity semantics** (`researchledger/codes.py`): baseline
+  errors always fail the build; a fixed, documented set of warnings (`RL302`, `RL310`) escalate to
+  errors under `--strict`; everything else stays advisory. `validate`/`run`/`migrate` fail closed
+  (exceptions propagate, exit codes are meaningful); the per-turn context hook still fails open —
+  see [`reference/run-ledger.md`](reference/run-ledger.md#fail-open-vs-fail-closed) for why that
+  split is deliberate.
+- **Provenance tracing in both directions.** `researchledger trace C014` walks forward to the run
+  and artifact; `researchledger trace R0042` walks *backward* to every evidence record, claim, and
+  manuscript section that depends on that run.
+- **Reproducibility as something that actually runs**, not a stored string:
+  `researchledger reproduce R0042` checks out the run's exact git commit into an isolated worktree,
+  re-executes, and compares metrics and artifact hashes against the original — `REPRODUCED ✓` or
+  not, with the specific mismatch shown. `--repeat N` reuses that same worktree for `N` runs and
+  compares against the observed spread (`mean ± max(tolerance, z·stddev)`) instead of one point,
+  for anything with real run-to-run noise; `--data <path>` content-hashes input datasets into the
+  manifest the same way artifacts are hashed on the way out, so a silently-changed dataset shows up
+  as a validation failure, not a silent discrepancy.
+- **A tamper-evident run chain.** Every run's manifest records the SHA-256 of the immediately
+  preceding run's manifest — the same idea as a git commit chain, applied to run history. Hand-edit
+  an old run's manifest and the next run's recorded hash of it no longer matches; `validate` catches
+  the break (`RL220`) and names which run detected it. Costs nothing extra to produce or check.
+- **Manuscript provenance auditing.** `researchledger validate-paper paper.md` counts a
+  manuscript's quantitative assertions and reports how many are linked to claims, backed by
+  verified evidence, backed by reproducible runs, unsupported, or resting on stale evidence.
+- **A v1 → v2 migration tool**, not a breaking change: `researchledger migrate --from v1
+  [--dry-run]` backs up first, rewrites the schema, and recomputes (never blindly renames) claim
+  status from the migrated evidence, flagging anything malformed for manual review instead of
+  aborting the batch.
+- **Transactional writes and a cached index.** Every ledger file is written via a temp-file +
+  `fsync` + atomic rename, with an advisory lock around run-id allocation so concurrent runs can't
+  collide. The context hook reads one small `.researchledger/index.json` instead of re-scanning the
+  whole workspace every turn — and reports *state*, never a prescribed pipeline stage, which was
+  the direct contradiction v1's hook had with this plugin's own "no fixed pipeline" design.
+- **The CLI is wired into the skills, not just available next to them.** `research` bootstraps the
+  ledger and surfaces `researchledger report` in its status view; `experiment-design` routes real
+  execution to `researchledger run`; `reproducible-implementation-spec` specifies runs in terms of
+  it (`--seed`, `--data`, and verifies via `researchledger reproduce`) instead of describing an
+  equivalent directory layout by hand; `evidence-assessment` audits via `researchledger
+  trace`/`validate` and creates evidence via `researchledger evidence create`. A tool nothing calls
+  is just a tool that exists.
+- **A shipped example, not just tests.** [`examples/quickstart/`](examples/quickstart/) is a real,
+  small workspace where `validate --strict` and `validate-paper` both pass clean out of the box —
+  `tests/test_examples.py` keeps it that way.
+
+This selectively reuses AutoResearch's mature execution-capture ideas (sandboxed-enough run
+wrapper, environment recording, timeout/retry controls, metrics extraction) but deliberately does
+**not** import its multi-agent orchestrator, planner, or paper-writer — those overlap with what the
+skills above already do as plain-file conventions, and pulling in a second agent framework would
+undermine the "no server, no daemon" design this plugin is built around. See
+[`reference/run-ledger.md`](reference/run-ledger.md) for the full spec, including what's explicitly
+scoped out (unattended execution, automatic retry-with-different-hyperparameters, judging whether
+evidence is "enough" — that stays with the skills and the human).
 
 ## License
 

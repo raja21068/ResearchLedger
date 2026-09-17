@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "generated_at": "2026-09-17T06:59:05Z",
+  "file_counts": {
+    "evidence": 1,
+    "claims": 1,
+    "decisions": 1,
+    "runs": 2,
+    "papers": 1
+  },
+  "counts": {
+    "claims": 1,
+    "evidence": 1,
+    "runs": 2,
+    "decisions": 1
+  },
+  "evidence_status_counts": {
+    "verified": 1
+  },
+  "claim_status_counts": {
+    "supported": 1
+  },
+  "literature_evidence": 0,
+  "metrics": {
+    "cross_reference_integrity": 100.0,
+    "run_backed_evidence": 100.0,
+    "artifact_verification": 100.0,
+    "quantitative_claim_coverage": 100.0,
+    "reproducible_runs": 100.0,
+    "chain_integrity": 100.0
+  },
+  "errors": 0,
+  "warnings": 0,
+  "top_issues": []
+}

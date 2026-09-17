@@ -1,8 +1,15 @@
 # Research Assets: project.md, research-state.md, evidence, claims, decisions
 
-This is the schema reference for every structured research-asset file ConvFusion skills read and
-write. Follow it exactly — the id schemes and cross-references only stay useful if every skill
+This is the schema reference for every structured research-asset file ResearchLedger skills read
+and write. Follow it exactly — the id schemes and cross-references only stay useful if every skill
 writes them the same way. All paths are relative to the workspace root (see `workspace-layout.md`).
+
+**v2 note**: evidence, claims and decisions are now schema-versioned (`schema_version: "2.0"`) and
+their list-valued fields (`supports`, `contradicts`, `evidence`, `runs`, `raw_artifacts`) are real
+YAML arrays, not comma/pipe-delimited strings — `researchledger validate` enforces this via JSON
+Schema (`schemas/*.schema.json`) and reports a v1-style file as schema-invalid (`RL003`) until it's
+migrated with `researchledger migrate --from v1`. See [`run-ledger.md`](run-ledger.md) for the CLI,
+the full validator rule catalog, and the status-vocabulary rationale summarized below.
 
 ## ID scheme
 
@@ -124,17 +131,21 @@ updated_at: <ISO8601>
 
 ```yaml
 ---
+schema_version: "2.0"
 name: Baseline accuracy drop on ImageNet-C
 type: experiment-evidence          # convention: `${source_kind}-evidence`
-status: supported                  # unverified | supported | verified | rejected | superseded
+status: checked                    # proposed | observed | checked | verified | contradicted | invalidated | superseded
 source_kind: experiment             # literature | experiment | computation | observation | dataset | implementation | analysis | user-judgment | external
-supports: C001, C003                # CLAIM ids this evidence supports
-contradicts: C007                   # CLAIM ids this evidence contradicts (omit if none)
-supersedes: E002                    # omit unless set
+supports: [C001, C003]              # CLAIM ids this evidence supports
+contradicts: [C007]                 # CLAIM ids this evidence contradicts (omit or [] if none)
+supersedes: E002                    # omit unless set — single id, not a list
 superseded_by: E011                 # omit unless set (filled in on the OLD record automatically)
 plan: baseline-robustness-eval      # plan id (no `plans/` prefix, no `.md` suffix)
 paper: paper-2026-01
-raw_artifacts: experiments/baseline-eval/results/imagenet-c.json | experiments/baseline-eval/results/summary.md
+raw_artifacts:
+  - experiments/baseline-eval/results/imagenet-c.json
+  - experiments/baseline-eval/results/summary.md
+runs: [R0001]                       # run ids that produced this evidence — see run-ledger.md
 created_at: <ISO8601>
 updated_at: <ISO8601>
 ---
@@ -160,20 +171,44 @@ updated_at: <ISO8601>
 <exact command to reproduce>
 
 ## Validation
-Status: supported
+Status: checked
 ```
 
 - All 7 body sections are a **recommended template, not a requirement** — write the ones that apply,
   skip the rest. `## Validation` must always end with a `Status: <status>` line, rewritten whenever
   status changes; add `Superseded by: <id>` (and optionally `Reason:`) when superseding.
-- `raw_artifacts` in frontmatter is `|`-delimited. Prefer setting it explicitly in frontmatter over
-  relying on parsing the `## Supporting Data` list.
+- **Evidence status vocabulary (v2)** — increasing rigor, not a linear pipeline (an evidence record
+  can land directly at whichever status is honest, and can move to `contradicted`/`invalidated`
+  from any earlier state):
+  - `proposed` — an experiment/observation is planned but hasn't run yet.
+  - `observed` — something was seen (a run happened, a paper was read) but not yet scrutinized.
+  - `checked` — the result has been looked at once and looks right. **This is what a run
+    completing successfully earns on its own** (`researchledger evidence create --from-run`
+    defaults here, and refuses to set anything higher) — it is deliberately *not* "verified".
+  - `verified` — independently corroborated (a second run with a different seed, a second
+    reviewer, cross-checked against an independent source) — a separate, deliberate step a human
+    or skill takes after `checked`, never automatic.
+  - `contradicted` / `invalidated` — the result turned out to be wrong or unsupported.
+  - `superseded` — replaced by newer evidence (see below); never reused for anything else.
+  This split exists so "a claim is not verified merely because one experiment supports it" is
+  enforced by the tooling, not just written down as a norm — see
+  [`run-ledger.md`](run-ledger.md#status-vocabulary).
+- `raw_artifacts` in frontmatter is a YAML list of file paths, relative to the workspace root.
+- **`runs` (new in v2)**: when evidence comes from `researchledger run`, set `runs` to the run
+  id(s) that produced it. This is what makes the evidence mechanically re-verifiable —
+  `researchledger validate` checks the run exists and its artifacts' hashes still match, and
+  `researchledger trace <this id>` walks straight through to them. Evidence with
+  `source_kind: experiment`/`computation` and no `runs` **fails validation** once its status moves
+  past `proposed` (`RL111`) — unlike v1, this is enforced, not just tracked. Prefer
+  `researchledger evidence create --from-run <id> --supports <claim>` over hand-writing this file:
+  it allocates the id, sets `runs`/`status` correctly, and updates the claim's cross-reference and
+  recomputed status in the same step. See [`run-ledger.md`](run-ledger.md).
 - **Supersede, don't overwrite**: when evidence is corrected/replaced, set the old file's
   `status: superseded` + `superseded_by: <new id>`, and the new file's `supersedes: <old id>` — never
-  delete the old file.
+  delete the old file. `researchledger validate` checks this edge is symmetric (`RL301`).
 - **Delete is only for evidence with zero references** (empty `supports`/`contradicts` everywhere it
-  might be cited) — a cited fact is never deleted outright; supersede it or set `status: rejected`
-  instead.
+  might be cited) — a cited fact is never deleted outright; supersede it or set
+  `status: invalidated` instead.
 - Before any mutating edit, snapshot the pre-edit file to
   `research/evidence/.history/E<NNN>.<ISO-timestamp-with-dashes>.md` (e.g.
   `E003.2026-09-16T10-22-01-123Z.md`) with a `<!-- snapshot: <note> -->` header. This is a per-file
@@ -185,11 +220,12 @@ Status: supported
 
 ```yaml
 ---
+schema_version: "2.0"
 name: ResNet-50 baseline is not robust to common corruptions
 type: research-claim
-status: supported                  # unverified | supported | verified | rejected | superseded
-evidence: E001                     # EVIDENCE ids supporting this claim
-contradicts: E009                   # EVIDENCE ids contradicting this claim
+status: supported                  # hypothesis | provisional | supported | mixed | contradicted | withdrawn
+evidence: [E001]                    # EVIDENCE ids supporting this claim
+contradicts: [E009]                 # EVIDENCE ids contradicting this claim
 required_evidence: <what would still be needed to establish this, if incomplete>
 paper: paper-2026-01
 created_at: <ISO8601>
@@ -217,26 +253,40 @@ updated_at: <ISO8601>
 > (`contradicts: C007`); on a **Claim** file it lists **evidence ids** (`contradicts: E009`). Do not
 > transpose these.
 
+- **Claim status vocabulary (v2)** — deliberately *not* the same words as evidence status, so a
+  claim can never accidentally inherit "verified": `hypothesis` (no qualifying evidence yet),
+  `provisional` (weak support — evidence that's `observed`/`checked` but not `verified`),
+  `supported` (at least one live `verified` supporting evidence, no live contradiction), `mixed`
+  (live verified-or-checked evidence on both sides — contested, not auto-resolved), `contradicted`
+  (live contradicting evidence, no supporting), `withdrawn` (a human/agent retired the claim —
+  manual-only; recomputation never produces or overrides this).
 - **Cross-reference invariant** (keep both sides consistent on every write):
   `Evidence.supports` <-> appears in `Claim.evidence`; `Evidence.contradicts` <-> appears in
-  `Claim.contradicts`.
-- **Reconciling a claim's status from its evidence** (deterministic, never a subjective judgment
-  call): recompute from the evidence side, ignoring superseded evidence.
-  - All supporting evidence `rejected` -> claim `rejected`.
-  - >=1 evidence `supported`/`verified` and none contradicting -> claim `supported` (or `verified`
-    if any evidence is `verified`).
-  - >=1 supporting AND >=1 contradicting -> claim `unverified` (contested — flag for a human, do not
-    auto-resolve).
-  - No qualifying evidence either way -> leave status unchanged.
+  `Claim.contradicts`. `researchledger validate` checks this (`RL102`, warning) and every id
+  actually resolving (`RL101`, error).
+- **Reconciling a claim's status from its evidence is code's job, not a subjective judgment
+  call** — `researchledger.models.recompute_claim_status` (mirrored by `researchledger validate`'s
+  `RL310` status-drift check) implements exactly this, ignoring superseded evidence:
+  - If the claim is already `withdrawn`, leave it — recomputation never reinstates a withdrawn claim.
+  - Live contradicting evidence at `checked`/`verified` **and** live supporting evidence at
+    `observed`/`checked`/`verified` -> `mixed`.
+  - Live contradicting evidence at `checked`/`verified` and no qualifying support -> `contradicted`.
+  - Live supporting evidence at `verified` -> `supported`.
+  - Live supporting evidence at `observed`/`checked` (but nothing `verified`) -> `provisional`.
+  - No qualifying evidence either way -> `hypothesis`.
+  `researchledger evidence create` calls this directly when it links new evidence to a claim, so a
+  claim's status is usually already correct by construction; `validate` catching drift (`RL310`,
+  promoted to a hard failure under `--strict`) is the backstop for hand-edited files.
 
 ## Decisions — `research/decisions/D<NNN>.md`
 
 ```yaml
 ---
+schema_version: "2.0"
 name: <short title>
 type: research-decision
 status: decided                    # free string; conventionally: decided | revisiting | reversed
-evidence: E001, E004                # evidence ids relied on (comma-joined)
+evidence: [E001, E004]              # evidence ids relied on
 created_at: <ISO8601>
 updated_at: <ISO8601>
 ---

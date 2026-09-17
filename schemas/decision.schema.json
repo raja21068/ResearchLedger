@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://researchledger.dev/schemas/decision.schema.json",
+  "title": "ResearchLedger Decision frontmatter (v2)",
+  "description": "The YAML frontmatter block of research/decisions/D<NNN>.md.",
+  "type": "object",
+  "required": ["schema_version", "name", "type", "status"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^2\\." },
+    "name": { "type": "string", "minLength": 1 },
+    "type": { "const": "research-decision" },
+    "status": { "type": "string", "description": "Free string; conventionally decided | revisiting | reversed." },
+    "evidence": { "type": "array", "items": { "type": "string", "pattern": "^E[0-9]{3}$" } },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}
