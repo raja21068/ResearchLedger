@@ -2,11 +2,11 @@
 
 # ResearchLedger for Claude Code
 
-**A research operating system for Claude Code — 53 peer-reviewed-style research skills, one `/research` entry point, zero API keys.**
+**A research operating system for Claude Code — 54 peer-reviewed-style research skills, one `/research` entry point, zero API keys.**
 
 [![Runs on Claude Code](https://img.shields.io/badge/runs%20on-Claude%20Code-5A32FB)](https://claude.com/claude-code)
 [![API Key](https://img.shields.io/badge/API%20key-not%20required-brightgreen)]()
-[![Skills](https://img.shields.io/badge/skills-53-blue)]()
+[![Skills](https://img.shields.io/badge/skills-54-blue)]()
 [![Run Ledger](https://img.shields.io/badge/run%20ledger-v2-orange)]()
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -29,7 +29,7 @@ plugin (built for the DeepSeek Harness agent runtime) onto Claude Code's plugin 
 
 ![ResearchLedger — architecture diagram](docs/architecture.png)
 
-Everything below the top band is **just files**: the plugin ships 53 Skills (markdown instructions),
+Everything below the top band is **just files**: the plugin ships 54 Skills (markdown instructions),
 a `reference/` folder of file-format conventions, and one small Python hook (see next section).
 Claude follows the skills/reference conventions using its own Read/Write/Edit/Bash/WebFetch tools to
 read and write your workspace. Nothing runs as a background service, and nothing requires an
@@ -100,7 +100,7 @@ ResearchLedger/
 │   └── inject_research_context.py  # the "harness style" auto-context script (see above)
 ├── skills/
 │   ├── research/SKILL.md          # the single entry point — /research, or auto-invoked
-│   └── <53 methodology skills>/SKILL.md  [+ reference.md for the more detailed ones]
+│   └── <54 methodology skills>/SKILL.md  [+ reference.md for the more detailed ones]
 ├── reference/                     # exact file-format schemas the skills read/write against
 │   ├── workspace-layout.md         # the directory layout ResearchLedger uses in your project
 │   ├── research-assets.md          # project.md, research-state.md, evidence/claims/decisions
@@ -125,10 +125,21 @@ ResearchLedger/
 
 - **One command, no fixed pipeline.** `/research` bootstraps, reports status, exports the methods
   library, or continues — natural language decides what happens next, not a rigid workflow engine.
-- **53 research-methodology skills**, each auto-triggerable by description or invokable by name,
+- **54 research-methodology skills**, each auto-triggerable by description or invokable by name,
   spanning topic framing, literature search/screening/review, hypothesis and experiment design,
-  evidence/claim analysis, direction and risk decisions, academic writing, peer-review simulation,
-  pre-submission editorial audit, and patent/report/slide drafting.
+  evidence/claim analysis, direction and risk decisions, academic writing, single- and
+  multi-reviewer peer-review simulation, pre-submission editorial audit, and patent/report/slide
+  drafting.
+- **Multi-perspective review panel.** `peer-review-panel` runs four independently-mandated
+  reviewers (Journal-Fit, Methods & Reproducibility, Impact & Related-Work, Devil's Advocate)
+  against the same manuscript, has the Methods reviewer trace empirical claims back to the
+  workspace's own evidence/run records rather than just plausibility-checking them, and reconciles
+  all four into a ranked action list with a single journal-style recommendation — the spread of
+  opinion a real review round produces, not one reviewer's blind spots. It also carries
+  presentation-invariance and hedging-does-not-rescue-a-claim safeguards against two documented
+  ways automated reviewers get gamed, and a small n=1 calibration fixture with a deterministic
+  scorer (`examples/review-panel-calibration/`) so you can measure hit-rate on planted defects and
+  run the same yardstick against a competing tool's output.
 - **Traceable research assets.** Evidence, claims, and decisions are structured, cross-referenced,
   numbered records — not just chat history — so every claim in a paper can be traced back to the
   evidence and the run that produced it.

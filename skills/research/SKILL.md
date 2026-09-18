@@ -9,7 +9,7 @@ argument-hint: "[research topic, question, or blank for status]"
 ResearchLedger's single entry point: open, inspect, or continue a long-running research project that
 lives as plain files in the current workspace (the directory Claude Code is running in — see
 [workspace-layout.md](../../reference/workspace-layout.md)). There is no fixed pipeline and no other
-command — natural language plus the 53 methodology skills in this plugin cover everything from
+command — natural language plus the 54 methodology skills in this plugin cover everything from
 topic framing through paper writing and submission audit.
 
 ## Procedure
@@ -44,7 +44,7 @@ Otherwise report, reading straight from disk (never from memory of earlier turns
 - Plans: for each file in `plans/`, its path, status, version, title — or "no plans yet; describe
   what you want to do and one will be drafted." If any plan is `draft`/`reviewed`, note that editing
   the file (or just continuing) will move it forward.
-- Skill count (53 built in, spanning topic understanding through paper writing and submission audit — plus any the user added).
+- Skill count (54 built in, spanning topic understanding through paper writing and submission audit — plus any the user added).
 - Evidence/claim/decision/run counts and integrity status — run `Bash researchledger report` (if
   `research/runs/` exists) rather than re-deriving these by reading files by hand; it's the
   mechanically checked source, not an approximation. Surface any errors/warnings it reports.
@@ -102,7 +102,7 @@ separate override-file mechanism to know about.
 2. Treat the text after `/research` as the user's actual intent for this turn (this covers
    status-flavored questions too, like "what stage are we at" — answer those from the Research
    Process section of the context you just built, not with a canned reply).
-3. Decide what the request needs and do it, pulling in whichever of the 53 skills apply — read a
+3. Decide what the request needs and do it, pulling in whichever of the 54 skills apply — read a
    skill's `SKILL.md` before following its method, don't wing it from the title alone. If the work
    needs real execution, write or update a plan under `plans/` first so the user can refine it before
    it runs; when it does run, execute it via `Bash researchledger run -- <command>`, not a bare

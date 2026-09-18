@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "manuscript": "papers/main/paper.md",
+  "note": "Ground truth for the peer-review-panel calibration fixture. Each flaw is planted in the manuscript on purpose. score_review_panel.py checks a review's text for ANY of a flaw's trigger phrases (case-insensitive substring match) as a coarse, deterministic proxy for 'did the reviewer catch this.' This is a floor check, not a semantic grader -- a review can legitimately catch a flaw while phrasing it in words the fixture doesn't anticipate, which would score as a miss. Treat the number as indicative, not authoritative, and read the actual review text before concluding a tool 'failed' a flaw.",
+  "flaws": [
+    {
+      "id": "F1",
+      "persona": "Methods & Reproducibility",
+      "location": "papers/main/paper.md \u00a75 Results",
+      "description": "Manuscript claims '97% accuracy across all clients' but the linked evidence record (E001) and claim record (C001) show 97% is a single outlier client's result, with the actual across-client mean at 89.1%.",
+      "trigger_phrases": [
+        "97%", "outlier", "best client", "single client", "not the mean",
+        "not the average", "overstate", "overstated", "mean accuracy is 89",
+        "89.1", "cherry-pick", "cherry pick"
+      ]
+    },
+    {
+      "id": "F2",
+      "persona": "Impact & Related-Work",
+      "location": "papers/main/paper.md \u00a71 Introduction / Abstract",
+      "description": "Manuscript claims to be 'the first to apply differential privacy to federated learning' while its own Related Work section cites two prior differentially-private federated learning papers (Chen et al. 2022; Okafor et al. 2022).",
+      "trigger_phrases": [
+        "chen et al", "okafor et al", "not the first", "prior work already",
+        "contradicts its own related work", "already exists", "novelty claim",
+        "first to apply differential privacy"
+      ]
+    },
+    {
+      "id": "F3",
+      "persona": "Devil's Advocate",
+      "location": "papers/main/paper.md \u00a73 Method",
+      "description": "The proposed method is trained for 200 communication rounds while the FedAvg baseline is trained for only 80 rounds -- an unmatched training budget that is a plausible alternative explanation for the accuracy gap, never ruled out.",
+      "trigger_phrases": [
+        "200 rounds", "80 rounds", "round budget", "unmatched", "not matched",
+        "confound", "undertrained", "under-trained", "alternative explanation",
+        "more training", "communication rounds"
+      ]
+    },
+    {
+      "id": "F4",
+      "persona": "Methods & Reproducibility",
+      "location": "papers/main/paper.md \u00a75 Results (final sentence)",
+      "description": "The causal claim that the improvement 'comes from our aggregation rule directly countering client drift' is hedged with 'results suggest' but no statistical test, ablation, or control isolating the aggregation rule from the round-budget difference is reported -- the hedge does not supply the missing evidence.",
+      "trigger_phrases": [
+        "hedg", "results suggest", "no statistical test", "no ablation",
+        "unsupported causal", "does not isolate", "no control",
+        "does not rescue", "causal claim"
+      ]
+    },
+    {
+      "id": "F5",
+      "persona": "Journal-Fit & Construct",
+      "location": "papers/main/paper.md \u00a71 Abstract / \u00a76 Discussion",
+      "description": "'Client drift resilience' is used repeatedly as a load-bearing term (including as the paper's title) but is never operationally defined -- no metric, threshold, or measurement procedure for it is given anywhere in the manuscript.",
+      "trigger_phrases": [
+        "not defined", "undefined", "no operational definition",
+        "never defined", "circular", "no metric for", "how is",
+        "construct clarity", "client drift resilience is not"
+      ]
+    }
+  ]
+}
