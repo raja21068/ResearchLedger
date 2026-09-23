@@ -1,0 +1,144 @@
+{
+  "schema": "prr-1",
+  "id": "RH10_SEURAT_NFEATURES_DEFAULT",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "satijalab/seurat",
+    "base_commit": "c4b718c54b08b372bf07e7a6e687850c7ffea942",
+    "revision_commit": "a61cd8b12242bc448d96ab54cd16eca4dc978bfd",
+    "revision_date": "2026-09-09",
+    "commit_message": "Fix default for nfeatures parameter in FindSpatiallyVariableFeatures.Assay",
+    "changed_files": [
+      "R/preprocessing.R"
+    ],
+    "source_url": "https://github.com/satijalab/seurat/commit/a61cd8b12242bc448d96ab54cd16eca4dc978bfd",
+    "semantic_effect": "The function default changed from self-referential nfeatures=nfeatures to nfeatures=2000; calls relying on the default are revision-sensitive while calls that explicitly pass nfeatures=2000 are not dependent on the changed default expression.",
+    "benchmark_task": "Run spatially variable feature selection with the implicit default and with nfeatures=2000 explicitly supplied.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "SEURAT_NFEATURES_DEFAULT": {
+        "kind": "default_configuration",
+        "uri": "https://github.com/satijalab/seurat/blob/c4b718c54b08b372bf07e7a6e687850c7ffea942/R/preprocessing.R",
+        "version": "c4b718c54b08b372bf07e7a6e687850c7ffea942"
+      },
+      "SEURAT_EXPLICIT_NFEATURES": {
+        "kind": "configuration",
+        "uri": "benchmark://seurat-nfeatures-2000",
+        "version": "explicit"
+      }
+    },
+    "tools": {
+      "T_DEFAULT": {
+        "name": "FindSpatiallyVariableFeatures.Assay[default]",
+        "entrypoint": ""
+      },
+      "T_EXPLICIT": {
+        "name": "FindSpatiallyVariableFeatures.Assay[nfeatures=2000]",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_DEFAULT": {},
+      "R_EXPLICIT": {}
+    },
+    "evidence": {
+      "E_DEFAULT": {
+        "statement": "Spatially variable feature set from implicit nfeatures",
+        "source_kind": "paper_agent_output"
+      },
+      "E_EXPLICIT": {
+        "statement": "Feature set from explicit nfeatures=2000 replication",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_DEFAULT": {
+        "statement": "Spatial feature conclusion based only on the implicit default"
+      },
+      "C_REPLICATED": {
+        "statement": "Spatial feature conclusion supported by either implicit or explicit-2000 run"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_DEFAULT": {
+        "locator": "pilot:RH10:1",
+        "text": "Default spatial-feature result"
+      },
+      "AS_REPLICATED": {
+        "locator": "pilot:RH10:2",
+        "text": "Replicated spatial-feature result"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "SEURAT_NFEATURES_DEFAULT",
+      "dst": "T_DEFAULT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_DEFAULT",
+      "dst": "R_DEFAULT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_DEFAULT",
+      "dst": "E_DEFAULT"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "SEURAT_EXPLICIT_NFEATURES",
+      "dst": "T_EXPLICIT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_EXPLICIT",
+      "dst": "R_EXPLICIT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_EXPLICIT",
+      "dst": "E_EXPLICIT"
+    },
+    {
+      "type": "supports",
+      "src": "E_DEFAULT",
+      "dst": "C_DEFAULT"
+    },
+    {
+      "type": "support_group",
+      "src": "E_DEFAULT",
+      "dst": "C_REPLICATED",
+      "group": "g_default"
+    },
+    {
+      "type": "alternative_support_group",
+      "src": "E_EXPLICIT",
+      "dst": "C_REPLICATED",
+      "group": "g_explicit"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_DEFAULT",
+      "dst": "AS_DEFAULT"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_REPLICATED",
+      "dst": "AS_REPLICATED"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "SEURAT_NFEATURES_DEFAULT"
+      ]
+    }
+  ]
+}

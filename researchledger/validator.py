@@ -24,6 +24,7 @@ from pathlib import Path
 from . import codes
 from .environment import environment_digest as compute_environment_digest
 from .hashing import sha256_file, sha256_path
+from .frontmatter import split_ids
 from .models import recompute_claim_status, scan_claims, scan_decisions, scan_evidence
 from .schema_validation import validate_instance
 from .workspace import Workspace
@@ -201,8 +202,17 @@ def validate(ws: Workspace) -> ValidationResult:
     xref_checks = 0
     xref_ok = 0
 
+    def _claim_support_ids(cl):
+        ordered = list(cl.evidence)
+        for group in cl.support_sets:
+            ordered.extend(group)
+        ordered.extend(split_ids(cl.required_evidence))
+        # stable de-duplication keeps metrics from double-counting an evidence id
+        # that appears in both the legacy flat list and a support set.
+        return list(dict.fromkeys(ordered))
+
     for cid, cl in claims.items():
-        for eid in cl.evidence:
+        for eid in _claim_support_ids(cl):
             xref_checks += 1
             if eid not in evidence:
                 error(codes.RL101_BROKEN_EDGE, f"{cid} references nonexistent evidence {eid}")
@@ -233,7 +243,7 @@ def validate(ws: Workspace) -> ValidationResult:
             if cid not in claims:
                 error(codes.RL101_BROKEN_EDGE, f"{eid} supports nonexistent claim {cid}")
                 continue
-            if eid in claims[cid].evidence:
+            if eid in _claim_support_ids(claims[cid]):
                 xref_ok += 1
             else:
                 warning(
@@ -372,7 +382,8 @@ def validate(ws: Workspace) -> ValidationResult:
             if roots_seen > 1:
                 error(
                     codes.RL220_CHAIN_BROKEN,
-                    f"{rid} claims to start the chain (previous_run_hash=null), but a chain root already exists",
+                    f"chain branch detected: {rid} claims to start the chain "
+                    f"(previous_run_hash=null), but a chain root already exists",
                 )
                 continue
             chained_ok += 1
@@ -428,7 +439,7 @@ def validate(ws: Workspace) -> ValidationResult:
 
     # --- Graph-shape constraints: C->E, E_experimental->R, claim basis -----
     for cid, cl in claims.items():
-        if cl.status != "hypothesis" and not cl.evidence:
+        if cl.status != "hypothesis" and not _claim_support_ids(cl):
             error(codes.RL110_EMPIRICAL_CLAIM_WITHOUT_EVIDENCE, f"{cid} is '{cl.status}' but cites no evidence")
 
     for eid, ev in evidence.items():
@@ -444,9 +455,10 @@ def validate(ws: Workspace) -> ValidationResult:
                     )
 
     for cid, cl in claims.items():
-        if not cl.evidence:
+        support_ids = _claim_support_ids(cl)
+        if not support_ids:
             continue
-        live_supporting = [evidence[e] for e in cl.evidence if e in evidence and evidence[e].status != "superseded"]
+        live_supporting = [evidence[e] for e in support_ids if e in evidence and evidence[e].status != "superseded"]
         if live_supporting and all(e.status in ("contradicted", "invalidated") for e in live_supporting):
             error(
                 codes.RL120_CLAIM_BASED_ON_REJECTED_EVIDENCE,
@@ -464,7 +476,7 @@ def validate(ws: Workspace) -> ValidationResult:
 
     # --- Superseded dependency ----------------------------------------------
     for cid, cl in claims.items():
-        for eid in cl.evidence:
+        for eid in _claim_support_ids(cl):
             cited_evidence = evidence.get(eid)
             if cited_evidence and cited_evidence.status == "superseded":
                 warning(codes.RL302_SUPERSEDED_DEPENDENCY, f"{cid} depends on superseded evidence {eid}")

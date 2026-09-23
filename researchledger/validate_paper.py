@@ -91,16 +91,31 @@ def audit_paper(ws: Workspace, paper_path: Path) -> PaperAuditResult:
             result.linked_to_claims += 1
             claim_ids = [c.strip() for c in marker.group("claims").split(",") if c.strip()]
             verified = reproducible = stale = False
+            explicitly_cited = [
+                e.strip()
+                for e in ((marker.group("evidence") or "").split(","))
+                if e.strip()
+            ]
             for cid in claim_ids:
                 claim = claims.get(cid)
                 if not claim:
                     continue
-                for eid in claim.evidence:
-                    ev = evidence.get(eid)
-                    if not ev:
-                        continue
-                    if ev.status == "superseded":
-                        stale = True
+
+                # If the manuscript marker names concrete evidence, audit exactly
+                # that evidence.  Otherwise treat the claim as recovered when it
+                # has live verified support; merely retaining superseded evidence
+                # in the claim's history must not keep the manuscript permanently
+                # stale after replacement evidence has been verified.
+                candidate_ids = explicitly_cited or claim.evidence
+                candidate = [evidence[eid] for eid in candidate_ids if eid in evidence]
+                live = [ev for ev in candidate if ev.status != "superseded"]
+
+                if explicitly_cited:
+                    stale = stale or any(ev.status == "superseded" for ev in candidate)
+                else:
+                    stale = stale or (bool(candidate) and not live and any(ev.status == "superseded" for ev in candidate))
+
+                for ev in live:
                     if ev.status == "verified":
                         verified = True
                     for rid in ev.runs:

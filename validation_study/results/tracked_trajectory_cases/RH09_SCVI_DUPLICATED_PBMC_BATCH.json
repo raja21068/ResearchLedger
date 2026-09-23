@@ -1,0 +1,53 @@
+{
+  "case_id": "RH09_SCVI_DUPLICATED_PBMC_BATCH",
+  "repository": "scverse/scvi-tools",
+  "base_commit": "2d720671cb994ae117192de952146c06cb48e81a",
+  "revision_commit": "f20be750893b55944ca6a68e3603141aa73c30de",
+  "replay_mode": "loader-filter-semantics-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "b04f4a00162a580151998a6482f03466faf1409e",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "997e56c03e08a51c38eefecab568746457af38626ccc0511cef7dd96fa7ba296",
+  "new_output_sha256": "d54727199ab4b0944b6b8ee568f45de025edf28bdb54405d5f1b204db06e2030",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080247-2fdd8ae8",
+  "invalidation_transaction": "REV20260923T080250-2dcec227",
+  "recovery_transaction": "REV20260923T080250-ffbcdba5",
+  "old_tool_seconds": 2.9020886230009637,
+  "new_tool_seconds": 2.835156929000732,
+  "time_to_safe_state_seconds": 0.00941267799862544,
+  "recovery_seconds_excluding_tool_execution": 0.014086031998886028,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

@@ -1,0 +1,136 @@
+{
+  "schema": "prr-1",
+  "id": "RH08_COMPASS_PENALTY_PCA",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "YosefLab/Compass",
+    "base_commit": "d684c70def5beadddf77b8d562ff7303ce8a7452",
+    "revision_commit": "b0cc0bae420d437019fa17d84e7957c86853aba4",
+    "revision_date": "2021-04-05",
+    "commit_message": "Fixed a bug in penalties (fixed a bad copy paste from microcluster code)",
+    "changed_files": [
+      "compass/compass/penalties.py"
+    ],
+    "source_url": "https://github.com/YosefLab/Compass/commit/b0cc0bae420d437019fa17d84e7957c86853aba4",
+    "semantic_effect": "The PCA component count used dimensions from log_expression_filtered while fitting PCA to log_expression; the fix derives the component count from the actual matrix being transformed.",
+    "benchmark_task": "Evaluate reaction penalties on a fixture where filtered and unfiltered expression dimensions differ; the scientific claim requires both valid expression input and valid PCA-derived penalties.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "COMPASS_PCA_DIM": {
+        "kind": "analysis_code",
+        "uri": "https://github.com/YosefLab/Compass/blob/d684c70def5beadddf77b8d562ff7303ce8a7452/compass/compass/penalties.py",
+        "version": "d684c70def5beadddf77b8d562ff7303ce8a7452"
+      },
+      "COMPASS_EXPRESSION_INPUT": {
+        "kind": "dataset",
+        "uri": "benchmark://compass-expression-matrix",
+        "version": "fixture"
+      }
+    },
+    "tools": {
+      "T_PENALTY": {
+        "name": "eval_reaction_penalties_shared",
+        "entrypoint": ""
+      },
+      "T_INPUT": {
+        "name": "expression validation",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_PENALTY": {},
+      "R_INPUT": {}
+    },
+    "evidence": {
+      "E_PENALTY": {
+        "statement": "PCA-derived reaction penalty scores",
+        "source_kind": "paper_agent_output"
+      },
+      "E_INPUT": {
+        "statement": "Expression matrix passed benchmark integrity checks",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_REACTION": {
+        "statement": "Reaction-activity conclusion requires both valid expression data and valid penalty calculation"
+      }
+    },
+    "decisions": {
+      "D_REACTION": {
+        "statement": "Prioritize metabolic reactions using the penalty scores"
+      }
+    },
+    "assertions": {
+      "AS_REACTION": {
+        "locator": "pilot:RH08:1",
+        "text": "Reaction-activity conclusion"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "COMPASS_PCA_DIM",
+      "dst": "T_PENALTY"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_PENALTY",
+      "dst": "R_PENALTY"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_PENALTY",
+      "dst": "E_PENALTY"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "COMPASS_EXPRESSION_INPUT",
+      "dst": "T_INPUT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_INPUT",
+      "dst": "R_INPUT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_INPUT",
+      "dst": "E_INPUT"
+    },
+    {
+      "type": "support_group",
+      "src": "E_PENALTY",
+      "dst": "C_REACTION",
+      "group": "g_joint"
+    },
+    {
+      "type": "support_group",
+      "src": "E_INPUT",
+      "dst": "C_REACTION",
+      "group": "g_joint"
+    },
+    {
+      "type": "depends_on",
+      "src": "E_PENALTY",
+      "dst": "D_REACTION"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_REACTION",
+      "dst": "AS_REACTION"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "COMPASS_PCA_DIM"
+      ]
+    }
+  ]
+}

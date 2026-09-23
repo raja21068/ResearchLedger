@@ -1,0 +1,346 @@
+{
+  "schema": "prr-repository-clustered-bootstrap-1",
+  "scope": "Repository-clustered bootstrap over the 10-event authored real-history structural pilot. These intervals quantify pilot sampling variability only; they are not external-validation intervals because dependency gold was authored for the pilot.",
+  "seed": 20260923,
+  "bootstrap_replicates": 10000,
+  "repositories": [
+    "PriorLabs/TabPFN",
+    "YosefLab/Compass",
+    "decoderesearch/SAELens",
+    "qlu-lab/POP-TOOLS",
+    "satijalab/seurat",
+    "scverse/scanpy",
+    "scverse/scvi-tools",
+    "scverse/squidpy"
+  ],
+  "n_repositories": 8,
+  "n_events": 10,
+  "point_estimates": {
+    "no_revision_state": {
+      "exact_event_rate": 0.0,
+      "claim_recall": 0.0,
+      "claim_precision": null,
+      "claim_false_invalidation_rate": 0.0,
+      "claim_escape_rate": 1.0,
+      "assertion_recall": 0.0,
+      "assertion_precision": null,
+      "assertion_escape_rate": 1.0
+    },
+    "full_rebuild": {
+      "exact_event_rate": 0.4,
+      "claim_recall": 1.0,
+      "claim_precision": 0.625,
+      "claim_false_invalidation_rate": 1.0,
+      "claim_escape_rate": 0.0,
+      "assertion_recall": 1.0,
+      "assertion_precision": 0.625,
+      "assertion_escape_rate": 0.0
+    },
+    "downstream_reachability": {
+      "exact_event_rate": 0.4,
+      "claim_recall": 1.0,
+      "claim_precision": 0.625,
+      "claim_false_invalidation_rate": 1.0,
+      "claim_escape_rate": 0.0,
+      "assertion_recall": 1.0,
+      "assertion_precision": 0.625,
+      "assertion_escape_rate": 0.0
+    },
+    "binary_edges": {
+      "exact_event_rate": 0.6,
+      "claim_recall": 0.6,
+      "claim_precision": 1.0,
+      "claim_false_invalidation_rate": 0.0,
+      "claim_escape_rate": 0.4,
+      "assertion_recall": 0.6,
+      "assertion_precision": 1.0,
+      "assertion_escape_rate": 0.4
+    },
+    "support_set_provenance": {
+      "exact_event_rate": 1.0,
+      "claim_recall": 1.0,
+      "claim_precision": 1.0,
+      "claim_false_invalidation_rate": 0.0,
+      "claim_escape_rate": 0.0,
+      "assertion_recall": 1.0,
+      "assertion_precision": 1.0,
+      "assertion_escape_rate": 0.0
+    },
+    "trl_v14": {
+      "exact_event_rate": 1.0,
+      "claim_recall": 1.0,
+      "claim_precision": 1.0,
+      "claim_false_invalidation_rate": 0.0,
+      "claim_escape_rate": 0.0,
+      "assertion_recall": 1.0,
+      "assertion_precision": 1.0,
+      "assertion_escape_rate": 0.0
+    }
+  },
+  "confidence_intervals": {
+    "no_revision_state": {
+      "exact_event_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "claim_recall": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "claim_false_invalidation_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "claim_escape_rate": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_recall": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "assertion_escape_rate": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      }
+    },
+    "full_rebuild": {
+      "exact_event_rate": {
+        "median": 0.4,
+        "lo95": 0.1111111111111111,
+        "hi95": 0.7
+      },
+      "claim_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_precision": {
+        "median": 0.625,
+        "lo95": 0.5294117647058824,
+        "hi95": 0.7692307692307693
+      },
+      "claim_false_invalidation_rate": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "assertion_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_precision": {
+        "median": 0.625,
+        "lo95": 0.5294117647058824,
+        "hi95": 0.7692307692307693
+      },
+      "assertion_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      }
+    },
+    "downstream_reachability": {
+      "exact_event_rate": {
+        "median": 0.4,
+        "lo95": 0.1111111111111111,
+        "hi95": 0.7
+      },
+      "claim_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_precision": {
+        "median": 0.625,
+        "lo95": 0.5294117647058824,
+        "hi95": 0.7692307692307693
+      },
+      "claim_false_invalidation_rate": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "assertion_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_precision": {
+        "median": 0.625,
+        "lo95": 0.5294117647058824,
+        "hi95": 0.7692307692307693
+      },
+      "assertion_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      }
+    },
+    "binary_edges": {
+      "exact_event_rate": {
+        "median": 0.6,
+        "lo95": 0.3,
+        "hi95": 0.8888888888888888
+      },
+      "claim_recall": {
+        "median": 0.6,
+        "lo95": 0.3,
+        "hi95": 0.8888888888888888
+      },
+      "claim_precision": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_false_invalidation_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "claim_escape_rate": {
+        "median": 0.4,
+        "lo95": 0.1111111111111111,
+        "hi95": 0.7
+      },
+      "assertion_recall": {
+        "median": 0.6,
+        "lo95": 0.3,
+        "hi95": 0.8888888888888888
+      },
+      "assertion_precision": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_escape_rate": {
+        "median": 0.4,
+        "lo95": 0.1111111111111111,
+        "hi95": 0.7
+      }
+    },
+    "support_set_provenance": {
+      "exact_event_rate": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_precision": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_false_invalidation_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "claim_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "assertion_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_precision": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      }
+    },
+    "trl_v14": {
+      "exact_event_rate": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_precision": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "claim_false_invalidation_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "claim_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      },
+      "assertion_recall": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_precision": {
+        "median": 1.0,
+        "lo95": 1.0,
+        "hi95": 1.0
+      },
+      "assertion_escape_rate": {
+        "median": 0.0,
+        "lo95": 0.0,
+        "hi95": 0.0
+      }
+    }
+  },
+  "paired_contrasts": {
+    "trl_minus_binary_claim_recall": {
+      "median": 0.4,
+      "lo95": 0.11111111111111116,
+      "hi95": 0.7
+    },
+    "trl_minus_binary_claim_escape": {
+      "median": -0.4,
+      "lo95": -0.7,
+      "hi95": -0.1111111111111111
+    },
+    "trl_minus_reachability_false_invalidation": {
+      "median": -1.0,
+      "lo95": -1.0,
+      "hi95": -1.0
+    },
+    "trl_minus_supportset_exact": {
+      "median": 0.0,
+      "lo95": 0.0,
+      "hi95": 0.0
+    }
+  }
+}

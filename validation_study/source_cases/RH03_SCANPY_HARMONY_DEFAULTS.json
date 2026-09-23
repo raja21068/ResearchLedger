@@ -1,0 +1,144 @@
+{
+  "schema": "prr-1",
+  "id": "RH03_SCANPY_HARMONY_DEFAULTS",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "scverse/scanpy",
+    "base_commit": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc",
+    "revision_commit": "2f3bdd263ef030c06a486eea78baf2189443a3b8",
+    "revision_date": "2026-08-13",
+    "commit_message": "perf: update harmony defaults (#4290)",
+    "changed_files": [
+      "src/scanpy/preprocessing/_harmony/__init__.py"
+    ],
+    "source_url": "https://github.com/scverse/scanpy/commit/2f3bdd263ef030c06a486eea78baf2189443a3b8",
+    "semantic_effect": "Unset harmony2 stopping parameters now follow Harmony2 defaults (4, 1e-3, 1e-2) instead of the previous 200, 1e-5, 1e-4 values; runs with explicit parameters are not dependent on the default constants.",
+    "benchmark_task": "Run harmony2 once with stopping rules omitted and once with the prior values supplied explicitly.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "HARMONY_UNSET_DEFAULTS": {
+        "kind": "default_configuration",
+        "uri": "https://github.com/scverse/scanpy/blob/d8bcdae3f92803a8b36ee7117b2584f834ddb4dc/src/scanpy/preprocessing/_harmony/__init__.py",
+        "version": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc"
+      },
+      "HARMONY_EXPLICIT_PARAMS": {
+        "kind": "configuration",
+        "uri": "benchmark://explicit-harmony-stopping",
+        "version": "explicit"
+      }
+    },
+    "tools": {
+      "T_DEFAULT": {
+        "name": "scanpy.pp.harmony_integrate[defaults]",
+        "entrypoint": ""
+      },
+      "T_EXPLICIT": {
+        "name": "scanpy.pp.harmony_integrate[explicit]",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_DEFAULT": {},
+      "R_EXPLICIT": {}
+    },
+    "evidence": {
+      "E_DEFAULT": {
+        "statement": "Integrated embedding produced using unset stopping parameters",
+        "source_kind": "paper_agent_output"
+      },
+      "E_EXPLICIT": {
+        "statement": "Replication embedding using explicitly pinned stopping parameters",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_DEFAULT": {
+        "statement": "Conclusion based only on the default-parameter integration"
+      },
+      "C_REPLICATED": {
+        "statement": "Conclusion supported by either default or explicitly pinned integration"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_DEFAULT": {
+        "locator": "pilot:RH03:1",
+        "text": "Default Harmony integration result"
+      },
+      "AS_REPLICATED": {
+        "locator": "pilot:RH03:2",
+        "text": "Replicated integration result"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "HARMONY_UNSET_DEFAULTS",
+      "dst": "T_DEFAULT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_DEFAULT",
+      "dst": "R_DEFAULT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_DEFAULT",
+      "dst": "E_DEFAULT"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "HARMONY_EXPLICIT_PARAMS",
+      "dst": "T_EXPLICIT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_EXPLICIT",
+      "dst": "R_EXPLICIT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_EXPLICIT",
+      "dst": "E_EXPLICIT"
+    },
+    {
+      "type": "supports",
+      "src": "E_DEFAULT",
+      "dst": "C_DEFAULT"
+    },
+    {
+      "type": "support_group",
+      "src": "E_DEFAULT",
+      "dst": "C_REPLICATED",
+      "group": "g_default"
+    },
+    {
+      "type": "alternative_support_group",
+      "src": "E_EXPLICIT",
+      "dst": "C_REPLICATED",
+      "group": "g_explicit"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_DEFAULT",
+      "dst": "AS_DEFAULT"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_REPLICATED",
+      "dst": "AS_REPLICATED"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "HARMONY_UNSET_DEFAULTS"
+      ]
+    }
+  ]
+}

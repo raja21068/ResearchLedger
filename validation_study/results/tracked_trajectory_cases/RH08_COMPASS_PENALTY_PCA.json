@@ -1,0 +1,53 @@
+{
+  "case_id": "RH08_COMPASS_PENALTY_PCA",
+  "repository": "YosefLab/Compass",
+  "base_commit": "d684c70def5beadddf77b8d562ff7303ce8a7452",
+  "revision_commit": "b0cc0bae420d437019fa17d84e7957c86853aba4",
+  "replay_mode": "direct-expression-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "46e8f590b7cf0b996d1dbe1933e8fe991e11dd78",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "d728545603318d9373bb523f5d87ba7a816d2a62afeda52f8d84872953eedce6",
+  "new_output_sha256": "062cdf277ff8f1dba47d2302a0dbe5856a66f3e5796843f0d3a39b1988a81f60",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080242-bfb6ff33",
+  "invalidation_transaction": "REV20260923T080245-0f74a1a9",
+  "recovery_transaction": "REV20260923T080245-9898efbb",
+  "old_tool_seconds": 2.9618738839999423,
+  "new_tool_seconds": 2.758875855000042,
+  "time_to_safe_state_seconds": 0.009155233999990742,
+  "recovery_seconds_excluding_tool_execution": 0.014556991998688318,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

@@ -1,0 +1,128 @@
+{
+  "schema": "prr-1",
+  "id": "RH09_SCVI_DUPLICATED_PBMC_BATCH",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "scverse/scvi-tools",
+    "base_commit": "2d720671cb994ae117192de952146c06cb48e81a",
+    "revision_commit": "f20be750893b55944ca6a68e3603141aa73c30de",
+    "revision_date": "2026-09-02",
+    "commit_message": "fix(data): drop duplicated cd4_t_helper batch in purified_pbmc_dataset (#3985)",
+    "changed_files": [
+      "src/scvi/data/_built_in_data/_pbmc.py",
+      "src/scvi/data/_datasets.py"
+    ],
+    "source_url": "https://github.com/scverse/scvi-tools/commit/f20be750893b55944ca6a68e3603141aa73c30de",
+    "semantic_effect": "The loader returned a duplicated cd4_t_helper batch; the fix removes raw batch 7, documented as a byte-for-byte duplicate of batch 0 from a copy-paste bug in the original dataset packaging.",
+    "benchmark_task": "Load the purified PBMC fixture and fit a fixed model; downstream performance claims require both a non-duplicated dataset and the fixed model configuration.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "SCVI_PBMC_DUP_BATCH": {
+        "kind": "dataset_loader",
+        "uri": "https://github.com/scverse/scvi-tools/blob/2d720671cb994ae117192de952146c06cb48e81a/src/scvi/data/_built_in_data/_pbmc.py",
+        "version": "2d720671cb994ae117192de952146c06cb48e81a"
+      },
+      "SCVI_MODEL_CONFIG": {
+        "kind": "model_configuration",
+        "uri": "benchmark://fixed-scvi-model-config",
+        "version": "fixture"
+      }
+    },
+    "tools": {
+      "T_DATA": {
+        "name": "purified_pbmc_dataset",
+        "entrypoint": ""
+      },
+      "T_MODEL": {
+        "name": "fixed scVI model config",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_DATA": {},
+      "R_MODEL": {}
+    },
+    "evidence": {
+      "E_DATA": {
+        "statement": "Purified PBMC dataset composition used by the analysis",
+        "source_kind": "paper_agent_output"
+      },
+      "E_MODEL": {
+        "statement": "Model configuration and fit procedure",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_BENCH": {
+        "statement": "Benchmark conclusion requires both valid dataset composition and fixed model procedure"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_BENCH": {
+        "locator": "pilot:RH09:1",
+        "text": "PBMC benchmark conclusion"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "SCVI_PBMC_DUP_BATCH",
+      "dst": "T_DATA"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_DATA",
+      "dst": "R_DATA"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_DATA",
+      "dst": "E_DATA"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "SCVI_MODEL_CONFIG",
+      "dst": "T_MODEL"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_MODEL",
+      "dst": "R_MODEL"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_MODEL",
+      "dst": "E_MODEL"
+    },
+    {
+      "type": "support_group",
+      "src": "E_DATA",
+      "dst": "C_BENCH",
+      "group": "g_joint"
+    },
+    {
+      "type": "support_group",
+      "src": "E_MODEL",
+      "dst": "C_BENCH",
+      "group": "g_joint"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_BENCH",
+      "dst": "AS_BENCH"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "SCVI_PBMC_DUP_BATCH"
+      ]
+    }
+  ]
+}

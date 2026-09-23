@@ -1,0 +1,198 @@
+{
+  "schema": "researchledger-source-audit-1",
+  "verified_on": "2026-09-23",
+  "verification_method": "GitHub repository API via connected GitHub tool; exact commit SHA, first parent, message, date, and changed-file list checked.",
+  "cases": [
+    {
+      "case_id": "RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT",
+      "repository": "qlu-lab/POP-TOOLS",
+      "revision_commit": "e5e3c9281e93b43b91da2dae1880acc3e29d6cc2",
+      "base_commit": "abc373b7a42c9dc7196436766eaba1a0a2aa3c92",
+      "date": "2025-09-02T15:08:21Z",
+      "message": "Update POP-GWAS.py",
+      "changed_files": [
+        "POP-GWAS.py"
+      ],
+      "url": "https://github.com/qlu-lab/POP-TOOLS/commit/e5e3c9281e93b43b91da2dae1880acc3e29d6cc2"
+    },
+    {
+      "case_id": "RH02_SCANPY_SPARSE_NORMALIZE_TOTAL",
+      "repository": "scverse/scanpy",
+      "revision_commit": "8f76101f14b85b9a59cec2d2a970fe3b85c1cce7",
+      "base_commit": "e59622e5d3a4a637b30b74f5112ebe798620b96a",
+      "date": "2026-07-27T11:26:09Z",
+      "message": "fix: use the non-zero median as `target_sum` on the sparse path (#4256)",
+      "changed_files": [
+        "docs/release-notes/4256.fix.md",
+        "src/scanpy/preprocessing/_normalization.py",
+        "tests/test_normalization.py"
+      ],
+      "url": "https://github.com/scverse/scanpy/commit/8f76101f14b85b9a59cec2d2a970fe3b85c1cce7"
+    },
+    {
+      "case_id": "RH03_SCANPY_HARMONY_DEFAULTS",
+      "repository": "scverse/scanpy",
+      "revision_commit": "2f3bdd263ef030c06a486eea78baf2189443a3b8",
+      "base_commit": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc",
+      "date": "2026-08-13T14:59:09Z",
+      "message": "perf: update harmony defaults (#4290)",
+      "changed_files": [
+        "docs/release-notes/4290.perf.md",
+        "src/scanpy/preprocessing/_harmony/__init__.py"
+      ],
+      "url": "https://github.com/scverse/scanpy/commit/2f3bdd263ef030c06a486eea78baf2189443a3b8"
+    },
+    {
+      "case_id": "RH04_SQUIDPY_GEARY_VARIANCE",
+      "repository": "scverse/squidpy",
+      "revision_commit": "40307c8885e5e3060ef646f5088df45d720e455f",
+      "base_commit": "55572c4c194247888e384f281522c0cb9b57c737",
+      "date": "2026-06-19T08:54:56Z",
+      "message": "Use Geary's C normality variance in spatial_autocorr (fixes #1183) (#1197)",
+      "changed_files": [
+        "docs/notebooks",
+        "src/squidpy/gr/_ppatterns.py",
+        "tests/graph/test_ppatterns.py"
+      ],
+      "url": "https://github.com/scverse/squidpy/commit/40307c8885e5e3060ef646f5088df45d720e455f"
+    },
+    {
+      "case_id": "RH05_TABPFN_PRIOR_SHIFT",
+      "repository": "PriorLabs/TabPFN",
+      "revision_commit": "12862a5723d3f64de04d28588a5925eb2303a26b",
+      "base_commit": "9f0c45c63da3216564f804398020705a5b70b86d",
+      "date": "2026-09-17T06:51:05Z",
+      "message": "Correct the target prior shift of majority_downsample row subsampling (#1270)",
+      "changed_files": [
+        "changelog/1270.changed.md",
+        "src/tabpfn/classifier.py",
+        "src/tabpfn/downsample_correction.py",
+        "src/tabpfn/inference_config.py",
+        "src/tabpfn/inference_tuning.py",
+        "src/tabpfn/preprocessing/ensemble.py",
+        "src/tabpfn/regressor.py",
+        "tests/test_downsample_correction.py",
+        "tests/test_preprocessing/test_ensemble.py",
+        "tests/test_regressor_interface.py"
+      ],
+      "url": "https://github.com/PriorLabs/TabPFN/commit/12862a5723d3f64de04d28588a5925eb2303a26b"
+    },
+    {
+      "case_id": "RH06_TABPFN_FEATURE_SUBSAMPLING",
+      "repository": "PriorLabs/TabPFN",
+      "revision_commit": "02a9978acfd538b058362257f885d173a366f79c",
+      "base_commit": "8b35121b0cad8dfca542d521e2310636a453ded7",
+      "date": "2026-09-02T12:54:08Z",
+      "message": "Fix importance-based feature subsampling never sharing pools across estimators (#1141)",
+      "changed_files": [
+        "changelog/1141.fixed.md",
+        "src/tabpfn/preprocessing/ensemble.py",
+        "tests/test_preprocessing/test_ensemble.py"
+      ],
+      "url": "https://github.com/PriorLabs/TabPFN/commit/02a9978acfd538b058362257f885d173a366f79c"
+    },
+    {
+      "case_id": "RH07_SAELENS_SEQUENCE_BOUNDARY",
+      "repository": "decoderesearch/SAELens",
+      "revision_commit": "964025a2bc492af955327eacc9eaa41d9642afdc",
+      "base_commit": "ee45e7406165ce267b33d33b7371bbb63ef24db8",
+      "date": "2026-09-11T07:09:11Z",
+      "message": "fix: preserve sequence starts at batch boundaries (#733)",
+      "changed_files": [
+        "sae_lens/tokenization_and_batching.py",
+        "tests/training/test_tokenization_and_batching.py"
+      ],
+      "url": "https://github.com/decoderesearch/SAELens/commit/964025a2bc492af955327eacc9eaa41d9642afdc"
+    },
+    {
+      "case_id": "RH08_COMPASS_PENALTY_PCA",
+      "repository": "YosefLab/Compass",
+      "revision_commit": "b0cc0bae420d437019fa17d84e7957c86853aba4",
+      "base_commit": "d684c70def5beadddf77b8d562ff7303ce8a7452",
+      "date": "2021-04-05T07:06:45Z",
+      "message": "Fixed a bug in penalties (fixed a bad copy paste from microcluster code)",
+      "changed_files": [
+        "compass/_version.py",
+        "compass/compass/penalties.py"
+      ],
+      "url": "https://github.com/YosefLab/Compass/commit/b0cc0bae420d437019fa17d84e7957c86853aba4"
+    },
+    {
+      "case_id": "RH09_SCVI_DUPLICATED_PBMC_BATCH",
+      "repository": "scverse/scvi-tools",
+      "revision_commit": "f20be750893b55944ca6a68e3603141aa73c30de",
+      "base_commit": "2d720671cb994ae117192de952146c06cb48e81a",
+      "date": "2026-09-02T11:31:51Z",
+      "message": "fix(data): drop duplicated cd4_t_helper batch in purified_pbmc_dataset (#3985)",
+      "changed_files": [
+        "CHANGELOG.md",
+        "src/scvi/data/_built_in_data/_pbmc.py",
+        "src/scvi/data/_datasets.py"
+      ],
+      "url": "https://github.com/scverse/scvi-tools/commit/f20be750893b55944ca6a68e3603141aa73c30de"
+    },
+    {
+      "case_id": "RH10_SEURAT_NFEATURES_DEFAULT",
+      "repository": "satijalab/seurat",
+      "revision_commit": "a61cd8b12242bc448d96ab54cd16eca4dc978bfd",
+      "base_commit": "c4b718c54b08b372bf07e7a6e687850c7ffea942",
+      "date": "2026-09-09T21:34:29Z",
+      "message": "Fix default for nfeatures parameter in FindSpatiallyVariableFeatures.Assay",
+      "changed_files": [
+        "R/preprocessing.R"
+      ],
+      "url": "https://github.com/satijalab/seurat/commit/a61cd8b12242bc448d96ab54cd16eca4dc978bfd"
+    },
+    {
+      "case_id": "RH11_SQUIDPY_PERMUTATION_NJOBS",
+      "repository": "scverse/squidpy",
+      "revision_commit": "8dd3bf4ee5b0a0ff789cbf8d346f75d2eb92cdee",
+      "base_commit": "005c9056fea7c5432fb220abc9b48a384fb8c090",
+      "date": "2026-07-06T14:26:07Z",
+      "message": "Fix: seed sequence permutation tests and make results independent of n_jobs (#1234)",
+      "changed_files": [
+        "src/squidpy/_docs.py",
+        "src/squidpy/_utils.py",
+        "src/squidpy/gr/_ligrec.py",
+        "src/squidpy/gr/_nhood.py",
+        "src/squidpy/gr/_ppatterns.py",
+        "src/squidpy/gr/_ripley.py",
+        "src/squidpy/gr/_utils.py",
+        "tests/_data/ligrec_no_numba.pickle",
+        "tests/graph/test_ligrec.py",
+        "tests/graph/test_nhood.py",
+        "tests/graph/test_ppatterns.py",
+        "tests/graph/test_ripley.py"
+      ],
+      "url": "https://github.com/scverse/squidpy/commit/8dd3bf4ee5b0a0ff789cbf8d346f75d2eb92cdee"
+    },
+    {
+      "case_id": "RH12_SKLEARN_SPARSE_QUANTILE_SUBSAMPLING",
+      "repository": "scikit-learn/scikit-learn",
+      "revision_commit": "cfb2977609132206cecb6000b2e0e27a04b5b983",
+      "base_commit": "9bafc1c9cab99aa036aba8207125637c39fd22db",
+      "date": "2026-09-07T13:26:14Z",
+      "message": "FIX: Fix `QuantileTransformer(ignore_implicit_zeros=True)` sub-sampling behavior (#32587)",
+      "changed_files": [
+        "doc/whats_new/upcoming_changes/sklearn.preprocessing/32587.fix.rst",
+        "sklearn/preprocessing/_data.py",
+        "sklearn/preprocessing/tests/test_data.py"
+      ],
+      "url": "https://github.com/scikit-learn/scikit-learn/commit/cfb2977609132206cecb6000b2e0e27a04b5b983"
+    },
+    {
+      "case_id": "RH13_SAELENS_ZERO_BOS",
+      "repository": "decoderesearch/SAELens",
+      "revision_commit": "48c0ea92aac5b3684d2c4cafd8b8dc3c19c9349a",
+      "base_commit": "78f3db823428bc84e44ac41cada6777f44057436",
+      "date": "2026-08-29T18:53:48Z",
+      "message": "fix: treat a BOS token id of 0 as set when concatenation is disabled (#724)",
+      "changed_files": [
+        "sae_lens/tokenization_and_batching.py",
+        "tests/training/test_tokenization_and_batching.py"
+      ],
+      "url": "https://github.com/decoderesearch/SAELens/commit/48c0ea92aac5b3684d2c4cafd8b8dc3c19c9349a"
+    }
+  ],
+  "n_cases": 13
+}

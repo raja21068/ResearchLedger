@@ -1,0 +1,53 @@
+{
+  "case_id": "RH11_SQUIDPY_PERMUTATION_NJOBS",
+  "repository": "scverse/squidpy",
+  "base_commit": "005c9056fea7c5432fb220abc9b48a384fb8c090",
+  "revision_commit": "8dd3bf4ee5b0a0ff789cbf8d346f75d2eb92cdee",
+  "replay_mode": "direct-rng-semantics-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "b7e27af1c0b624db534d9f63d7131efb7f9b1e57",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "d145185092caf5c2b5490e9bbbeffa4c219de1dc5806192bbf51c56d3da95d15",
+  "new_output_sha256": "f2760c7b4c7bc5b4c06287c42055cdf9586c3f73c911fb006be5f9248d522e3f",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080307-8ad8bf00",
+  "invalidation_transaction": "REV20260923T080310-fa45fe33",
+  "recovery_transaction": "REV20260923T080310-449ce767",
+  "old_tool_seconds": 2.9130306639999617,
+  "new_tool_seconds": 2.9817991180007084,
+  "time_to_safe_state_seconds": 0.00953735199982475,
+  "recovery_seconds_excluding_tool_execution": 0.015804278000359773,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

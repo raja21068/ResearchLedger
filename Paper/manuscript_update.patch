@@ -1,0 +1,404 @@
+--- a/main.tex
++++ b/main.tex
+@@ -27,7 +27,7 @@
+ \newcommand{\etal}{\textit{et al.}}
+ \newcommand{\suppl}[1]{Supplement~#1}
+ 
+-\title{AutoResearch-Ledger: Transactional Research-State Revision over Support-Set Dependencies for Research Agents}
++\title{AutoResearch-Ledger: Transactional Revision Integrity for Executable Research Agents}
+ 
+ \author{
+     Rajesh~Kumar, %
+@@ -46,7 +46,7 @@
+ \maketitle
+ 
+ \begin{abstract}
+-Long-horizon research agents can run experiments and draft manuscripts, yet a later evidence correction can leave stale claims, decisions and manuscript statements downstream. We present AutoResearch-Ledger, a transactional research-state layer over executable provenance. \emph{Research state} denotes recorded commitments and their declared dependencies, not truth or belief. Claims rest on \emph{support sets}---jointly sufficient evidence sets plus necessary premises, non-epistemic dependencies and evidence lineage---so conjunction, alternatives and lineage are expressible where binary support edges are not. Five object kinds carry typed state machines, and ``verified'' evidence is redefined as \emph{provenance-verified}, with artifact, execution and result tiers that exclude scientific validity. Revisions commit atomically after dependency propagation, or roll back. TRL is an execution engine for \emph{externally supplied} dependency declarations, not an end-to-end reliability solution: its guarantees hold for the registered graph, and how a graph is acquired is outside it. Our experiments are synthetic conformance and representation checks whose gold structure the generator authors: full TRL matches an independently written oracle in 815 of 815 revision events, independently written JTMS and ATMS formulations agree with it, TRL without support sets fails on the conjunctive cases it cannot represent, and dropping 5\% of true edges lets 17\% of invalid manuscript assertions escape. As developer-run, non-blind development evidence, we additionally replayed the narrow semantic change in 13 genuine historical revisions across nine scientific-software repositories (13/13 reproduced the documented difference) and fault-injected the revision transaction (6/6 checks, including exact pre-image recovery at all 11 tested entity-write failure positions of an 11-file revision). We report no independently annotated real-trajectory result and no human study, so the claim is machine-checkable traceability, not better human auditing, and the results do not show that real dependencies fit the representation. We release the protocol and instrument---blind annotation, an independent oracle, a matched comparison harness---to measure how well real agents register the dependencies on which TRL's guarantees depend.
++Long-horizon research agents and executable paper agents can preserve outputs and draft manuscripts, yet a later code, data or evidence correction can leave stale downstream claims. We present AutoResearch-Ledger (TRL), a transactional research-state layer over executable provenance. \emph{Research state} denotes recorded commitments and declared dependencies, not truth. Claims use \emph{support sets}---jointly sufficient evidence sets plus necessary premises, non-epistemic dependencies and lineage---so conjunction and alternatives are representable where flat singleton support edges are not. Typed state machines separate provenance verification from scientific validity, while revisions propagate on a private copy before atomic commit or rollback. On synthetic conformance fixtures, full TRL matches an independently written oracle in 815/815 non-empty revision events. We additionally replayed 13 genuine historical scientific-software revisions across nine repositories; all 13 reproduced the documented semantic change. Executed as immutable old/new runs through a deterministic paper-agent proxy, all 13 completed the lifecycle \texttt{supported}$\rightarrow$\texttt{hypothesis}$\rightarrow$\texttt{supported}, and manuscript audit flagged explicit use of superseded evidence until replacement evidence was cited. Local transaction fault injection passed 6/6 checks, including exact restoration at all 11 tested entity-write failure positions. In an authored 10-event structural pilot, support-set provenance and full TRL achieved 10/10 exact impact identification, flat binary edges 6/10, and reachability/full rebuild 4/10. The integrated validation build passed 206/206 tests. We do not report an old/new Paper2Agent MCP replay or independent human annotation; these results establish implementation-level revision integrity under developer-authored bindings, not end-to-end scientific validity of real paper agents.
+ \end{abstract}
+ 
+ \begin{IEEEkeywords}
+@@ -55,7 +55,7 @@
+ 
+ \section{Introduction}
+ \label{sec:intro}
+-\IEEEPARstart{R}{esearch} agents now search literature, formulate hypotheses, run code and draft manuscripts \cite{lu2026aiscientist,yamada2025aiscientistv2,schmidgall2025agentlab}. Recent work has shifted attention from generation to \emph{verifiability}: ScientistOne maintains chains of evidence, EviGraph makes a typed evidence graph the agent's operational state, ARIS audits manuscript statements against a claim ledger, and claim-level provenance has been argued to be an evaluation target in its own right \cite{meng2026scientistone,ren2026evigraph,yang2026aris,rasheed2026auditability}. The remaining systems question is not whether an agent can attach evidence to a claim, but whether the \emph{whole} research state remains valid after that evidence is rejected, superseded or invalidated. In a sequential pipeline a corrected run may update one artifact while downstream claims, decisions and manuscript sentences stay unchanged: a \emph{stale dependency}.
++\IEEEPARstart{R}{esearch} agents now search literature, formulate hypotheses, run code and draft manuscripts \cite{lu2026aiscientist,yamada2025aiscientistv2,schmidgall2025agentlab}. Paper2Agent extends this direction by converting papers, code, data and workflows into validated MCP-based executable agents that can reproduce analyses and answer new scientific queries \cite{miao2026paper2agent}. Recent work has also shifted attention from generation to \emph{verifiability}: ScientistOne maintains chains of evidence, EviGraph makes a typed evidence graph the agent's operational state, ARIS audits manuscript statements against a claim ledger, and claim-level provenance has been argued to be an evaluation target in its own right \cite{meng2026scientistone,ren2026evigraph,yang2026aris,rasheed2026auditability}. Agentification makes a remaining systems question more acute: after an upstream code, data, result or evidence correction, which previously generated outputs, claims, decisions and manuscript statements are still admissible? A corrected run can change one artifact while downstream state remains unchanged, even when both old and new software execute successfully: a \emph{stale dependency}.
+ 
+ We study this as a problem of \emph{revision semantics} over a typed, versioned research state (Fig.~\ref{fig:framework}). The Transactional Research Ledger (TRL) applies each change to a private copy, propagates it through the registered dependency graph, checks global invariants, and either commits a content-addressed snapshot or rolls back. Two design decisions carry most of the weight. First, a claim's dependence on evidence is not a set of independent edges: a claim that needs an experiment \emph{and} a robustness check survives the loss of one only if a different sufficient set remains. TRL therefore represents claims by \emph{support sets}. Second, the label ``verified'' is separated into what deterministic code can check (artifact, execution, result) and what it cannot (scientific validity), so that TRL never certifies more than it can inspect.
+ 
+@@ -68,18 +68,19 @@
+ 
+ We do not claim novelty for evidence graphs, provenance, truth maintenance or transactional agent state, nor for support sets themselves, which are the monotone fragment of ATMS labels and Boolean provenance (Section~\ref{sec:related}). As far as their published descriptions state, existing research agents provide evidence tracking, repair or audit; what we specify is \emph{atomic revision semantics} that propagate an invalidation through a typed research state with conjunctive and alternative dependencies. The contribution is this research-specific composition and its measurement, not a new formalism, and TRL is an execution engine for externally supplied dependency declarations, not a solution to acquiring them. The contributions are:
+ \begin{itemize}
+-    \item \textbf{Support-set dependency semantics} with necessary premises, non-epistemic dependencies and evidence lineage, strictly more expressive than binary edges (Section~\ref{sec:support}).
++    \item \textbf{Support-set dependency semantics} with necessary premises, non-epistemic dependencies and evidence lineage, strictly more expressive than flat singleton support-edge semantics (Section~\ref{sec:support}).
+     \item \textbf{Typed state machines and provenance-verified evidence} with explicit tiers and an explicit exclusion of scientific validity (Section~\ref{sec:states}).
+     \item \textbf{Atomic, tamper-evident revision} through invariants $I_1$--$I_8$, with a propagation soundness result scoped to the registered graph (Section~\ref{sec:txn}).
+     \item \textbf{Dependency registration as a measured quantity}: precision, recall and support-set coverage, with flattened and spurious edges distinguished from missing ones (Sections~\ref{sec:registration}, \ref{sec:reg_results}).
+-    \item \textbf{An instrument for external validation}: a real-trajectory protocol, blind annotation, an independent oracle, and a matched seven-condition comparison including a labelled reconstruction of EviGraph's reported mechanism (Section~\ref{sec:design}), self-tested on synthetic fixtures.
++    \item \textbf{A bridge validation on genuine revisions}: 13 historical semantic changes from nine repositories are replayed as old/new immutable runs through the implemented ledger, including claim invalidation, manuscript provenance audit and recovery (Section~\ref{sec:hist_replay_main}).
++    \item \textbf{An instrument for confirmatory external validation}: a preregistered old/new executable-paper-agent protocol, blind annotation, an independent oracle, matched logical baselines and repository-clustered uncertainty (Section~\ref{sec:design}).
+ \end{itemize}
+-Our questions are: \textbf{RQ1} does TRL preserve invariants and prevent stale claims \emph{given a registered graph}; \textbf{RQ2} which mechanisms are necessary, including support sets and lineage; \textbf{RQ3} is its state machine-checkable (deterministic validation, tamper-evident history) and practical up to $10^5$ triples; \textbf{RQ4} how sensitive is protection to registration quality; \textbf{RQ5} how well do real agents register dependencies, and how do architectures compare on real revisions. RQ1--RQ4 are answered here with network-free mechanism experiments; RQ5 and any question about human auditing are \emph{specified but not answered}, and all claims are scoped accordingly. Extended tables, protocols and proofs are in the Supplement (\suppl{S1}--S10).
++Our questions are: \textbf{RQ1} does TRL preserve invariants and prevent stale claims \emph{given a registered graph}; \textbf{RQ2} which mechanisms are necessary, including support sets and lineage; \textbf{RQ3} is its state machine-checkable (deterministic validation, rollback, tamper-evident history) and practical up to $10^5$ triples; \textbf{RQ4} how sensitive is protection to registration quality; \textbf{RQ5} can genuine historical semantic revisions be carried through immutable runs, evidence supersession, claim invalidation, manuscript audit and recovery in the implemented ledger; and \textbf{RQ6} how well do independently generated real paper agents register dependencies and preserve scientific state under genuine revisions. RQ1--RQ4 are answered with mechanism experiments, RQ5 with a developer-run tracked-proxy bridge study, and RQ6 and all human-audit claims remain open. Extended tables, protocols and proofs are in the Supplement (\suppl{S1}--S10).
+ 
+ \section{Related Work}
+ \label{sec:related}
+ \paragraph{Research agents and evidence assurance}
+-The AI Scientist, its tree-search successor and Agent Laboratory connect ideation, experimentation and writing \cite{lu2026aiscientist,yamada2025aiscientistv2,schmidgall2025agentlab}. ScientistOne requires generated claims to stay traceable to evidence across the lifecycle; EviGraph repairs downstream subgraphs when a weak dependency is found; ARIS audits manuscript statements against a claim ledger and raw evidence \cite{meng2026scientistone,ren2026evigraph,yang2026aris}. Auditability itself has been proposed as an evaluation dimension \cite{rasheed2026auditability,martinboyle2026papertrail}; we do not evaluate it, as we ran no human study. None of these was run head-to-head with TRL; \suppl{S8} tabulates their reported mechanisms.
++The AI Scientist, its tree-search successor and Agent Laboratory connect ideation, experimentation and writing \cite{lu2026aiscientist,yamada2025aiscientistv2,schmidgall2025agentlab}. Paper2Agent converts a paper and its public computational assets into tested MCP tools and reports robustness to several execution-level repository defects \cite{miao2026paper2agent}. That addresses whether a paper agent can be made executable and kept available; our target is complementary: whether \emph{persisted downstream research state} remains admissible after a scientifically consequential upstream revision, including a revision for which both versions still execute. ScientistOne requires generated claims to stay traceable to evidence across the lifecycle; EviGraph repairs downstream subgraphs when a weak dependency is found; ARIS audits manuscript statements against a claim ledger and raw evidence \cite{meng2026scientistone,ren2026evigraph,yang2026aris}. Auditability itself has been proposed as an evaluation dimension \cite{rasheed2026auditability,martinboyle2026papertrail}; we do not evaluate it, as we ran no human study. None of these was run head-to-head with TRL; \suppl{S8} tabulates their reported mechanisms.
+ 
+ \paragraph{Truth maintenance, belief revision and argumentation}
+ Justification-based truth maintenance labels nodes IN or OUT from justifications and revises dependents when an assumption is withdrawn \cite{doyle1979tms}; assumption-based maintenance instead labels each node with the minimal sets of assumptions (environments) under which it holds and answers queries in any context \cite{dekleer1986atms}. TRL's claim liveness is the monotone fragment of both: a sufficient set is an in-list, required premises and non-epistemic dependencies are in-list members common to every justification, lineage is the justification of derived evidence, and a claim's family of sufficient sets is its ATMS label. The same function is the positive-Boolean provenance polynomial of the claim over its evidence, and rejecting evidence is deletion propagation \cite{buneman2001provenance,green2007provenance}. We test this correspondence (Section~\ref{sec:tms_xc}, \suppl{S8}). TRL lacks non-monotonic (OUT) justifications, nogood-directed backtracking and an ATMS's lattice of contexts; contradicting evidence only makes a claim \texttt{contested}. What it adds is orthogonal: atomic, predecessor-anchored commit and rollback, hash-chained history, typed lifecycles and a fail-closed export gate. AGM theory characterizes rational revision \cite{alchourron1985agm}; structured argumentation represents claims as conclusions of premise sets under attack relations \cite{toulmin1958uses,dung1995acceptability,modgil2014aspic}. Our support sets are a restricted, \emph{declared} fragment: sufficient sets are premise sets, required premises are common to all of them, contradicting evidence is a rebutter. TRL neither weighs argument strength nor revises beliefs; it revises recorded commitments.
+@@ -201,37 +202,38 @@
+ \section{Implementation and Evaluation Design}
+ \label{sec:design}
+ \subsection{Implementation}
+-TRL is a model-agnostic Python layer (typed dataclasses, JSON, SHA-256, a JSONL log) around AutoResearch's 23-stage workflow; pipeline hooks record evidence, claims, decisions and manuscript bindings, and a fail-closed bridge to ResearchLedger v2 supplies immutable runs, artifact hashing, tracing and manuscript audit (\suppl{S2}). ResearchLedger v2's 93 tests and TRL's 56 tests pass.
++TRL is a model-agnostic Python layer (typed dataclasses, JSON, SHA-256, a JSONL log) around AutoResearch's 23-stage workflow; pipeline hooks record evidence, claims, decisions and manuscript bindings, and a fail-closed bridge to ResearchLedger supplies immutable runs, artifact hashing, tracing and manuscript audit (\suppl{S2}). The integrated v2.2 validation build---including support-set revision, transaction recovery, tracked trajectories, paper audit and study tooling---passed 206/206 automated tests across 22 modules in non-overlapping batches; no lint or static-type result is claimed for that run because those executables were unavailable.
+ 
+ \subsection{Evidence hierarchy}
+-The mechanism benchmarks are generated from mutation classes that correspond closely to TRL's own invariants: excellent conformance tests, weak evidence that the representation captures real revision. Table~\ref{tab:hierarchy} therefore orders experiments by the role they can play and states what has been executed.
++The mechanism benchmarks are generated from mutation classes that correspond closely to TRL's own invariants: excellent conformance tests, weak evidence that the representation captures real revision. We therefore separate developer-run bridge evidence from confirmatory external validation (Table~\ref{tab:hierarchy}).
+ 
+ \begin{table}[t]
+ \centering
+-\caption{Evidence hierarchy. Tiers 4--6 are executed in this paper; tier 1 additionally has narrow, non-blind historical replay (\suppl{S9}).}
++\caption{Evidence hierarchy and current execution status. The tracked-proxy and structural-pilot rows use genuine revision identities but developer-authored bindings; only the top row would provide independent end-to-end construct validation.}
+ \label{tab:hierarchy}
+ \scriptsize
+-\begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}p{2.35cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.35cm}}
++\begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}p{2.45cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.25cm}}
+ \toprule
+-Tier & Role & Status \\
++Layer & Role & Status \\
+ \midrule
+-1 Real-trajectory benchmark (RRT-100) & registration quality and invalidation against independent human truth & tooling only; narrow developer-run historical replay executed (below) \\
+-2 Matched external comparison & which architecture reconciles affected objects & synthetic only \\
+-3 Human audit study & time-to-locate, stale statements missed & protocol only \\
+-4 Mechanism diagnostics & RSM, RSR, HT, DRS, SUP, REG, SM-CONF, TMS-XC, scaling & executed \\
+-5 Validator challenge & RLV2-400 rule enforcement & executed \\
+-6 Unit and smoke tests & software correctness & executed \\
++Confirmatory old/new paper-agent study & real tool outputs, blind dependency/impact truth, matched and native registration & not executed \\
++Tracked historical proxy trajectories & immutable runs, supersession, claim/paper invalidation and recovery on genuine revisions & 13/13 executed \\
++Authored real-history structural pilot & selective impact semantics on controlled graphs tied to genuine revisions & 10 events executed \\
++Human audit study & time-to-locate and stale statements missed & protocol only \\
++Mechanism diagnostics & RSM, RSR, HT, DRS, SUP, REG, SM-CONF, TMS-XC, scaling & executed \\
++Transaction fault injection & rollback, interrupted recovery, alternative support, concurrent writers & 6/6 executed \\
++Integrated software suite & implementation conformance & 206/206 passed \\
+ \bottomrule
+ \end{tabularx}
+ \end{table}
+ 
+-\subsection{Real-trajectory benchmark and matched comparison (specified, not executed)}
+-The scientific validation this work needs has ground truth \emph{outside} TRL. RRT-100 comprises 50--100 complete agent trajectories; independent annotators, blind to the registered graph, construct the dependency graph and separately label which claims, decisions and assertions a fixed set of evidence mutations invalidates; a third party adjudicates (Fig.~\ref{fig:design}). Metrics are registration precision, recall and coverage, claim-invalidation recall, false-invalidation rate, decision-revision recall, stale-assertion escape, inter-annotator agreement \cite{cohen1960kappa,fleiss1971kappa} and cost; recall, false invalidation and escape are reported both over what a system \emph{identifies} and over what it \emph{updates} in stored state. Ground truth comes from an oracle that shares no code with the ledger. The primary question is not whether TRL satisfies its own invariants but which of seven architectures correctly identifies \emph{and reconciles} the objects a revision affects, given identical trajectory, mutation, registered graph and truth: mutable state; claim relabelling; a provenance graph without transactions; transactions without propagation; a reconstruction of EviGraph's reported mechanism; TRL with binary edges; full TRL. The EviGraph condition (EG-R) implements only what that paper reports as core---an evidence graph as state, weak-dependency localization, downstream-subgraph regeneration \cite{ren2026evigraph}---and is \emph{given} the invalid node and models regeneration as flagging every reachable node, both favoring it. It says nothing about the original system, and we do not simulate a native condition for it. Protocols and the human-audit study design are in \suppl{S7}. Separately from this specified study, \suppl{S9} reports a developer-run, non-blind replay of the narrow semantic change in 13 genuine historical revisions and a fault-injected test of the revision transaction; these strengthen implementation confidence but do not satisfy RRT-100's independence requirement.
++\subsection{Confirmatory old/new paper-agent benchmark (specified, not executed)}
++The scientific validation this work needs has ground truth \emph{outside} TRL. The preregistered confirmatory study targets at least 60 genuine semantic revision events from at least 15 repositories (preferred 100--150 events from 25+ repositories). For each event, the old commit is frozen, an executable paper agent is generated where feasible (Paper2Agent provides one concrete standardized substrate \cite{miao2026paper2agent}), a prespecified task is executed, and its outputs and downstream claims are persisted before the historical correction is replayed. Two annotators, blind to registrations and system predictions, independently label affected claims, decisions and assertions and distinguish conjunctive from alternative support; a third adjudicates. Primary outcomes are stale-assertion escape and false invalidation; secondary outcomes include claim precision/recall, selective recomputation, executions avoided relative to full rebuild, recovery correctness, time-to-safe-state, dependency precision/recall and support-set coverage. The preregistered matched-registration systems are: no revision-state management; invalidate-all/full rebuild; downstream reachability; flat binary dependency propagation; AND/OR support-set provenance without transactions; and full TRL. Where feasible, an ATMS or positive-Boolean-provenance implementation is added as a strong formal comparator. Repository, not event, is the resampling unit for 95\% bootstrap intervals. The original EviGraph reconstruction remains a synthetic mechanism comparator only and is not treated as evidence about the native system. Protocols and the human-audit design are in \suppl{S7}; the executed 13-case tracked-proxy study below exercises the downstream ledger lifecycle but not real paper-agent generation or independent annotation.
+ 
+ \begin{figure*}[t]
+ \centering
+ \includegraphics[width=\textwidth]{fig_design.pdf}
+-\caption{Evaluation design. Solid boxes are implemented and self-tested on synthetic fixtures; dashed boxes require real trajectories and human annotators and have not been executed. All seven conditions receive the same registered graph and mutation, isolating revision semantics from extraction.}
++\caption{Confirmatory evaluation design. Dashed boxes require real old/new executable-paper-agent trajectories and blind human annotation and have not been executed. The 13-case tracked-proxy bridge study exercises the downstream immutable-run, invalidation, manuscript-audit and recovery path, but does not replace these external acquisition and annotation stages.}
+ \label{fig:design}
+ \end{figure*}
+ 
+@@ -325,33 +327,61 @@
+ \label{fig:scale}
+ \end{figure*}
+ 
+-\subsection{Historical replay and transaction fault injection (development evidence)}
++\subsection{Historical revisions, tracked proxy trajectories and fault injection (development evidence)}
+ \label{sec:hist_replay_main}
+-As development evidence rather than RRT-100, we replayed the smallest changed semantic unit of 13 genuine historical revisions across nine scientific-software repositories (\texttt{POP-TOOLS}, \texttt{scanpy}, \texttt{squidpy}, \texttt{TabPFN}, \texttt{SAELens}, \texttt{Compass}, \texttt{scvi-tools}, \texttt{seurat}, \texttt{scikit-learn}); all 13 reproduced the documented old/new behavioral, numerical or configuration difference on a controlled fixture (\suppl{S9}). We fault-injected the multi-file revision transaction under six deterministic checks, including a forced write failure and a simulated mid-transaction crash, both recovering exact pre-image hashes, and 11/11 tested entity-write positions on an 11-file revision restoring all pre-images; two concurrent independent revision processes both committed to the expected final state. On a separate authored 10-event structural pilot, support-set provenance alone already matches full TRL's 10/10 exact impact identification, while flat binary edges reach 6/10 and unconditional downstream reachability or full rebuild reach 4/10 by over-invalidating claims with an alternative sufficient support path; a repository-clustered bootstrap over this pilot gives a median TRL-minus-binary-edge claim-recall difference of 0.40 (95\% interval $[0.111,0.700]$). Because support-set provenance matches full TRL here, this pilot attributes impact-identification gains to AND/OR support semantics rather than to the transaction layer, consistent with Section~\ref{sec:sup_results}; the transaction layer's independent contribution is atomicity, rollback and recovery, tested above. These results are developer-run and non-blind, and the pilot's ten dependency graphs were authored for mechanism development, so neither substitutes for RRT-100's independent annotation.
++The source audit identified 13 genuine semantic revisions across nine scientific-software repositories (\texttt{POP-TOOLS}, \texttt{scanpy}, \texttt{squidpy}, \texttt{TabPFN}, \texttt{SAELens}, \texttt{Compass}, \texttt{scvi-tools}, \texttt{seurat}, \texttt{scikit-learn}). Replaying the smallest changed semantic unit reproduced the documented old/new behavioral, numerical, data or configuration difference in 13/13 cases (\suppl{S9}). The cases include sparse normalization, a statistical-variance correction, calibration under majority downsampling, feature subsampling, sequence-boundary handling, PCA setup, duplicated data removal and scientific defaults. These are narrow semantic replays rather than full historical repository builds.
++
++We then passed every case through a deterministic paper-agent proxy as two separate immutable ResearchLedger runs. The old output was frozen as provenance-verified evidence for a claim; the historical revision superseded that evidence transactionally; and the revised output was attached as replacement evidence and verified. All 13 trajectories produced different old/new artifact hashes and completed the same expected lifecycle (Table~\ref{tab:tracked_proxy}): the claim was \texttt{supported} before revision, became \texttt{hypothesis} after the old evidence was superseded, and returned to \texttt{supported} after replacement verification. An explicit manuscript provenance marker naming the superseded evidence was flagged stale in 13/13 cases and recovered in 13/13 after the marker was changed to the replacement evidence. Every final workspace had zero validation errors. Median local transaction-only time to the safe invalidated state was 9.6 ms and median recovery bookkeeping after the revised output already existed was 15.0 ms; old/new proxy tool runs were about 2.9--3.0 s and were dominated by local process/environment capture. These timings are implementation diagnostics, not Paper2Agent or production benchmarks.
++
++\begin{table}[t]
++\centering
++\caption{Ledger-integrated tracked proxy trajectories over 13 genuine historical revisions. Bindings and proxy tools were developer-authored; this is bridge/conformance evidence, not independent external validation.}
++\label{tab:tracked_proxy}
++\scriptsize
++\begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}Xr}
++\toprule
++Outcome & Result \\
++\midrule
++Historical revisions / repositories & 13 / 9 \\
++Documented old/new semantic change reproduced & 13/13 \\
++Old/new artifact hash changed & 13/13 \\
++Claim \texttt{supported}$\to$\texttt{hypothesis} after supersession & 13/13 \\
++Explicit superseded-evidence manuscript marker flagged stale & 13/13 \\
++Replacement evidence restored \texttt{supported} claim & 13/13 \\
++Recovered manuscript marker no longer stale & 13/13 \\
++Final workspace validation errors & 0 in 13/13 \\
++Median time to safe invalidated state$^\dagger$ & 9.6 ms \\
++Median recovery bookkeeping$^\dagger$ & 15.0 ms \\
++\bottomrule
++\multicolumn{2}{l}{\scriptsize $^\dagger$Excludes generation of the revised tool output; local proxy diagnostic only.}
++\end{tabularx}
++\end{table}
++
++We separately fault-injected the multi-file revision transaction under six deterministic checks. All passed, including forced write failure and simulated mid-transaction crash with exact pre-image restoration, 11/11 tested entity-write fault positions on an 11-file revision, preservation of a claim when one of two alternative sufficient support paths remained live, and two independent concurrent revision processes both reaching the expected final state. On a separate authored 10-event structural pilot, support-set provenance without transactions and full TRL both reached 10/10 exact impact identification; flat binary edges reached 6/10; unconditional downstream reachability and invalidate-all/full rebuild reached 4/10 exact matches because they over-invalidated claims retaining an alternative sufficient support path. A repository-clustered bootstrap over eight repository clusters gave a median TRL-minus-binary-edge claim-recall difference of 0.40 (95\% percentile interval $[0.111,0.700]$) and a median TRL-minus-support-set-provenance exact-match difference of 0.0 ($[0,0]$). Because the impact graphs and gold sets were authored for mechanism development, these intervals are descriptive sensitivity analyses, not external-validation uncertainty. The decomposition is important: AND/OR support semantics explain selective impact identification on this pilot; the transaction layer contributes atomic multi-file state change, rollback, crash recovery, freshness/serialization and auditable history. The integrated validation package passed 206/206 automated tests across 22 modules.
+ 
+ \section{Discussion and Limitations}
+ \label{sec:discussion}
+ \subsection{Implications}
+-The results suggest two separable layers of reliability in research agents: \emph{artifact reliability} (code runs, citations resolve, numbers match stored results) and \emph{revision integrity} (when an artifact changes, the system knows what is no longer justified). The diagnostics add two lessons for anyone building the second layer. First, protection depends on registration quality in ways that edge recall understates: a lost conjunction member, a flattened premise or a single spurious alternative path each disables protection for a whole claim, so registration should be reported as precision, recall and support-set coverage together. Second, a system that can \emph{list} affected objects but does not reconcile stored state leaves invalid assertions admissible; whether identification suffices in practice is a design question that must be measured on real trajectories rather than assumed. Our design principle, from this implementation and not established in general, is that global integrity conditions should be deterministic checks, since such a check cannot be argued out of failing by the process whose output it gates.
++The results suggest two separable layers of reliability in research agents: \emph{artifact reliability} (code runs, citations resolve, numbers match stored results) and \emph{revision integrity} (when an artifact changes, the system knows what is no longer justified). Executable-paper systems such as Paper2Agent make the distinction operational: a tool may remain executable while a historical semantic correction changes the output on which persisted claims depend. The tracked-proxy study shows that the implemented ledger can carry such an old/new change through immutable runs, stale-evidence detection and recovery, although it does not establish that a native paper agent will register the right dependencies. The diagnostics add two lessons for anyone building the second layer. First, protection depends on registration quality in ways that edge recall understates: a lost conjunction member, a flattened premise or a single spurious alternative path each disables protection for a whole claim, so registration should be reported as precision, recall and support-set coverage together. Second, a system that can \emph{list} affected objects but does not reconcile stored state leaves invalid assertions admissible; whether identification suffices in practice is a design question that must be measured on real trajectories rather than assumed. Our design principle, from this implementation and not established in general, is that global integrity conditions should be deterministic checks, since such a check cannot be argued out of failing by the process whose output it gates.
+ 
+ \subsection{Threats to validity and limitations}
+ \begin{itemize}
+-    \item \textbf{Construct validity: no independent real-trajectory result.} Every executed conformance and mechanism experiment either derives mutation classes from TRL's own invariants or uses a generator that authors the gold structure (SUP-300, REG, SM-CONF); agreement of full TRL with the oracle shows that two implementations of one specification agree, not that the specification captures how real evidence relates to claims. The historical replay and fault injection of Section~\ref{sec:hist_replay_main} add developer-run evidence that the selected historical revisions are semantically consequential and that the transaction recovers correctly under local fault injection, which materially strengthens implementation confidence, but the dependency graphs involved were authored or run by the developers, not by blind annotators, so they do not establish how often real agents fail to register dependencies or whether TRL detects what real revisions affect; those remain questions for RRT-100.
++    \item \textbf{Construct and external validity: no independent real-paper-agent result.} Synthetic experiments still use generator-authored gold. The 13 historical revision identities and changed semantics are genuine, and the tracked proxy executes the full ledger invalidation/recovery lifecycle, but the executable is a deterministic paper-agent proxy rather than a Paper2Agent-generated MCP and the claim/evidence bindings are developer-authored rather than blind human labels. Thus the study does not establish how often real agents register the right dependencies, how native agent outputs change across revisions, or how well TRL agrees with independent scientific judgement; these remain the confirmatory study's purpose.
+     \item \textbf{Comparator validity.} EG-R is a reconstruction of published mechanism under assumptions that favor it; no original system was run, and no human used the system. Conclusions about EviGraph itself are out of scope.
+     \item \textbf{Semantic warrant.} A support set is a declaration checked for structure, and provenance-verified does not mean well designed or validly inferred. The schema has no graded contradiction, no claim-to-claim or decision-to-claim dependency, no evidence-quality model, and no notion of statistical dependence between apparently independent evidence.
+     \item \textbf{Auditability.} No person has used TRL. We claim only deterministic checking of invariants, digests and the export gate and tamper evidence against local edits; we do not claim that reviewers find stale evidence faster or miss fewer stale statements (\suppl{S7} is a protocol only).
+     \item \textbf{Registration.} Real registration quality is not measured, and automatic edge proposal from manuscript text or run logs is not implemented.
+-    \item \textbf{Internal and statistical validity.} Diagnostics use fixed seeds and one generator configuration; confidence intervals are cluster-bootstrapped in the harness but degenerate on perfectly registered fixtures. Timing is from one noisy machine.
++    \item \textbf{Internal and statistical validity.} Diagnostics use fixed seeds and one generator configuration. The 10-event historical structural pilot is authored development evidence; its repository-clustered interval quantifies sensitivity within that pilot, not population-level uncertainty. Timing is from one local machine, and the millisecond tracked-proxy transaction times exclude external agent generation and revised computation.
+     \item \textbf{Scale.} Measured to $10^5$ triples on full snapshots; beyond that requires a persistent Merkle or delta store with lazy loading.
+     \item \textbf{Novelty.} Truth maintenance, provenance, argumentation and predecessor-anchored activation already exist \cite{doyle1979tms,buneman2001provenance,dung1995acceptability,he2026continuity}; the support-set model is a restricted, declared fragment, not an advance on them. Any novelty is in the composition (typed research objects, transactional commit, manuscript gating, registration metrics), and the literature survey behind it is narrow.
+ \end{itemize}
+ Because a provenance layer lowers the cost of tracing but not the cost of judging, it should support, not replace, human review of generated manuscripts (\suppl{S9}).
+ 
+ \section{Conclusion}
+-We presented a transactional research-state layer whose revision semantics rest on support sets, evidence lineage and typed state machines, and whose strongest evidence state is provenance-verified rather than scientifically valid. Existing conformance benchmarks reproduce on the new core. Diagnostics show that support sets and lineage matter, that protection is far more sensitive to registration quality than edge recall alone suggests, and that identifying affected objects is not the same as reconciling them; a conformance fuzzer also corrected a mistake in our first claim state machine. All of this is mechanism-level evidence. We report no results on real trajectories, no comparison with the original EviGraph or ScientistOne, and no human study; we release the instrument for each so that TRL's central open question, how well real agents register the dependencies its guarantees depend on, can be measured rather than assumed.
++We presented a transactional research-state layer whose revision semantics rest on declared support sets, evidence lineage and typed state machines, and whose strongest evidence state is provenance-verified rather than scientifically valid. Synthetic conformance experiments show that the implementation matches its specification and that selective invalidation requires AND/OR support semantics rather than flat singleton edges. Registration diagnostics show that missing, flattened and spurious dependencies can each defeat protection. Beyond synthetic fixtures, 13 genuine historical software revisions from nine repositories reproduced their documented semantic change, and all 13 completed an immutable-run proxy lifecycle in which superseding old evidence moved a supported claim to hypothesis, explicit stale manuscript provenance was detected, and verified replacement evidence restored the claim; local fault injection separately exercised rollback and crash recovery. These bridge results materially strengthen implementation confidence but do not close the central external-validity gap. We therefore do not claim that real paper agents remain scientifically valid under revision. The decisive next study is preregistered: old/new executable-paper-agent replay on at least 60 genuine revision events from at least 15 repositories, with two blind annotators, adjudication, strong logical baselines and repository-clustered uncertainty.
+ 
+ \section*{Data and Code Availability}
+-Code, seeds, result files, the RRT harness and annotation tooling, and protocols are in the accompanying package (\suppl{S10}); the ResearchLedger v2 source archive is frozen by SHA-256.
++Code, seeds, result files, the 13-case tracked-trajectory runner, transaction fault-injection outputs, blind annotation packets and aggregation/adjudication tooling, confirmatory preregistration, and protocols are in the accompanying v2.2 validation package (\suppl{S10}); the package is frozen by SHA-256.
+ 
+ \printbibliography
+ 
+--- a/supplement.tex
++++ b/supplement.tex
+@@ -20,13 +20,13 @@
+ \renewcommand{\thefigure}{S\arabic{figure}}
+ \renewcommand{\theequation}{S\arabic{equation}}
+ 
+-\title{Supplementary Material for ``AutoResearch-Ledger: Transactional Research-State Revision over Support-Set Dependencies for Research Agents''}
++\title{Supplementary Material for ``AutoResearch-Ledger: Transactional Revision Integrity for Executable Research Agents''}
+ \author{Rajesh~Kumar, Waqar~Ali, Junaid~Ahmed, Abdullah~Aman~Khan, Shaoning~Zeng}
+ 
+ \begin{document}
+ \maketitle
+ 
+-\noindent This supplement contains material that supports, but is not needed to follow, the main paper: full state-machine relations, implementation details, complete benchmark tables, protocols for the studies the paper specifies but does not execute, a comparison with related systems, and reproducibility information. References to ``the main text'' are to the accompanying manuscript.
++\noindent This supplement contains material that supports, but is not needed to follow, the main paper: full state-machine relations, implementation details, complete benchmark tables, the 13-case historical tracked-proxy bridge study, transaction fault injection, protocols for the confirmatory study that remains unexecuted, a comparison with related systems, and reproducibility information. References to ``the main text'' are to the accompanying manuscript.
+ 
+ \section{Formal Details}
+ \subsection{Per-object state machines}
+@@ -85,7 +85,7 @@
+ \end{table*}
+ 
+ \paragraph{Test inventory}
+-The TRL suite has 56 tests: nine original mechanism tests (rejection and supersession propagation, reciprocal-link rollback, hash-chain tamper detection, workspace import, stale-head rejection, supersession cycles, artifact drift, pipeline-hook export gate); 34 tests of support sets (conjunction, alternatives, required premises, dependencies, weakest-member level, contradiction), lineage and run invalidation, derivation cycles, verification tiers, legacy canonicalization, terminal states, decision lifecycle, assertions, and store equivalence; ten harness self-checks (oracle semantics, baseline separation, registration metrics, agreement, blind-packet content, worksheet round trip, ledger-to-trajectory conversion); two code-path tests of the audit-study analysis on simulated data; and two tests of the JTMS/ATMS cross-check. ResearchLedger v2's own 93-test suite passed in two batches (39 + 54).
++The integrated ResearchLedger v2.2 validation build passed 206/206 automated tests across 22 modules in five non-overlapping batches: 88 tests for models/validator/revision/revision CLI/tracked trajectories/paper validation/study tooling; 68 for atomicity/CLI/errors/environment/evidence/examples/hooks/indexing/migration/reporting; 14 reproduction tests; 20 runner tests; and 16 skill-wiring/trace/workspace tests. This supersedes the earlier separately reported 56-test TRL and 93-test ResearchLedger counts for the code exercised by the updated historical-validation study. The run used the same source tree as the tracked-trajectory results. \texttt{ruff} and \texttt{mypy} were not installed in that execution environment, so no new lint or static-type result is claimed.
+ 
+ \section{Conformance Benchmarks}
+ All six benchmarks are deterministic, network-free and generated from fixed seeds. They test conformance of the implementation to its specification.
+@@ -307,6 +307,7 @@
+ \toprule
+ System & Operational evidence state & Response to evidence change & Global transaction semantics & Decision provenance & Auditable revision mechanism \\
+ \midrule
++Paper2Agent \cite{miao2026paper2agent} & Tested MCP tools + paper resources & Execute--diagnose--repair for tool/repository failures; no persisted claim-revision semantics reported & NR & NR & Tool tests + code references \\
+ ScientistOne \cite{meng2026scientistone} & Chain-of-Evidence & NR & NR & NR & Post-hoc CoE audit \\
+ EviGraph \cite{ren2026evigraph} & Typed evidence graph & Downstream subgraph regeneration & Partial: graph checkpoint/repair & NR & Graph checkpointing \\
+ ARIS \cite{yang2026aris} & Claim ledger + raw evidence & Partial: verdict propagation & NR & NR & Evidence-to-claim audit cascade \\
+@@ -405,9 +406,9 @@
+ \end{tabular}
+ \end{table}
+ 
+-\subsection{Executed historical-semantic replay and transaction fault injection}
++\subsection{Executed historical-semantic replay, tracked proxy trajectories and transaction fault injection}
+ \label{sec:hist_replay_supp}
+-This subsection reports development evidence collected after the main experiments, using genuine historical revisions rather than the generator-authored fixtures of the Support Sets and Registration Diagnostics and State-Machine sections above. It is developer-run and non-blind: dependency graphs and fixtures were constructed by the authors, not by independent annotators, so it strengthens implementation confidence but does not satisfy RRT-100. It is summarized in the main paper's Results (``Historical replay and transaction fault injection'') and referenced there as Supplement~S9.
++This subsection reports development evidence collected after the main mechanism experiments, using genuine historical revisions rather than only generator-authored fixtures. It is developer-run and non-blind: semantic fixtures, dependency bindings and the paper-agent proxy were constructed by the developers rather than independent annotators, so it strengthens implementation and integration confidence but does not satisfy the preregistered confirmatory study. It is summarized in the main paper's Results and referenced there as Supplement~S9.
+ 
+ \paragraph{Historical semantic replay} Table~\ref{tab:hist_replay} lists 13 revisions across nine repositories, verified against public repository metadata on 2026-09-23 (revision identity and changed-file counts only; the authored dependency graph and downstream claim impact are not verified by this audit). For each case we replayed the smallest changed semantic unit on a fixture derived from the commit. All 13 reproduced the documented old/new difference. RH01, RH03, RH07 and RH10 are direct code or configuration replays reported qualitatively as ``differs as documented''; the remaining cases carry a measured before/after value. For RH04, an earlier description of this fixture stated that the corrected Geary's-C analytic variance crossed the 0.05 significance threshold; the measured values are approximately 0.0444 before correction and 0.0209 after, both below 0.05, so this is a material $p$-value shift and \emph{not} a threshold crossing, and we correct that description here. RH09 executes the historical filtering predicate on a surrogate batch table rather than the original H5AD file. A supplemental PyMC underflow diagnostic was excluded from this count because the installed PyMC/ArviZ combination could not be imported in the runtime used.
+ 
+@@ -437,13 +438,39 @@
+ \end{tabularx}
+ \end{table}
+ 
++\paragraph{Ledger-integrated tracked proxy trajectories} Each of the 13 cases was next executed as two immutable ResearchLedger runs through \texttt{validation\_study/trajectory\_runner.py}. The old run produced an artifact whose hash was captured in the run manifest, was promoted to verified evidence, and supported claim \texttt{C001}. The genuine historical revision identity was then used as the reason for transactionally superseding the old evidence; the claim lost live support and moved to \texttt{hypothesis}. The revised semantic fixture was executed as a new immutable run, attached as replacement evidence, verified, and the claim returned to \texttt{supported}. A manuscript marker explicitly naming the old evidence was audited before revision, after supersession and after recovery; stale usage appeared after supersession and disappeared only after the marker was changed to the replacement evidence.
++
++\begin{table}[!t]
++\centering
++\caption{Tracked proxy lifecycle over the 13 historical revisions. The executable is a deterministic paper-agent proxy, not a Paper2Agent MCP; bindings are developer-authored.}
++\label{tab:tracked_proxy_supp}
++\scriptsize
++\begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}Xr}
++\toprule
++Outcome & Result \\
++\midrule
++Different old/new artifact hashes & 13/13 \\
++Initial verified evidence + supported claim & 13/13 \\
++Supersession produced \texttt{hypothesis} & 13/13 \\
++Explicit old-evidence manuscript marker stale & 13/13 \\
++Verified replacement restored \texttt{supported} & 13/13 \\
++Replacement marker cleared stale usage & 13/13 \\
++Final validation errors & 0/13 \\
++Median transaction-only time to safe state & 9.6 ms \\
++Median recovery bookkeeping after new output exists & 15.0 ms \\
++\bottomrule
++\end{tabularx}
++\end{table}
++
++Each case retains the two immutable run manifests, artifact hashes, three committed revision journals (old-evidence verification, supersession, replacement verification), audit snapshots and timing fields. Median old/new proxy executions were approximately 2.9--3.0 s and were dominated by process/environment capture. These timings are local implementation diagnostics and exclude real paper-agent generation or the scientific computation cost of an arbitrary repository.
++
+ \paragraph{Transaction fault injection} We fault-injected the multi-file revision transaction under six deterministic checks, all passing: (1) an ordinary two-entity revision commits; (2) a forced write failure on the second entity restores exact pre-image hashes and marks the transaction \texttt{rolled\_back}; (3) a simulated process crash during the \texttt{applying} phase is recovered from the journal, restoring the pre-image; (4) removing one of two alternative sufficient support paths for a claim leaves it \texttt{supported}; (5) an 11-file transaction faulted at every one of its 11 entity-write positions restores all original file hashes in 11/11 trials; (6) two independent revision CLI processes launched concurrently both commit, leaving both evidence/claim pairs in the expected final states. These checks support the implemented local atomicity/recovery protocol under the tested fault model; they are not a distributed-database durability claim and do not cover storage-device failure, network partitions or hostile writers.
+ 
+ \paragraph{Authored structural pilot and repository-clustered bootstrap} On a separate authored 10-event pilot mapping the first ten historical revisions to controlled dependency graphs (distinct from SUP-300's 815 generator-authored events), support-set provenance and full TRL both reach exact 10/10 impact identification; flat binary edges reach 6/10; unconditional downstream reachability and unconditional full rebuild reach 4/10 exact matches, over-invalidating claims that retain an alternative sufficient support path (claim false-invalidation rate 1.0 for both, against 0.0 for support-set provenance and full TRL). A repository-clustered bootstrap (10,000 replicates, 8 repository clusters) gives a median TRL-minus-binary-edge claim-recall difference of 0.40 (95\% percentile interval $[0.111,0.700]$) and a median TRL-minus-support-set-provenance exact-match difference of 0.0 (interval $[0.0,0.0]$), i.e.\ support-set provenance alone already matches full TRL on this pilot. Because the ten dependency graphs and gold impact sets were authored for mechanism development rather than independently annotated, this interval is a descriptive sensitivity analysis over the pilot, not external-validation uncertainty, and it should not be read as a confidence interval on TRL's advantage over binary edges in general. The pilot result is consistent with the main paper's SUP-300 support-set results: it attributes impact-identification gains to AND/OR support semantics rather than to the transaction layer, whose independently tested contribution is atomicity, rollback, crash recovery and auditable history (above).
+ 
+-\paragraph{Full test suite} The validation bundle's complete automated test suite passed 201/201 tests across 21 modules (executed in chunks because a single invocation exceeds the runtime's per-command time limit; no test module was omitted). This is a software-conformance result for the codebase exercised by this replay, reported here rather than as an update to the Implementation and Integration counts above (Supplement~S2) because the two test runs were not executed in the same session.
++\paragraph{Full test suite} The v2.2 validation bundle's complete automated test inventory passed 206/206 tests across 22 modules in non-overlapping batches because a monolithic invocation exceeds the runtime's per-command time limit; no test module was omitted. This is software-conformance evidence for the source tree exercised by the semantic replay, tracked trajectories and transaction tests, not a scientific-validity result.
+ 
+-\paragraph{Interpretation boundary} This evidence is not independent external validation. It strengthens confidence that the implementation behaves correctly on genuine historical revisions and under local fault injection, but the dependency graphs, fixtures and fault schedule were all authored or run by the developers. The decisive remaining study is a full old-commit $\to$ executable paper-agent $\to$ frozen outputs/claims $\to$ historical correction $\to$ re-execution trajectory with independent blind human annotation and adjudication, as specified for RRT-100 above; those labels cannot be produced by an automated run, and blind annotation packets for the 13 cases above exist only as unfilled study materials.
++\paragraph{Interpretation boundary} This evidence is not independent external validation. It strengthens confidence that genuine historical semantic changes can be carried through the implemented immutable-run, evidence, claim, transaction and manuscript-audit lifecycle, but the executable tool is a deterministic proxy, and the dependency/claim bindings, fixtures and fault schedule were authored by the developers. The decisive remaining study is a full old-commit $\to$ generated executable paper agent (for example a Paper2Agent MCP) $\to$ frozen outputs/claims $\to$ historical correction $\to$ regenerated/re-executed agent, evaluated against two blind independent annotators plus adjudication. The preregistration requires at least 60 revision events from at least 15 repositories, matched- and native-registration analyses, strong logical baselines and repository-clustered uncertainty. Blind packets for the current cases remain unfilled study materials; no human labels or agreement statistic are fabricated.
+ 
+ \subsection{Ethical considerations}
+ Automated paper generation risks low-quality, misleading or plagiarized submissions. AutoResearch includes execution, citation and evidence-alignment checks before artifact promotion, and TRL adds deterministic provenance and revision-state constraints; these reduce particular failure modes but do not establish correctness, novelty or ethical acceptability. Users could still misuse the system to mass-produce superficial papers; we recommend human oversight and treating generated manuscripts as drafts. A ledger makes stale dependencies visible and preserves a reviewable history of evidence changes, at the cost of retaining superseded state and some review burden. Provenance integrity is not a certificate of scientific validity.
+@@ -460,7 +487,8 @@
+ Artifact & Identifier \\
+ \midrule
+ AutoResearch base & \texttt{\seqsplit{3277c5381b08dc7ec93374fa869784fb5397e3c7}} \\
+-ResearchLedger v2 source ZIP & \texttt{\seqsplit{79a4428f1af995b7dc846701378fa93127169bea7c6e957f295eed3188a5b722}} \\
++ResearchLedger v2.2 validation ZIP & \texttt{\seqsplit{97e016dfb8a6d75c3c1564110af005b13aaf3ba7348fe35aa216ea008bca4ae4}} \\
++Uploaded ResearchLedger base ZIP & \texttt{\seqsplit{c5c9f24d21484b343b5e0b265202a0583c19fc901843e806f682447d06521c30}} \\
+ TRL code v13 ZIP SHA-256 & \texttt{\seqsplit{7c66c55fda0f333bca4027eb42f43c575923f8af0a70d2fdfa3411be1b16eba6}} \\
+ RSM output & \texttt{code\_patch/benchmark\_results.json} \\
+ Scaling output & \texttt{code\_patch/scaling\_results.json} \\
+@@ -469,7 +497,7 @@
+ Tamper output & \texttt{code\_patch/tamper\_results.json} \\
+ DRS-1400 output & \texttt{eval/dependency\_registration\_results.json} \\
+ RLV2-400 output & \texttt{eval/researchledger\_v2\_validator\_results.json} \\
+-ResearchLedger tests & 93/93 passed in supplied source \\
++Integrated v2.2 tests & 206/206 passed across 22 modules \\
+ Bridge smoke test & \texttt{integration/test\_bridge.py} \\
+ Unit tests & \texttt{code\_patch/tests/test\_research\_ledger.py} \\
+ Legacy Docker image & TBD (legacy executor rerun only) \\
+@@ -478,7 +506,7 @@
+ \end{table}
+ 
+ \subsection{Commands}
+-Everything except the ResearchLedger v2 suite requires only Python and \texttt{pytest}; no model API, GPU or network access is needed. From the \texttt{code/} directory:
++The synthetic mechanism suite and local validation harness require only Python and \texttt{pytest}; the confirmatory old/new paper-agent study will additionally require the selected repositories, their dependencies and the chosen paper-agent generator. No model API, GPU or network access is needed for the already executed local replays. From the \texttt{code/} directory:
+ \begin{lstlisting}[basicstyle=\scriptsize\ttfamily,breaklines=true]
+ PYTHONPATH=. pytest -q tests
+ PYTHONPATH=. python eval/research_state_mutation_benchmark.py --trials 1000 --seed 7
+@@ -492,8 +520,14 @@
+ PYTHONPATH=. python eval/scaling_v13.py --scales 1000 10000 50000 100000 --extra 10000:5 10000:20 50000:5
+ PYTHONPATH=. python -m eval.rrt.run --selftest 100 --seed 5     # synthetic self-test, NOT RRT results
+ PYTHONPATH=. python -m eval.rrt.run --data rrt_data/             # real trajectories, once collected
+-# ResearchLedger v2 source root:
+-python -m pytest -q
++# ResearchLedger v2.2 validation source root:
++python -m pytest -q                         # may be chunked on short command budgets
++PYTHONPATH=. python validation_study/run_semantic_replay.py
++PYTHONPATH=. python validation_study/analysis/expanded_semantic_replay.py
++PYTHONPATH=. python validation_study/trajectory_runner.py --fresh
++PYTHONPATH=. python validation_study/analysis/transaction_fault_injection.py
++PYTHONPATH=. python validation_study/analysis/bootstrap_repository_clustered.py
++# Blind human packets / aggregation are generated by validation_study/annotation_tool.py
+ PYTHONPATH=. python ../eval/researchledger_v2_validator_benchmark.py --trials-per-scenario 50
+ \end{lstlisting}
+ The RRT tooling is \texttt{eval/rrt/} (schema, independent oracle, systems, metrics, agreement, blind packets); protocols are \texttt{docs/RRT\_PROTOCOL.md} and \texttt{docs/HUMAN\_AUDIT\_STUDY.md}; the audit-study analysis is \texttt{eval/analyze\_audit\_study.py}. Historical executor results require the original environment and are not reproduced.
+--- a/figs/fig_design.tex
++++ b/figs/fig_design.tex
+@@ -6,8 +6,6 @@
+ \renewcommand{\tiny}{\fontsize{6.5}{7.5}\selectfont}
+ \renewcommand{\scriptsize}{\fontsize{7.5}{8.5}\selectfont}
+ \usetikzlibrary{arrows.meta,fit,backgrounds,calc,positioning}
+-\definecolor{cOK}{HTML}{009E73}
+-\definecolor{cNo}{HTML}{C0392B}
+ \definecolor{cInk}{HTML}{22303C}
+ \definecolor{cGrp}{HTML}{0072B2}
+ \definecolor{cWarm}{HTML}{E69F00}
+@@ -15,7 +13,7 @@
+   every node/.style={font=\scriptsize, text=cInk},
+   done/.style={draw=cInk!75, rounded corners=2pt, fill=white, align=center, inner sep=3pt, minimum height=0.7cm},
+   pend/.style={draw=cWarm!90!black, rounded corners=2pt, fill=cWarm!10, dash pattern=on 2.5pt off 1.8pt, thick, align=center, inner sep=3pt, minimum height=0.7cm},
+-  sysb/.style={draw=cGrp!80, rounded corners=2pt, fill=cGrp!7, align=left, inner sep=2pt, minimum height=0.42cm, text width=4.15cm, font=\tiny},
++  sysb/.style={draw=cGrp!80, rounded corners=2pt, fill=cGrp!7, align=left, inner sep=2pt, minimum height=0.42cm, text width=4.2cm, font=\tiny},
+   arr/.style={-{Stealth[length=4pt,width=3pt]}, thick, draw=cInk!75},
+   parr/.style={-{Stealth[length=4pt,width=3pt]}, thick, draw=cWarm!90!black, dash pattern=on 2.5pt off 1.8pt},
+   panel/.style={draw=cInk!35, rounded corners=3pt, fill=cInk!3, inner sep=5pt},
+@@ -23,46 +21,39 @@
+ }
+ \begin{document}
+ \begin{tikzpicture}[x=1cm,y=1cm]
+-% frozen trajectory
+-\node[pend, text width=2.7cm] (traj) at (0,2.3) {\textbf{Frozen real trajectory}\\[-1pt]{\tiny evidence, runs, claims,\\decisions, manuscript}};
+-% registered graph
+-\node[done, text width=2.9cm] (reg) at (4.1,4.1) {\textbf{Registered graph}\\[-1pt]{\tiny what the system captured\\(hooks, adapter, run capture)}};
+-% annotators
+-\node[pend, text width=2.9cm] (ann) at (4.1,0.85) {\textbf{Blind annotators}\\[-1pt]{\tiny 2--3 per trajectory,\\no sight of the registered graph}};
+-\node[pend, text width=2.9cm] (gold) at (8.05,0.85) {\textbf{Adjudicated gold}\\[-1pt]{\tiny graph and impact labels}};
+-\node[done, text width=2.55cm] (orc) at (8.05,2.55) {\textbf{Independent oracle}\\[-1pt]{\tiny shares no code with TRL}};
+-% mutation
+-\node[done, text width=2.55cm] (mut) at (8.05,3.85) {\textbf{Evidence mutation}\\[-1pt]{\tiny sampled on the gold graph}};
+-% systems
+-\begin{scope}[shift={(12.2,0)}]
+-\node[sysb] (s1) at (0,4.35) {1\enspace Mutable state};
+-\node[sysb] (s2) at (0,3.85) {2\enspace Claim relabelling};
+-\node[sysb] (s3) at (0,3.35) {3\enspace Provenance graph, no transactions};
+-\node[sysb] (s4) at (0,2.85) {4\enspace Transaction, no propagation};
+-\node[sysb, fill=cWarm!14, draw=cWarm!90!black] (s5) at (0,2.35) {5\enspace EviGraph mechanism (reconstruction)};
+-\node[sysb] (s6) at (0,1.85) {6\enspace TRL, binary edges};
+-\node[sysb, fill=cGrp!16] (s7) at (0,1.35) {\textbf{7\enspace Full TRL (support sets, lineage)}};
++% external trajectory and truth construction
++\node[pend, text width=3.05cm] (traj) at (0,2.85) {\textbf{Old/new executable paper-agent trajectory}\\[-1pt]{\tiny pinned commits, same task,\\frozen outputs and claims}};
++\node[pend, text width=2.85cm] (reg) at (4.05,4.35) {\textbf{Registered dependencies}\\[-1pt]{\tiny matched graph or native\\system registration}};
++\node[pend, text width=2.85cm] (ann) at (4.05,1.15) {\textbf{Blind annotators}\\[-1pt]{\tiny two independent labels;\\no system predictions}};
++\node[pend, text width=2.8cm] (gold) at (7.95,1.15) {\textbf{Adjudicated gold}\\[-1pt]{\tiny affected objects and\\support structure}};
++\node[pend, text width=2.8cm] (mut) at (7.95,4.05) {\textbf{Historical revision}\\[-1pt]{\tiny genuine semantic correction\\between pinned commits}};
++% implemented system conditions
++\begin{scope}[shift={(12.15,0)}]
++\node[sysb] (s1) at (0,4.45) {1\enspace No revision-state management};
++\node[sysb] (s2) at (0,3.90) {2\enspace Full rebuild / invalidate all};
++\node[sysb] (s3) at (0,3.35) {3\enspace Downstream reachability provenance};
++\node[sysb] (s4) at (0,2.80) {4\enspace Flat binary dependency propagation};
++\node[sysb] (s5) at (0,2.25) {5\enspace AND/OR support-set provenance, no transaction};
++\node[sysb, fill=cGrp!16] (s6) at (0,1.70) {\textbf{6\enspace Full TRL transactional support-set revision}};
+ \begin{scope}[on background layer]
+-\node[panel, fit=(s1)(s7), inner ysep=8pt] (PS) {};
++\node[panel, fit=(s1)(s6), inner ysep=8pt] (PS) {};
+ \end{scope}
+-\node[ptitle] at (PS.north west) {Seven conditions, same graph and mutation};
++\node[ptitle] at (PS.north west) {Preregistered conditions, same event};
+ \end{scope}
+-% metrics
+-\node[done, text width=3.0cm, align=left] (met) at (17.45,2.85) {\textbf{Metrics against gold}\\[2pt]{\tiny registration precision, recall,\\ object and support-set coverage\\claim-invalidation recall\\false-invalidation rate\\decision-revision recall\\stale-assertion escape\\inter-annotator agreement\\latency and cost}};
++\node[done, text width=3.15cm, align=left] (met) at (17.5,3.0) {\textbf{Metrics against gold}\\[2pt]{\tiny stale-assertion escape\\false invalidation\\claim precision / recall\\exact impact-set match\\selective recomputation\\executions avoided vs rebuild\\recovery correctness\\time-to-safe-state\\registration precision / recall\\support-set coverage}};
+ % arrows
+-\draw[parr] (traj.east) -- ++(0.55,0) |- (ann.west);
+-\draw[arr] (traj.north) |- (reg.west);
++\draw[parr] (traj.east) -- ++(0.45,0) |- (ann.west);
++\draw[parr] (traj.north) |- (reg.west);
++\draw[parr] (traj.east) -- ++(0.45,0) |- (mut.west);
+ \draw[parr] (ann) -- (gold);
+-\draw[arr] (gold.north) -- (orc.south);
+-\draw[arr] (orc.north) -- (mut.south);
+-\draw[arr] (mut.east) -- (PS.west |- 0,3.85);
+-\draw[arr] (reg.east) -- ++(0.45,0) |- (PS.west |- 0,4.5);
+-\draw[arr] (PS.east |- 0,2.85) -- (met.west);
+-\draw[parr] ([xshift=0.6cm]gold.south) -- ++(0,-0.35) -| ([yshift=-0.0cm,xshift=0.2cm]met.south);
+-% legend
+-\begin{scope}[shift={(0,-0.95)}]
+-\node[done, minimum height=0.32cm, minimum width=0.7cm] at (0,0) {}; \node[anchor=west,font=\tiny] at (0.45,0) {built and self-tested (synthetic fixtures)};
+-\node[pend, minimum height=0.32cm, minimum width=0.7cm] at (6.3,0) {}; \node[anchor=west,font=\tiny] at (6.75,0) {requires real trajectories and human annotators (not executed)};
++\draw[parr] (mut.east) -- (PS.west |- 0,4.05);
++\draw[parr] (reg.east) -- ++(0.4,0) |- (PS.west |- 0,4.65);
++\draw[arr] (PS.east |- 0,3.0) -- (met.west);
++\draw[parr] (gold.east) -- ++(0.45,0) |- (met.south west);
++% status legend
++\begin{scope}[shift={(0,-0.85)}]
++\node[done, minimum height=0.32cm, minimum width=0.7cm] at (0,0) {}; \node[anchor=west,font=\tiny] at (0.45,0) {implemented scoring / system harness};
++\node[pend, minimum height=0.32cm, minimum width=0.7cm] at (5.8,0) {}; \node[anchor=west,font=\tiny] at (6.25,0) {requires real paper-agent execution or independent annotation (not yet executed)};
+ \end{scope}
+ \end{tikzpicture}
+ \end{document}

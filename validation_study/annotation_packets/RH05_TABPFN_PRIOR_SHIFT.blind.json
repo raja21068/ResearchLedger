@@ -1,0 +1,123 @@
+{
+  "schema": "prr-blind-annotation-packet-1",
+  "trajectory_id": "RH05_TABPFN_PRIOR_SHIFT",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "PriorLabs/TabPFN",
+    "base_commit": "9f0c45c63da3216564f804398020705a5b70b86d",
+    "revision_commit": "12862a5723d3f64de04d28588a5925eb2303a26b",
+    "revision_date": "2026-09-17",
+    "commit_message": "Correct the target prior shift of majority_downsample row subsampling (#1270)",
+    "changed_files": [
+      "src/tabpfn/classifier.py",
+      "src/tabpfn/regressor.py",
+      "src/tabpfn/downsample_correction.py"
+    ],
+    "source_url": "https://github.com/PriorLabs/TabPFN/commit/12862a5723d3f64de04d28588a5925eb2303a26b",
+    "semantic_effect": "The majority_downsample sampler previously shifted the target prior; the revision adds correction so predicted probabilities/regression distributions are calibrated to the training data rather than the downsampled context.",
+    "benchmark_task": "Compare a majority-downsampled prediction with a no-downsampling replication on a class-imbalanced fixture.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "TABPFN_MAJORITY_PRIOR": {
+        "kind": "model_inference_logic",
+        "uri": "https://github.com/PriorLabs/TabPFN/blob/9f0c45c63da3216564f804398020705a5b70b86d/src/tabpfn/classifier.py",
+        "version": "9f0c45c63da3216564f804398020705a5b70b86d"
+      },
+      "TABPFN_NO_DOWNSAMPLE": {
+        "kind": "configuration",
+        "uri": "benchmark://tabpfn-no-downsample",
+        "version": "unchanged"
+      }
+    },
+    "tools": {
+      "T_MD": {
+        "name": "TabPFNClassifier[majority_downsample]",
+        "entrypoint": ""
+      },
+      "T_BASE": {
+        "name": "TabPFNClassifier[no_downsample]",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_MD": {},
+      "R_BASE": {}
+    },
+    "evidence": {
+      "E_MD": {
+        "statement": "Predicted probabilities from majority-downsample context",
+        "source_kind": "paper_agent_output"
+      },
+      "E_BASE": {
+        "statement": "Prediction from no-downsampling replication",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_MD": {
+        "statement": "Prediction conclusion based only on majority-downsampled probabilities"
+      },
+      "C_REPLICATED": {
+        "statement": "Prediction conclusion supported by either majority-downsample or no-downsample run"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_MD": {
+        "locator": "pilot:RH05:1",
+        "text": "Majority-downsampled prediction"
+      },
+      "AS_REPLICATED": {
+        "locator": "pilot:RH05:2",
+        "text": "Replicated prediction"
+      }
+    }
+  },
+  "revision_event": {
+    "id": "M1",
+    "kind": "artifact_supersession",
+    "targets": [
+      "TABPFN_MAJORITY_PRIOR"
+    ]
+  },
+  "instructions": [
+    "Annotate from the historical source/diff and object descriptions only.",
+    "Do not infer labels from any TRL/system output; none is included in this packet.",
+    "Mark an object affected only when the revision removes a dependency needed for that object to remain valid.",
+    "For claims, distinguish conjunctive support (all members required) from alternative sufficient paths.",
+    "If the supplied context is insufficient, use overall_sufficient_context=false rather than guessing."
+  ],
+  "questions": {
+    "affected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "unaffected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_decisions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_assertions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "support_relations": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "overall_sufficient_context": {
+      "value": null,
+      "rationale": null
+    }
+  }
+}

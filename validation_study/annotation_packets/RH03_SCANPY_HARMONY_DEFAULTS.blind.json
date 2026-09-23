@@ -1,0 +1,121 @@
+{
+  "schema": "prr-blind-annotation-packet-1",
+  "trajectory_id": "RH03_SCANPY_HARMONY_DEFAULTS",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "scverse/scanpy",
+    "base_commit": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc",
+    "revision_commit": "2f3bdd263ef030c06a486eea78baf2189443a3b8",
+    "revision_date": "2026-08-13",
+    "commit_message": "perf: update harmony defaults (#4290)",
+    "changed_files": [
+      "src/scanpy/preprocessing/_harmony/__init__.py"
+    ],
+    "source_url": "https://github.com/scverse/scanpy/commit/2f3bdd263ef030c06a486eea78baf2189443a3b8",
+    "semantic_effect": "Unset harmony2 stopping parameters now follow Harmony2 defaults (4, 1e-3, 1e-2) instead of the previous 200, 1e-5, 1e-4 values; runs with explicit parameters are not dependent on the default constants.",
+    "benchmark_task": "Run harmony2 once with stopping rules omitted and once with the prior values supplied explicitly.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "HARMONY_UNSET_DEFAULTS": {
+        "kind": "default_configuration",
+        "uri": "https://github.com/scverse/scanpy/blob/d8bcdae3f92803a8b36ee7117b2584f834ddb4dc/src/scanpy/preprocessing/_harmony/__init__.py",
+        "version": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc"
+      },
+      "HARMONY_EXPLICIT_PARAMS": {
+        "kind": "configuration",
+        "uri": "benchmark://explicit-harmony-stopping",
+        "version": "explicit"
+      }
+    },
+    "tools": {
+      "T_DEFAULT": {
+        "name": "scanpy.pp.harmony_integrate[defaults]",
+        "entrypoint": ""
+      },
+      "T_EXPLICIT": {
+        "name": "scanpy.pp.harmony_integrate[explicit]",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_DEFAULT": {},
+      "R_EXPLICIT": {}
+    },
+    "evidence": {
+      "E_DEFAULT": {
+        "statement": "Integrated embedding produced using unset stopping parameters",
+        "source_kind": "paper_agent_output"
+      },
+      "E_EXPLICIT": {
+        "statement": "Replication embedding using explicitly pinned stopping parameters",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_DEFAULT": {
+        "statement": "Conclusion based only on the default-parameter integration"
+      },
+      "C_REPLICATED": {
+        "statement": "Conclusion supported by either default or explicitly pinned integration"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_DEFAULT": {
+        "locator": "pilot:RH03:1",
+        "text": "Default Harmony integration result"
+      },
+      "AS_REPLICATED": {
+        "locator": "pilot:RH03:2",
+        "text": "Replicated integration result"
+      }
+    }
+  },
+  "revision_event": {
+    "id": "M1",
+    "kind": "artifact_supersession",
+    "targets": [
+      "HARMONY_UNSET_DEFAULTS"
+    ]
+  },
+  "instructions": [
+    "Annotate from the historical source/diff and object descriptions only.",
+    "Do not infer labels from any TRL/system output; none is included in this packet.",
+    "Mark an object affected only when the revision removes a dependency needed for that object to remain valid.",
+    "For claims, distinguish conjunctive support (all members required) from alternative sufficient paths.",
+    "If the supplied context is insufficient, use overall_sufficient_context=false rather than guessing."
+  ],
+  "questions": {
+    "affected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "unaffected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_decisions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_assertions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "support_relations": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "overall_sufficient_context": {
+      "value": null,
+      "rationale": null
+    }
+  }
+}

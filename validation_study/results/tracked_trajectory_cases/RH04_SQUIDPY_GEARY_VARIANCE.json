@@ -1,0 +1,53 @@
+{
+  "case_id": "RH04_SQUIDPY_GEARY_VARIANCE",
+  "repository": "scverse/squidpy",
+  "base_commit": "55572c4c194247888e384f281522c0cb9b57c737",
+  "revision_commit": "40307c8885e5e3060ef646f5088df45d720e455f",
+  "replay_mode": "numeric-formula-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "e718453c1a625f0d7c77beccf21bad25474090fc",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "b9966967ba7f4f0ce37d9319cec8a6b619e6456a4bacfb363a2dd87569249a38",
+  "new_output_sha256": "8796e7b42000abbc79d8930fc116f653cd927236f58154a475cba24afecaff85",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080210-1e989300",
+  "invalidation_transaction": "REV20260923T080213-00629574",
+  "recovery_transaction": "REV20260923T080213-8dae07ae",
+  "old_tool_seconds": 2.844857160999709,
+  "new_tool_seconds": 2.961663946999579,
+  "time_to_safe_state_seconds": 0.00979773800008843,
+  "recovery_seconds_excluding_tool_execution": 0.01564951199998177,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

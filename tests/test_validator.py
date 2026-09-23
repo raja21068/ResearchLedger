@@ -705,3 +705,34 @@ def test_artifact_symlink_is_rejected(tmp_path):
 
     result = validate(ws)
     assert any(i.code == codes.RL203_UNSAFE_PATH for i in result.errors)
+
+
+def test_validator_accepts_bidirectional_support_sets(tmp_path):
+    ws = init_workspace(tmp_path)
+    _write_run(ws, "R0001")
+    _write_run(ws, "R0002")
+    _write_claim(
+        ws, "C020", name="C020", status="supported",
+        evidence=["E001", "E002"], support_sets=[["E001", "E002"]],
+    )
+    for eid, rid in (("E001", "R0001"), ("E002", "R0002")):
+        _write_evidence(
+            ws, eid, name=eid, status="verified", source_kind="experiment",
+            supports=["C020"], runs=[rid],
+            body=f"# Evidence: {eid}\n\n## Reproducibility\nresearchledger reproduce {rid}\n",
+        )
+    result = validate(ws)
+    assert not any(i.code == codes.RL101_BROKEN_EDGE for i in result.errors)
+    assert not any(i.code == codes.RL102_ASYMMETRIC_EDGE for i in result.warnings)
+    assert not any(i.code == codes.RL310_STATUS_DRIFT for i in result.warnings)
+
+
+def test_validator_flags_missing_support_set_member(tmp_path):
+    ws = init_workspace(tmp_path)
+    _write_claim(
+        ws, "C021", name="C021", status="hypothesis",
+        evidence=["E001", "E404"], support_sets=[["E001", "E404"]],
+    )
+    _write_evidence(ws, "E001", name="E001", status="proposed", source_kind="observation", supports=["C021"])
+    result = validate(ws)
+    assert any(i.code == codes.RL101_BROKEN_EDGE and "E404" in i.message for i in result.errors)

@@ -116,7 +116,7 @@ ResearchLedger/
 ├── researchledger/                # v2: the run-ledger CLI package (see "Run Ledger" below)
 ├── schemas/                        # JSON Schemas for run/evidence/claim/decision frontmatter
 ├── examples/quickstart/            # a real workspace that `validate --strict` passes clean
-├── tests/                           # pytest suite for researchledger/ (168 tests, 97% coverage)
+├── tests/                           # pytest suite + journal-validation regression tests (206 passing in this build)
 ├── .github/workflows/ci.yml        # lint + type-check + test + CLI smoke test, 3 OSes x 4 Pythons
 └── pyproject.toml                  # packages researchledger/ as the `researchledger` command
 ```
@@ -181,9 +181,7 @@ RL-coded validator rule catalog (including the tamper-evident run chain), the ev
 status vocabulary, and the manuscript provenance-marker syntax are all in
 [`reference/run-ledger.md`](reference/run-ledger.md).
 
-Quality, as actually run in this repo: 168 tests / 97% statement coverage
-(`pytest --cov=researchledger`), clean `ruff` and `mypy`, zero known vulnerabilities in its two
-runtime dependencies (`pip-audit`), a shipped example workspace that validates clean (checked by
+Quality in the journal-validation build: **206/206 tests passed** in non-overlapping chunks. The historical 97% coverage, `ruff`, `mypy`, and `pip-audit` figures belong to the earlier base build and were not re-measured in this runtime; a shipped example workspace that validates clean (checked by
 `tests/test_examples.py`, not just by hand), and a 3-OS × 4-Python CI matrix
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) that also runs an `init` → `run` →
 `validate --strict` → `report` smoke test plus the shipped example's own validation.
@@ -452,6 +450,42 @@ undermine the "no server, no daemon" design this plugin is built around. See
 [`reference/run-ledger.md`](reference/run-ledger.md) for the full spec, including what's explicitly
 scoped out (unattended execution, automatic retry-with-different-hyperparameters, judging whether
 evidence is "enough" — that stays with the skills and the human).
+
+## v2.2 journal-validation continuation
+
+The journal-validation branch adds a deliberately narrow revision layer without changing ResearchLedger into an autonomous orchestrator. Claims can now declare `support_sets` (AND within a set, OR across sets) plus `required_evidence`; claim status is still derived deterministically. `researchledger revision plan` previews the consequence of evidence-state changes, while `researchledger revision apply` journals pre-images, commits the evidence + derived claim changes under the workspace lock, validates the resulting graph, and restores every pre-image if any write or invariant check fails. Interrupted `prepared`/`applying` transactions are recovered before the next revision.
+
+The accompanying [`validation_study/`](validation_study/) keeps conformance, real-history semantic replay, tracked proxy trajectories, fault injection, and future blind annotation separate so the manuscript cannot silently treat authored graph gold as external construct validation. The current local study includes 13 real-history semantic replays across nine repositories, **13 ledger-integrated old/new proxy trajectories with persisted invalidation and recovery**, and deterministic transaction fault injection; see [`JOURNAL_VALIDATION_STATUS.md`](JOURNAL_VALIDATION_STATUS.md) for the exact evidence boundary and remaining external-validation work.
+
+## Transactional evidence revision (v2.2 build)
+
+ResearchLedger can now preview and atomically apply evidence-state revisions while deterministically recomputing dependent claim states. Claims may declare alternative sufficient support sets; members inside a support set are conjunctive. This distinguishes a lost evidence path from a lost claim.
+
+```bash
+# Preview the derived impact without mutating files
+researchledger revision plan --update E001=superseded --reason "upstream correction"
+
+# Apply under the workspace lock. A transaction journal stores exact pre-images
+# and automatically rolls back if validation fails.
+researchledger revision apply --update E001=superseded --reason "upstream correction"
+```
+
+A claim frontmatter block can use:
+
+```yaml
+evidence: [E001, E002, E003]
+support_sets:
+  - [E001, E002]   # both are required for this path
+  - [E003]         # independent alternative sufficient path
+required_evidence: [E004]
+```
+
+The implementation is in `researchledger/revision.py`; transaction records are stored under `.researchledger/revisions/`. Recovery restores transactions left in `prepared` or `applying` state after interruption.
+
+## Journal-validation package
+
+`validation_study/` contains the real-history development study used to test revision semantics: pinned historical software revisions, executed semantic fixtures, ledger-integrated old/new proxy trajectories, repository-clustered pilot uncertainty, blind annotation packets, agreement/adjudication tooling, and a pre-registered confirmatory design. The directory explicitly separates authored mechanism-development gold from future independently adjudicated external validation. See `validation_study/README.md`.
+
 
 ## License
 

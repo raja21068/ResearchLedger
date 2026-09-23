@@ -1,0 +1,122 @@
+{
+  "schema": "prr-blind-annotation-packet-1",
+  "trajectory_id": "RH02_SCANPY_SPARSE_NORMALIZE_TOTAL",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "scverse/scanpy",
+    "base_commit": "e59622e5d3a4a637b30b74f5112ebe798620b96a",
+    "revision_commit": "8f76101f14b85b9a59cec2d2a970fe3b85c1cce7",
+    "revision_date": "2026-07-27",
+    "commit_message": "fix: use the non-zero median as target_sum on the sparse path (#4256)",
+    "changed_files": [
+      "src/scanpy/preprocessing/_normalization.py",
+      "tests/test_normalization.py"
+    ],
+    "source_url": "https://github.com/scverse/scanpy/commit/8f76101f14b85b9a59cec2d2a970fe3b85c1cce7",
+    "semantic_effect": "Sparse input used a plain median including zero-count cells while dense input used the non-zero median; with zero-count cells the paths could normalize to different target sums.",
+    "benchmark_task": "Normalize a matrix containing zero-count cells through sparse and dense representations, then bind downstream evidence to both runs.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "SCANPY_SPARSE_MEDIAN": {
+        "kind": "code_component",
+        "uri": "https://github.com/scverse/scanpy/blob/e59622e5d3a4a637b30b74f5112ebe798620b96a/src/scanpy/preprocessing/_normalization.py",
+        "version": "e59622e5d3a4a637b30b74f5112ebe798620b96a"
+      },
+      "SCANPY_DENSE_PATH": {
+        "kind": "code_path",
+        "uri": "benchmark://dense-normalization-path",
+        "version": "unchanged"
+      }
+    },
+    "tools": {
+      "T_SPARSE": {
+        "name": "scanpy.pp.normalize_total[sparse]",
+        "entrypoint": ""
+      },
+      "T_DENSE": {
+        "name": "scanpy.pp.normalize_total[dense]",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_SPARSE": {},
+      "R_DENSE": {}
+    },
+    "evidence": {
+      "E_SPARSE": {
+        "statement": "Normalized counts from sparse matrix with zero-count cells",
+        "source_kind": "paper_agent_output"
+      },
+      "E_DENSE": {
+        "statement": "Normalized counts from equivalent dense matrix",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_SPARSE": {
+        "statement": "Downstream result derived only from the sparse normalization"
+      },
+      "C_ROBUST": {
+        "statement": "Downstream conclusion independently reproduced from sparse or dense preprocessing"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_SPARSE": {
+        "locator": "pilot:RH02:1",
+        "text": "Sparse-normalized result"
+      },
+      "AS_ROBUST": {
+        "locator": "pilot:RH02:2",
+        "text": "Representation-robust result"
+      }
+    }
+  },
+  "revision_event": {
+    "id": "M1",
+    "kind": "artifact_supersession",
+    "targets": [
+      "SCANPY_SPARSE_MEDIAN"
+    ]
+  },
+  "instructions": [
+    "Annotate from the historical source/diff and object descriptions only.",
+    "Do not infer labels from any TRL/system output; none is included in this packet.",
+    "Mark an object affected only when the revision removes a dependency needed for that object to remain valid.",
+    "For claims, distinguish conjunctive support (all members required) from alternative sufficient paths.",
+    "If the supplied context is insufficient, use overall_sufficient_context=false rather than guessing."
+  ],
+  "questions": {
+    "affected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "unaffected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_decisions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_assertions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "support_relations": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "overall_sufficient_context": {
+      "value": null,
+      "rationale": null
+    }
+  }
+}

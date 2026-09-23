@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "researchledger"
-version = "2.0.0"
-description = "Immutable run ledger, deterministic validator and claim-to-artifact tracing for ResearchLedger (ConvFusion) research workspaces."
+version = "2.2.0"
+description = "Immutable research ledger with deterministic validation, support-set claim semantics, and transactional evidence revision."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "waqar", email = "waqar.uestc@yahoo.com" }]

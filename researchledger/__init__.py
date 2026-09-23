@@ -3,4 +3,4 @@ validator, and claim-to-artifact tracing for ResearchLedger research
 workspaces.
 """
 
-__version__ = "2.0.0"
+__version__ = "2.2.0"

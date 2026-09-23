@@ -1,0 +1,154 @@
+{
+  "schema": "prr-1",
+  "id": "RH04_SQUIDPY_GEARY_VARIANCE",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "scverse/squidpy",
+    "base_commit": "55572c4c194247888e384f281522c0cb9b57c737",
+    "revision_commit": "40307c8885e5e3060ef646f5088df45d720e455f",
+    "revision_date": "2026-06-19",
+    "commit_message": "Use Geary's C normality variance in spatial_autocorr (fixes #1183) (#1197)",
+    "changed_files": [
+      "src/squidpy/gr/_ppatterns.py",
+      "tests/graph/test_ppatterns.py"
+    ],
+    "source_url": "https://github.com/scverse/squidpy/commit/40307c8885e5e3060ef646f5088df45d720e455f",
+    "semantic_effect": "The pre-fix code reused Moran's I normality variance for Geary's C, miscalibrating Geary analytic p-values; the commit notes permutation-based p-values are unaffected.",
+    "benchmark_task": "Compute Geary's C significance using both the analytic normality path and an independent permutation path.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "GEARY_ANALYTIC_VARIANCE": {
+        "kind": "statistical_formula",
+        "uri": "https://github.com/scverse/squidpy/blob/55572c4c194247888e384f281522c0cb9b57c737/src/squidpy/gr/_ppatterns.py",
+        "version": "55572c4c194247888e384f281522c0cb9b57c737"
+      },
+      "GEARY_PERMUTATION_ENGINE": {
+        "kind": "statistical_procedure",
+        "uri": "benchmark://geary-permutation-path",
+        "version": "unchanged"
+      }
+    },
+    "tools": {
+      "T_ANALYTIC": {
+        "name": "spatial_autocorr[geary,n_perms=None]",
+        "entrypoint": ""
+      },
+      "T_PERM": {
+        "name": "spatial_autocorr[geary,permutation]",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_ANALYTIC": {},
+      "R_PERM": {}
+    },
+    "evidence": {
+      "E_ANALYTIC": {
+        "statement": "Geary C analytic p-value",
+        "source_kind": "paper_agent_output"
+      },
+      "E_PERM": {
+        "statement": "Geary C permutation p-value",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_ANALYTIC": {
+        "statement": "Spatial-autocorrelation conclusion based only on analytic p-value"
+      },
+      "C_CONVERGENT": {
+        "statement": "Spatial-autocorrelation conclusion supported by either analytic or permutation inference"
+      }
+    },
+    "decisions": {
+      "D_ANALYTIC": {
+        "statement": "Select spatially autocorrelated features using analytic p-value"
+      }
+    },
+    "assertions": {
+      "AS_ANALYTIC": {
+        "locator": "pilot:RH04:1",
+        "text": "Analytic Geary significance"
+      },
+      "AS_CONVERGENT": {
+        "locator": "pilot:RH04:2",
+        "text": "Convergent Geary significance"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "GEARY_ANALYTIC_VARIANCE",
+      "dst": "T_ANALYTIC"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_ANALYTIC",
+      "dst": "R_ANALYTIC"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_ANALYTIC",
+      "dst": "E_ANALYTIC"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "GEARY_PERMUTATION_ENGINE",
+      "dst": "T_PERM"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_PERM",
+      "dst": "R_PERM"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_PERM",
+      "dst": "E_PERM"
+    },
+    {
+      "type": "supports",
+      "src": "E_ANALYTIC",
+      "dst": "C_ANALYTIC"
+    },
+    {
+      "type": "support_group",
+      "src": "E_ANALYTIC",
+      "dst": "C_CONVERGENT",
+      "group": "g_analytic"
+    },
+    {
+      "type": "alternative_support_group",
+      "src": "E_PERM",
+      "dst": "C_CONVERGENT",
+      "group": "g_perm"
+    },
+    {
+      "type": "depends_on",
+      "src": "E_ANALYTIC",
+      "dst": "D_ANALYTIC"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_ANALYTIC",
+      "dst": "AS_ANALYTIC"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_CONVERGENT",
+      "dst": "AS_CONVERGENT"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "GEARY_ANALYTIC_VARIANCE"
+      ]
+    }
+  ]
+}

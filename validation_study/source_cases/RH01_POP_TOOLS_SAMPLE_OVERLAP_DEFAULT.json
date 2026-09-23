@@ -1,0 +1,153 @@
+{
+  "schema": "prr-1",
+  "id": "RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "qlu-lab/POP-TOOLS",
+    "base_commit": "abc373b7a42c9dc7196436766eaba1a0a2aa3c92",
+    "revision_commit": "e5e3c9281e93b43b91da2dae1880acc3e29d6cc2",
+    "revision_date": "2025-09-02",
+    "commit_message": "Update POP-GWAS.py",
+    "changed_files": [
+      "POP-GWAS.py"
+    ],
+    "source_url": "https://github.com/qlu-lab/POP-TOOLS/commit/e5e3c9281e93b43b91da2dae1880acc3e29d6cc2",
+    "semantic_effect": "CLI default for --sample-overlap changed from False to True; a task with overlapping samples is therefore sensitive when the flag is omitted.",
+    "benchmark_task": "Run ML-assisted GWAS on an overlap-containing fixture once with the old implicit default and once with an explicit overlap-correction configuration.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "POP_OVP_DEFAULT": {
+        "kind": "code_component",
+        "uri": "https://github.com/qlu-lab/POP-TOOLS/blob/abc373b7a42c9dc7196436766eaba1a0a2aa3c92/POP-GWAS.py",
+        "version": "abc373b7a42c9dc7196436766eaba1a0a2aa3c92"
+      },
+      "POP_OVP_EXPLICIT": {
+        "kind": "configuration",
+        "uri": "benchmark://explicit-sample-overlap",
+        "version": "explicit"
+      }
+    },
+    "tools": {
+      "T_DEFAULT": {
+        "name": "pop_gwas_implicit_default",
+        "entrypoint": "POP-GWAS.py"
+      },
+      "T_EXPLICIT": {
+        "name": "pop_gwas_explicit_overlap",
+        "entrypoint": "POP-GWAS.py --sample-overlap"
+      }
+    },
+    "runs": {
+      "R_DEFAULT": {},
+      "R_EXPLICIT": {}
+    },
+    "evidence": {
+      "E_DEFAULT": {
+        "statement": "GWAS summary statistics generated under the implicit overlap default",
+        "source_kind": "paper_agent_output"
+      },
+      "E_EXPLICIT": {
+        "statement": "Replication summary statistics generated with overlap correction explicitly enabled",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_DEFAULT": {
+        "statement": "Association conclusion based only on the implicit-default run"
+      },
+      "C_REPLICATED": {
+        "statement": "Association conclusion supported by either the implicit-default run or an explicit corrected replication"
+      }
+    },
+    "decisions": {
+      "D_DEFAULT": {
+        "statement": "Prioritize loci using the implicit-default result"
+      }
+    },
+    "assertions": {
+      "AS_DEFAULT": {
+        "locator": "pilot:RH01:1",
+        "text": "Reported association based on implicit default"
+      },
+      "AS_REPLICATED": {
+        "locator": "pilot:RH01:2",
+        "text": "Association independently reproduced with explicit overlap correction"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "POP_OVP_DEFAULT",
+      "dst": "T_DEFAULT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_DEFAULT",
+      "dst": "R_DEFAULT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_DEFAULT",
+      "dst": "E_DEFAULT"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "POP_OVP_EXPLICIT",
+      "dst": "T_EXPLICIT"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_EXPLICIT",
+      "dst": "R_EXPLICIT"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_EXPLICIT",
+      "dst": "E_EXPLICIT"
+    },
+    {
+      "type": "supports",
+      "src": "E_DEFAULT",
+      "dst": "C_DEFAULT"
+    },
+    {
+      "type": "support_group",
+      "src": "E_DEFAULT",
+      "dst": "C_REPLICATED",
+      "group": "g_old"
+    },
+    {
+      "type": "alternative_support_group",
+      "src": "E_EXPLICIT",
+      "dst": "C_REPLICATED",
+      "group": "g_explicit"
+    },
+    {
+      "type": "depends_on",
+      "src": "E_DEFAULT",
+      "dst": "D_DEFAULT"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_DEFAULT",
+      "dst": "AS_DEFAULT"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_REPLICATED",
+      "dst": "AS_REPLICATED"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "POP_OVP_DEFAULT"
+      ]
+    }
+  ]
+}

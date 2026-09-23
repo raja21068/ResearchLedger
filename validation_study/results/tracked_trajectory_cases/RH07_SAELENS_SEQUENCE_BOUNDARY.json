@@ -1,0 +1,53 @@
+{
+  "case_id": "RH07_SAELENS_SEQUENCE_BOUNDARY",
+  "repository": "decoderesearch/SAELens",
+  "base_commit": "ee45e7406165ce267b33d33b7371bbb63ef24db8",
+  "revision_commit": "964025a2bc492af955327eacc9eaa41d9642afdc",
+  "replay_mode": "direct-code-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "cc3ebc40d2cf159de5da490ae6bd2cf451ddcd61",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "c7c48d5d5d0faf84e38d2ead34e90fdf5570666d7c5a5031e824d7397da7e19d",
+  "new_output_sha256": "409188ff47de781f6402f819b673d2d66698a5ecccfd8a494a94127d0f170304",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080236-f7cd1fbe",
+  "invalidation_transaction": "REV20260923T080239-7859cee1",
+  "recovery_transaction": "REV20260923T080239-e7171002",
+  "old_tool_seconds": 2.880552319999879,
+  "new_tool_seconds": 3.012142963999395,
+  "time_to_safe_state_seconds": 0.010381211000094481,
+  "recovery_seconds_excluding_tool_execution": 0.016070099999524246,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

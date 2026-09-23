@@ -127,3 +127,62 @@ def test_heading_and_table_lines_are_not_counted(tmp_path):
 
     result = audit_paper(ws, paper_path)
     assert result.quantitative_assertions == 0
+
+
+def test_recovered_claim_with_new_verified_evidence_is_not_permanently_stale(tmp_path):
+    ws = init_workspace(tmp_path)
+    _seed_graph(ws, evidence_status="superseded")
+
+    ev2 = Evidence(
+        id="E002", path=ws.evidence_dir / "E002.md", schema_version="2.0", name="E002",
+        status="verified", source_kind="experiment", supports=["C001"], runs=["R0001"],
+        body="# Evidence: E002\n",
+    )
+    ev2.path.write_text(ev2.render(), encoding="utf-8")
+    claim = Claim.load(ws.claims_dir / "C001.md")
+    claim.evidence.append("E002")
+    claim.status = "supported"
+    claim.path.write_text(claim.render(), encoding="utf-8")
+
+    paper_path = tmp_path / "paper.md"
+    paper_path.write_text(
+        "Our method improved F1 by 4.8 points.\n<!-- rl:claim=C001 -->\n",
+        encoding="utf-8",
+    )
+    result = audit_paper(ws, paper_path)
+    assert result.stale_evidence_usage == 0
+    assert result.backed_by_verified_evidence == 1
+
+
+def test_explicit_stale_evidence_marker_remains_stale_after_claim_recovery(tmp_path):
+    ws = init_workspace(tmp_path)
+    _seed_graph(ws, evidence_status="superseded")
+
+    ev2 = Evidence(
+        id="E002", path=ws.evidence_dir / "E002.md", schema_version="2.0", name="E002",
+        status="verified", source_kind="experiment", supports=["C001"], runs=["R0001"],
+        body="# Evidence: E002\n",
+    )
+    ev2.path.write_text(ev2.render(), encoding="utf-8")
+    claim = Claim.load(ws.claims_dir / "C001.md")
+    claim.evidence.append("E002")
+    claim.status = "supported"
+    claim.path.write_text(claim.render(), encoding="utf-8")
+
+    old_paper = tmp_path / "old.md"
+    old_paper.write_text(
+        "Our method improved F1 by 4.8 points.\n<!-- rl:claim=C001 evidence=E001 -->\n",
+        encoding="utf-8",
+    )
+    old_result = audit_paper(ws, old_paper)
+    assert old_result.stale_evidence_usage == 1
+    assert old_result.backed_by_verified_evidence == 0
+
+    new_paper = tmp_path / "new.md"
+    new_paper.write_text(
+        "Our method improved F1 by 4.8 points.\n<!-- rl:claim=C001 evidence=E002 -->\n",
+        encoding="utf-8",
+    )
+    new_result = audit_paper(ws, new_paper)
+    assert new_result.stale_evidence_usage == 0
+    assert new_result.backed_by_verified_evidence == 1

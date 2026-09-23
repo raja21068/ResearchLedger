@@ -23,6 +23,7 @@ from .report import render_json, render_text
 from .reproduce import DEFAULT_TOLERANCE, DEFAULT_Z_SCORE
 from .reproduce import render as render_reproduction
 from .reproduce import reproduce as run_reproduce
+from .revision import RevisionError, apply_evidence_revision, plan_evidence_revision
 from .runner import run_command
 from .trace import trace
 from .validate_paper import audit_paper
@@ -195,6 +196,53 @@ def _cmd_validate_paper(args: argparse.Namespace) -> int:
     return 1 if result.unsupported else 0
 
 
+def _parse_revision_updates(values: list[str]) -> dict[str, str]:
+    updates: dict[str, str] = {}
+    for value in values:
+        if "=" not in value:
+            raise ValueError(f"invalid revision update {value!r}; expected E001=status")
+        eid, status = (part.strip() for part in value.split("=", 1))
+        if not eid or not status:
+            raise ValueError(f"invalid revision update {value!r}; expected E001=status")
+        updates[eid.upper()] = status
+    return updates
+
+
+def _cmd_revision_plan(args: argparse.Namespace) -> int:
+    ws = find_workspace()
+    try:
+        updates = _parse_revision_updates(args.update)
+        plan = plan_evidence_revision(ws, updates, reason=args.reason or "")
+    except (ValueError, RevisionError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    payload = plan.to_dict()
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print("Revision plan")
+        for ch in payload["evidence_changes"]:
+            print(f"  {ch['entity_id']}: {ch['before']} -> {ch['after']}")
+        for ch in payload["claim_changes"]:
+            print(f"  {ch['entity_id']}: {ch['before']} -> {ch['after']} (derived)")
+        if not payload["evidence_changes"] and not payload["claim_changes"]:
+            print("  (no state changes)")
+    return 0
+
+
+def _cmd_revision_apply(args: argparse.Namespace) -> int:
+    ws = find_workspace()
+    try:
+        updates = _parse_revision_updates(args.update)
+        result = apply_evidence_revision(ws, updates, reason=args.reason or "")
+    except (ValueError, RevisionError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, indent=2) if args.json else f"{result['txid']}: {result['status']} ({len(result['claim_changes'])} claim state changes)")
+    _refresh_index(ws)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="researchledger",
@@ -299,6 +347,19 @@ def build_parser() -> argparse.ArgumentParser:
     p_evidence_create.add_argument("--status", default="checked")
     p_evidence_create.add_argument("--name", default=None)
     p_evidence_create.set_defaults(func=_cmd_evidence_create, command=[])
+
+    p_revision = sub.add_parser("revision", help="Plan or atomically apply evidence-state revisions")
+    revision_sub = p_revision.add_subparsers(dest="revision_command", required=True)
+    for name, func, help_text in (
+        ("plan", _cmd_revision_plan, "Preview evidence and derived claim state changes"),
+        ("apply", _cmd_revision_apply, "Commit evidence and derived claim state changes transactionally"),
+    ):
+        rp = revision_sub.add_parser(name, help=help_text)
+        rp.add_argument("--update", action="append", required=True, metavar="E###=STATUS",
+                        help="Evidence status update; repeat for multiple evidence records")
+        rp.add_argument("--reason", default="")
+        rp.add_argument("--json", action="store_true")
+        rp.set_defaults(func=func, command=[])
 
     return parser
 

@@ -4,22 +4,90 @@
   "title": "ResearchLedger Claim frontmatter (v2)",
   "description": "The YAML frontmatter block of research/claims/C<NNN>.md. v2 canonical form uses real YAML arrays, not comma-delimited strings. Note: `contradicts` holds EVIDENCE ids (the reverse of Evidence.contradicts, which holds claim ids).",
   "type": "object",
-  "required": ["schema_version", "name", "type", "status"],
+  "required": [
+    "schema_version",
+    "name",
+    "type",
+    "status"
+  ],
   "additionalProperties": true,
   "properties": {
-    "schema_version": { "type": "string", "pattern": "^2\\." },
-    "name": { "type": "string", "minLength": 1 },
-    "type": { "const": "research-claim" },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^2\\."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "const": "research-claim"
+    },
     "status": {
       "type": "string",
-      "enum": ["hypothesis", "provisional", "supported", "mixed", "contradicted", "withdrawn"],
-      "description": "v2 claim states — deliberately disjoint from evidence states. See reference/run-ledger.md#status-vocabulary; a claim is never 'verified', only ever supported by evidence that is."
+      "enum": [
+        "hypothesis",
+        "provisional",
+        "supported",
+        "mixed",
+        "contradicted",
+        "withdrawn"
+      ],
+      "description": "v2 claim states \u2014 deliberately disjoint from evidence states. See reference/run-ledger.md#status-vocabulary; a claim is never 'verified', only ever supported by evidence that is."
     },
-    "evidence": { "type": "array", "items": { "type": "string", "pattern": "^E[0-9]{3}$" } },
-    "contradicts": { "type": "array", "items": { "type": "string", "pattern": "^E[0-9]{3}$" } },
-    "required_evidence": { "type": "string" },
-    "paper": { "type": "string" },
-    "created_at": { "type": "string", "format": "date-time" },
-    "updated_at": { "type": "string", "format": "date-time" }
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^E[0-9]{3}$"
+      }
+    },
+    "contradicts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^E[0-9]{3}$"
+      }
+    },
+    "required_evidence": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^E[0-9]{3}$"
+          }
+        }
+      ],
+      "description": "Evidence that is necessary in addition to every sufficient support set."
+    },
+    "paper": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "support_sets": {
+      "type": "array",
+      "description": "Alternative sufficient evidence sets. Members within a set are conjunctive; sets are alternatives.",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^E[0-9]{3}$"
+        }
+      }
+    }
   }
 }

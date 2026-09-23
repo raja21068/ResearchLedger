@@ -1,0 +1,118 @@
+{
+  "schema": "prr-blind-annotation-packet-1",
+  "trajectory_id": "RH08_COMPASS_PENALTY_PCA",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "YosefLab/Compass",
+    "base_commit": "d684c70def5beadddf77b8d562ff7303ce8a7452",
+    "revision_commit": "b0cc0bae420d437019fa17d84e7957c86853aba4",
+    "revision_date": "2021-04-05",
+    "commit_message": "Fixed a bug in penalties (fixed a bad copy paste from microcluster code)",
+    "changed_files": [
+      "compass/compass/penalties.py"
+    ],
+    "source_url": "https://github.com/YosefLab/Compass/commit/b0cc0bae420d437019fa17d84e7957c86853aba4",
+    "semantic_effect": "The PCA component count used dimensions from log_expression_filtered while fitting PCA to log_expression; the fix derives the component count from the actual matrix being transformed.",
+    "benchmark_task": "Evaluate reaction penalties on a fixture where filtered and unfiltered expression dimensions differ; the scientific claim requires both valid expression input and valid PCA-derived penalties.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "COMPASS_PCA_DIM": {
+        "kind": "analysis_code",
+        "uri": "https://github.com/YosefLab/Compass/blob/d684c70def5beadddf77b8d562ff7303ce8a7452/compass/compass/penalties.py",
+        "version": "d684c70def5beadddf77b8d562ff7303ce8a7452"
+      },
+      "COMPASS_EXPRESSION_INPUT": {
+        "kind": "dataset",
+        "uri": "benchmark://compass-expression-matrix",
+        "version": "fixture"
+      }
+    },
+    "tools": {
+      "T_PENALTY": {
+        "name": "eval_reaction_penalties_shared",
+        "entrypoint": ""
+      },
+      "T_INPUT": {
+        "name": "expression validation",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_PENALTY": {},
+      "R_INPUT": {}
+    },
+    "evidence": {
+      "E_PENALTY": {
+        "statement": "PCA-derived reaction penalty scores",
+        "source_kind": "paper_agent_output"
+      },
+      "E_INPUT": {
+        "statement": "Expression matrix passed benchmark integrity checks",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_REACTION": {
+        "statement": "Reaction-activity conclusion requires both valid expression data and valid penalty calculation"
+      }
+    },
+    "decisions": {
+      "D_REACTION": {
+        "statement": "Prioritize metabolic reactions using the penalty scores"
+      }
+    },
+    "assertions": {
+      "AS_REACTION": {
+        "locator": "pilot:RH08:1",
+        "text": "Reaction-activity conclusion"
+      }
+    }
+  },
+  "revision_event": {
+    "id": "M1",
+    "kind": "artifact_supersession",
+    "targets": [
+      "COMPASS_PCA_DIM"
+    ]
+  },
+  "instructions": [
+    "Annotate from the historical source/diff and object descriptions only.",
+    "Do not infer labels from any TRL/system output; none is included in this packet.",
+    "Mark an object affected only when the revision removes a dependency needed for that object to remain valid.",
+    "For claims, distinguish conjunctive support (all members required) from alternative sufficient paths.",
+    "If the supplied context is insufficient, use overall_sufficient_context=false rather than guessing."
+  ],
+  "questions": {
+    "affected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "unaffected_claims": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_decisions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "affected_assertions": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "support_relations": {
+      "value": null,
+      "confidence": null,
+      "rationale": null
+    },
+    "overall_sufficient_context": {
+      "value": null,
+      "rationale": null
+    }
+  }
+}

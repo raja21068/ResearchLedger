@@ -1,0 +1,128 @@
+{
+  "schema": "prr-1",
+  "id": "RH07_SAELENS_SEQUENCE_BOUNDARY",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "decoderesearch/SAELens",
+    "base_commit": "ee45e7406165ce267b33d33b7371bbb63ef24db8",
+    "revision_commit": "964025a2bc492af955327eacc9eaa41d9642afdc",
+    "revision_date": "2026-09-11",
+    "commit_message": "fix: preserve sequence starts at batch boundaries (#733)",
+    "changed_files": [
+      "sae_lens/tokenization_and_batching.py",
+      "tests/training/test_tokenization_and_batching.py"
+    ],
+    "source_url": "https://github.com/decoderesearch/SAELens/commit/964025a2bc492af955327eacc9eaa41d9642afdc",
+    "semantic_effect": "The revision preserves begin-sequence tokens when a separator fills the last slot of a batch; the regression test shows that the next sequence must still begin with its start token rather than losing sequence structure.",
+    "benchmark_task": "Create a training fixture with a separator exactly filling the previous batch and bind a training conclusion to both dataset integrity and correct boundary tokenization.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "SAE_BATCH_BOUNDARY": {
+        "kind": "tokenization_logic",
+        "uri": "https://github.com/decoderesearch/SAELens/blob/ee45e7406165ce267b33d33b7371bbb63ef24db8/sae_lens/tokenization_and_batching.py",
+        "version": "ee45e7406165ce267b33d33b7371bbb63ef24db8"
+      },
+      "SAE_DATASET_CONTENT": {
+        "kind": "dataset",
+        "uri": "benchmark://fixed-token-sequences",
+        "version": "fixture"
+      }
+    },
+    "tools": {
+      "T_BOUNDARY": {
+        "name": "concat_and_batch_sequences",
+        "entrypoint": ""
+      },
+      "T_DATA": {
+        "name": "dataset checksum",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_BOUNDARY": {},
+      "R_DATA": {}
+    },
+    "evidence": {
+      "E_BOUNDARY": {
+        "statement": "Token batches preserve sequence starts at a boundary",
+        "source_kind": "paper_agent_output"
+      },
+      "E_DATA": {
+        "statement": "Underlying token sequences are unchanged and valid",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_TRAIN": {
+        "statement": "Training trace is interpretable only if dataset content and boundary tokenization are both valid"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_TRAIN": {
+        "locator": "pilot:RH07:1",
+        "text": "SAE training trace"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "SAE_BATCH_BOUNDARY",
+      "dst": "T_BOUNDARY"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_BOUNDARY",
+      "dst": "R_BOUNDARY"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_BOUNDARY",
+      "dst": "E_BOUNDARY"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "SAE_DATASET_CONTENT",
+      "dst": "T_DATA"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_DATA",
+      "dst": "R_DATA"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_DATA",
+      "dst": "E_DATA"
+    },
+    {
+      "type": "support_group",
+      "src": "E_BOUNDARY",
+      "dst": "C_TRAIN",
+      "group": "g_joint"
+    },
+    {
+      "type": "support_group",
+      "src": "E_DATA",
+      "dst": "C_TRAIN",
+      "group": "g_joint"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_TRAIN",
+      "dst": "AS_TRAIN"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "SAE_BATCH_BOUNDARY"
+      ]
+    }
+  ]
+}

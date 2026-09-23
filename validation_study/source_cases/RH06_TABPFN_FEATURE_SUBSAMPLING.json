@@ -1,0 +1,127 @@
+{
+  "schema": "prr-1",
+  "id": "RH06_TABPFN_FEATURE_SUBSAMPLING",
+  "source": {
+    "tier": "A-historical-semantic-revision",
+    "repository": "PriorLabs/TabPFN",
+    "base_commit": "8b35121b0cad8dfca542d521e2310636a453ded7",
+    "revision_commit": "02a9978acfd538b058362257f885d173a366f79c",
+    "revision_date": "2026-09-02",
+    "commit_message": "Fix importance-based feature subsampling never sharing pools across estimators (#1141)",
+    "changed_files": [
+      "src/tabpfn/preprocessing/ensemble.py"
+    ],
+    "source_url": "https://github.com/PriorLabs/TabPFN/commit/02a9978acfd538b058362257f885d173a366f79c",
+    "semantic_effect": "The changelog states that estimators drew non-top features independently rather than from a shared round-robin pool, potentially leaving features unseen despite enough combined feature budget; results can change for gini_feature_importance or auto on large wide datasets.",
+    "benchmark_task": "Run an importance-based wide-dataset ensemble where validity of feature coverage requires both a stable ranking and correct shared-pool coverage.",
+    "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+  },
+  "objects": {
+    "artifacts": {
+      "TABPFN_FEATURE_POOL": {
+        "kind": "sampling_algorithm",
+        "uri": "https://github.com/PriorLabs/TabPFN/blob/8b35121b0cad8dfca542d521e2310636a453ded7/src/tabpfn/preprocessing/ensemble.py",
+        "version": "8b35121b0cad8dfca542d521e2310636a453ded7"
+      },
+      "TABPFN_IMPORTANCE_RANKING": {
+        "kind": "feature_ranking",
+        "uri": "benchmark://importance-ranking",
+        "version": "unchanged"
+      }
+    },
+    "tools": {
+      "T_POOL": {
+        "name": "importance-based feature pool allocation",
+        "entrypoint": ""
+      },
+      "T_RANK": {
+        "name": "feature importance ranking",
+        "entrypoint": ""
+      }
+    },
+    "runs": {
+      "R_POOL": {},
+      "R_RANK": {}
+    },
+    "evidence": {
+      "E_POOL": {
+        "statement": "Non-top features are covered across ensemble members",
+        "source_kind": "paper_agent_output"
+      },
+      "E_RANK": {
+        "statement": "Top-feature ranking used by the ensemble",
+        "source_kind": "paper_agent_output"
+      }
+    },
+    "claims": {
+      "C_WIDE": {
+        "statement": "Wide-dataset ensemble result is justified only when ranking and cross-estimator feature coverage are both valid"
+      }
+    },
+    "decisions": {},
+    "assertions": {
+      "AS_WIDE": {
+        "locator": "pilot:RH06:1",
+        "text": "Wide-dataset ensemble result"
+      }
+    }
+  },
+  "gold": [
+    {
+      "type": "uses_artifact",
+      "src": "TABPFN_FEATURE_POOL",
+      "dst": "T_POOL"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_POOL",
+      "dst": "R_POOL"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_POOL",
+      "dst": "E_POOL"
+    },
+    {
+      "type": "uses_artifact",
+      "src": "TABPFN_IMPORTANCE_RANKING",
+      "dst": "T_RANK"
+    },
+    {
+      "type": "executed_by",
+      "src": "T_RANK",
+      "dst": "R_RANK"
+    },
+    {
+      "type": "derived_from",
+      "src": "R_RANK",
+      "dst": "E_RANK"
+    },
+    {
+      "type": "support_group",
+      "src": "E_POOL",
+      "dst": "C_WIDE",
+      "group": "g_joint"
+    },
+    {
+      "type": "support_group",
+      "src": "E_RANK",
+      "dst": "C_WIDE",
+      "group": "g_joint"
+    },
+    {
+      "type": "depends_on",
+      "src": "C_WIDE",
+      "dst": "AS_WIDE"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "kind": "artifact_supersession",
+      "targets": [
+        "TABPFN_FEATURE_POOL"
+      ]
+    }
+  ]
+}

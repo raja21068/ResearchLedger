@@ -1,0 +1,53 @@
+{
+  "case_id": "RH03_SCANPY_HARMONY_DEFAULTS",
+  "repository": "scverse/scanpy",
+  "base_commit": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc",
+  "revision_commit": "2f3bdd263ef030c06a486eea78baf2189443a3b8",
+  "replay_mode": "configuration-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "2bcd442c3a2d7dd599a45f378c795d9151d13db6",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "aea1ff99f924652cf6d860626a8187f18bff8e2c1ee9db8395096e42655b40b9",
+  "new_output_sha256": "a84d954927c9573e042295e1e7bf9ad2c8f7d6c504985ac23ad6f02158a4cb2d",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080154-97b2d4c4",
+  "invalidation_transaction": "REV20260923T080157-986bdf8e",
+  "recovery_transaction": "REV20260923T080157-037318fa",
+  "old_tool_seconds": 2.8900195260002874,
+  "new_tool_seconds": 2.9825602719993185,
+  "time_to_safe_state_seconds": 0.012677980999797,
+  "recovery_seconds_excluding_tool_execution": 0.01637027099968691,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

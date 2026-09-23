@@ -1,0 +1,14 @@
+case_id,repository,output_changed,claim_state_before_revision,claim_state_after_old_evidence_superseded,claim_state_after_recovery,time_to_safe_state_seconds,lifecycle_ok
+RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT,qlu-lab/POP-TOOLS,true,supported,hypothesis,supported,0.009204434999446676,true
+RH02_SCANPY_SPARSE_NORMALIZE_TOTAL,scverse/scanpy,true,supported,hypothesis,supported,0.01076080999973783,true
+RH03_SCANPY_HARMONY_DEFAULTS,scverse/scanpy,true,supported,hypothesis,supported,0.012677980999797,true
+RH04_SQUIDPY_GEARY_VARIANCE,scverse/squidpy,true,supported,hypothesis,supported,0.00979773800008843,true
+RH05_TABPFN_PRIOR_SHIFT,PriorLabs/TabPFN,true,supported,hypothesis,supported,0.009245512999768835,true
+RH06_TABPFN_FEATURE_SUBSAMPLING,PriorLabs/TabPFN,true,supported,hypothesis,supported,0.011896037999576947,true
+RH07_SAELENS_SEQUENCE_BOUNDARY,decoderesearch/SAELens,true,supported,hypothesis,supported,0.010381211000094481,true
+RH08_COMPASS_PENALTY_PCA,YosefLab/Compass,true,supported,hypothesis,supported,0.009155233999990742,true
+RH09_SCVI_DUPLICATED_PBMC_BATCH,scverse/scvi-tools,true,supported,hypothesis,supported,0.00941267799862544,true
+RH10_SEURAT_NFEATURES_DEFAULT,satijalab/seurat,true,supported,hypothesis,supported,0.009623608000765671,true
+RH11_SQUIDPY_PERMUTATION_NJOBS,scverse/squidpy,true,supported,hypothesis,supported,0.00953735199982475,true
+RH12_SKLEARN_SPARSE_QUANTILE_SUBSAMPLING,scikit-learn/scikit-learn,true,supported,hypothesis,supported,0.009111684001254616,true
+RH13_SAELENS_ZERO_BOS,decoderesearch/SAELens,true,supported,hypothesis,supported,0.009854396999799064,true

@@ -1,0 +1,2236 @@
+{
+  "schema": "prr-real-history-pilot-results-1",
+  "pilot_scope": "10 real historical code revisions mapped to controlled paper-agent dependency graphs; no upstream repositories were re-executed here and no human adjudication was performed.",
+  "cases": [
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "POP_OVP_DEFAULT"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_DEFAULT",
+              "POP_OVP_DEFAULT",
+              "R_DEFAULT",
+              "T_DEFAULT"
+            ],
+            "dead_evidence": [
+              "E_DEFAULT"
+            ],
+            "claims": [
+              "C_DEFAULT"
+            ],
+            "decisions": [
+              "D_DEFAULT"
+            ],
+            "assertions": [
+              "AS_DEFAULT"
+            ],
+            "claims_valid_before": [
+              "C_DEFAULT",
+              "C_REPLICATED"
+            ],
+            "claims_unaffected": [
+              "C_REPLICATED"
+            ]
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0029150000955269206,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.0025039998945430852,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.0102349999906437,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.011887999789905734,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.020451000182220014,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [
+                  "D_DEFAULT"
+                ],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 1.0650109998096013,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "qlu-lab/POP-TOOLS",
+        "base_commit": "abc373b7a42c9dc7196436766eaba1a0a2aa3c92",
+        "revision_commit": "e5e3c9281e93b43b91da2dae1880acc3e29d6cc2",
+        "revision_date": "2025-09-02",
+        "commit_message": "Update POP-GWAS.py",
+        "changed_files": [
+          "POP-GWAS.py"
+        ],
+        "source_url": "https://github.com/qlu-lab/POP-TOOLS/commit/e5e3c9281e93b43b91da2dae1880acc3e29d6cc2",
+        "semantic_effect": "CLI default for --sample-overlap changed from False to True; a task with overlapping samples is therefore sensitive when the flag is omitted.",
+        "benchmark_task": "Run ML-assisted GWAS on an overlap-containing fixture once with the old implicit default and once with an explicit overlap-correction configuration.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH02_SCANPY_SPARSE_NORMALIZE_TOTAL",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "SCANPY_SPARSE_MEDIAN"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_SPARSE",
+              "R_SPARSE",
+              "SCANPY_SPARSE_MEDIAN",
+              "T_SPARSE"
+            ],
+            "dead_evidence": [
+              "E_SPARSE"
+            ],
+            "claims": [
+              "C_SPARSE"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_SPARSE"
+            ],
+            "claims_valid_before": [
+              "C_ROBUST",
+              "C_SPARSE"
+            ],
+            "claims_unaffected": [
+              "C_ROBUST"
+            ]
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0018929999896499794,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_ROBUST",
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_ROBUST",
+                  "AS_SPARSE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ROBUST",
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_ROBUST",
+                  "AS_SPARSE"
+                ]
+              },
+              "latency_ms": 0.001973000053112628,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_ROBUST",
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_ROBUST",
+                  "AS_SPARSE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ROBUST",
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_ROBUST",
+                  "AS_SPARSE"
+                ]
+              },
+              "latency_ms": 0.007301000096049393,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_SPARSE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_SPARSE"
+                ]
+              },
+              "latency_ms": 0.012058000265824376,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_SPARSE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_SPARSE"
+                ]
+              },
+              "latency_ms": 0.08350600000994746,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_SPARSE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_SPARSE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_SPARSE"
+                ]
+              },
+              "latency_ms": 0.711255999704008,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "scverse/scanpy",
+        "base_commit": "e59622e5d3a4a637b30b74f5112ebe798620b96a",
+        "revision_commit": "8f76101f14b85b9a59cec2d2a970fe3b85c1cce7",
+        "revision_date": "2026-07-27",
+        "commit_message": "fix: use the non-zero median as target_sum on the sparse path (#4256)",
+        "changed_files": [
+          "src/scanpy/preprocessing/_normalization.py",
+          "tests/test_normalization.py"
+        ],
+        "source_url": "https://github.com/scverse/scanpy/commit/8f76101f14b85b9a59cec2d2a970fe3b85c1cce7",
+        "semantic_effect": "Sparse input used a plain median including zero-count cells while dense input used the non-zero median; with zero-count cells the paths could normalize to different target sums.",
+        "benchmark_task": "Normalize a matrix containing zero-count cells through sparse and dense representations, then bind downstream evidence to both runs.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH03_SCANPY_HARMONY_DEFAULTS",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "HARMONY_UNSET_DEFAULTS"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_DEFAULT",
+              "HARMONY_UNSET_DEFAULTS",
+              "R_DEFAULT",
+              "T_DEFAULT"
+            ],
+            "dead_evidence": [
+              "E_DEFAULT"
+            ],
+            "claims": [
+              "C_DEFAULT"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_DEFAULT"
+            ],
+            "claims_valid_before": [
+              "C_DEFAULT",
+              "C_REPLICATED"
+            ],
+            "claims_unaffected": [
+              "C_REPLICATED"
+            ]
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0016919998415687587,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.001633000010770047,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.007040999662422109,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.01300999974773731,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.09167899997919449,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.7671399998798734,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "scverse/scanpy",
+        "base_commit": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc",
+        "revision_commit": "2f3bdd263ef030c06a486eea78baf2189443a3b8",
+        "revision_date": "2026-08-13",
+        "commit_message": "perf: update harmony defaults (#4290)",
+        "changed_files": [
+          "src/scanpy/preprocessing/_harmony/__init__.py"
+        ],
+        "source_url": "https://github.com/scverse/scanpy/commit/2f3bdd263ef030c06a486eea78baf2189443a3b8",
+        "semantic_effect": "Unset harmony2 stopping parameters now follow Harmony2 defaults (4, 1e-3, 1e-2) instead of the previous 200, 1e-5, 1e-4 values; runs with explicit parameters are not dependent on the default constants.",
+        "benchmark_task": "Run harmony2 once with stopping rules omitted and once with the prior values supplied explicitly.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH04_SQUIDPY_GEARY_VARIANCE",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "GEARY_ANALYTIC_VARIANCE"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_ANALYTIC",
+              "GEARY_ANALYTIC_VARIANCE",
+              "R_ANALYTIC",
+              "T_ANALYTIC"
+            ],
+            "dead_evidence": [
+              "E_ANALYTIC"
+            ],
+            "claims": [
+              "C_ANALYTIC"
+            ],
+            "decisions": [
+              "D_ANALYTIC"
+            ],
+            "assertions": [
+              "AS_ANALYTIC"
+            ],
+            "claims_valid_before": [
+              "C_ANALYTIC",
+              "C_CONVERGENT"
+            ],
+            "claims_unaffected": [
+              "C_CONVERGENT"
+            ]
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.002534000032028416,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_ANALYTIC",
+                  "C_CONVERGENT"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC",
+                  "AS_CONVERGENT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ANALYTIC",
+                  "C_CONVERGENT"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC",
+                  "AS_CONVERGENT"
+                ]
+              },
+              "latency_ms": 0.003245000243623508,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_ANALYTIC",
+                  "C_CONVERGENT"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC",
+                  "AS_CONVERGENT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ANALYTIC",
+                  "C_CONVERGENT"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC",
+                  "AS_CONVERGENT"
+                ]
+              },
+              "latency_ms": 0.031907999982649926,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [
+                  "C_ANALYTIC"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ANALYTIC"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC"
+                ]
+              },
+              "latency_ms": 0.009603999842511257,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_ANALYTIC"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ANALYTIC"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC"
+                ]
+              },
+              "latency_ms": 0.017226000181835843,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_ANALYTIC"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_ANALYTIC"
+                ],
+                "decisions": [
+                  "D_ANALYTIC"
+                ],
+                "assertions": [
+                  "AS_ANALYTIC"
+                ]
+              },
+              "latency_ms": 0.7435349998559104,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "scverse/squidpy",
+        "base_commit": "55572c4c194247888e384f281522c0cb9b57c737",
+        "revision_commit": "40307c8885e5e3060ef646f5088df45d720e455f",
+        "revision_date": "2026-06-19",
+        "commit_message": "Use Geary's C normality variance in spatial_autocorr (fixes #1183) (#1197)",
+        "changed_files": [
+          "src/squidpy/gr/_ppatterns.py",
+          "tests/graph/test_ppatterns.py"
+        ],
+        "source_url": "https://github.com/scverse/squidpy/commit/40307c8885e5e3060ef646f5088df45d720e455f",
+        "semantic_effect": "The pre-fix code reused Moran's I normality variance for Geary's C, miscalibrating Geary analytic p-values; the commit notes permutation-based p-values are unaffected.",
+        "benchmark_task": "Compute Geary's C significance using both the analytic normality path and an independent permutation path.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH05_TABPFN_PRIOR_SHIFT",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "TABPFN_MAJORITY_PRIOR"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_MD",
+              "R_MD",
+              "TABPFN_MAJORITY_PRIOR",
+              "T_MD"
+            ],
+            "dead_evidence": [
+              "E_MD"
+            ],
+            "claims": [
+              "C_MD"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_MD"
+            ],
+            "claims_valid_before": [
+              "C_MD",
+              "C_REPLICATED"
+            ],
+            "claims_unaffected": [
+              "C_REPLICATED"
+            ]
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.002122999831044581,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_MD",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_MD",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.0015929999790387228,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_MD",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_MD",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.007070000265230192,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [
+                  "C_MD"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_MD"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD"
+                ]
+              },
+              "latency_ms": 0.008824000360618811,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_MD"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_MD"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD"
+                ]
+              },
+              "latency_ms": 0.02583900004538009,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_MD"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_MD"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_MD"
+                ]
+              },
+              "latency_ms": 0.7498340000893222,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "PriorLabs/TabPFN",
+        "base_commit": "9f0c45c63da3216564f804398020705a5b70b86d",
+        "revision_commit": "12862a5723d3f64de04d28588a5925eb2303a26b",
+        "revision_date": "2026-09-17",
+        "commit_message": "Correct the target prior shift of majority_downsample row subsampling (#1270)",
+        "changed_files": [
+          "src/tabpfn/classifier.py",
+          "src/tabpfn/regressor.py",
+          "src/tabpfn/downsample_correction.py"
+        ],
+        "source_url": "https://github.com/PriorLabs/TabPFN/commit/12862a5723d3f64de04d28588a5925eb2303a26b",
+        "semantic_effect": "The majority_downsample sampler previously shifted the target prior; the revision adds correction so predicted probabilities/regression distributions are calibrated to the training data rather than the downsampled context.",
+        "benchmark_task": "Compare a majority-downsampled prediction with a no-downsampling replication on a class-imbalanced fixture.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH06_TABPFN_FEATURE_SUBSAMPLING",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "TABPFN_FEATURE_POOL"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_POOL",
+              "R_POOL",
+              "TABPFN_FEATURE_POOL",
+              "T_POOL"
+            ],
+            "dead_evidence": [
+              "E_POOL"
+            ],
+            "claims": [
+              "C_WIDE"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_WIDE"
+            ],
+            "claims_valid_before": [
+              "C_WIDE"
+            ],
+            "claims_unaffected": []
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0019230001271353103,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "latency_ms": 0.001571999746374786,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "latency_ms": 0.0058790001276065595,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.007611999990331242,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "latency_ms": 0.14208499987944379,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_WIDE"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_WIDE"
+                ]
+              },
+              "latency_ms": 0.6691120001960371,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "PriorLabs/TabPFN",
+        "base_commit": "8b35121b0cad8dfca542d521e2310636a453ded7",
+        "revision_commit": "02a9978acfd538b058362257f885d173a366f79c",
+        "revision_date": "2026-09-02",
+        "commit_message": "Fix importance-based feature subsampling never sharing pools across estimators (#1141)",
+        "changed_files": [
+          "src/tabpfn/preprocessing/ensemble.py"
+        ],
+        "source_url": "https://github.com/PriorLabs/TabPFN/commit/02a9978acfd538b058362257f885d173a366f79c",
+        "semantic_effect": "The changelog states that estimators drew non-top features independently rather than from a shared round-robin pool, potentially leaving features unseen despite enough combined feature budget; results can change for gini_feature_importance or auto on large wide datasets.",
+        "benchmark_task": "Run an importance-based wide-dataset ensemble where validity of feature coverage requires both a stable ranking and correct shared-pool coverage.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH07_SAELENS_SEQUENCE_BOUNDARY",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "SAE_BATCH_BOUNDARY"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_BOUNDARY",
+              "R_BOUNDARY",
+              "SAE_BATCH_BOUNDARY",
+              "T_BOUNDARY"
+            ],
+            "dead_evidence": [
+              "E_BOUNDARY"
+            ],
+            "claims": [
+              "C_TRAIN"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_TRAIN"
+            ],
+            "claims_valid_before": [
+              "C_TRAIN"
+            ],
+            "claims_unaffected": []
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.001642000370338792,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "latency_ms": 0.001482000243413495,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "latency_ms": 0.005989000328554539,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.006961000053706812,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "latency_ms": 0.03705600011016941,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_TRAIN"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_TRAIN"
+                ]
+              },
+              "latency_ms": 0.7333489998018194,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "decoderesearch/SAELens",
+        "base_commit": "ee45e7406165ce267b33d33b7371bbb63ef24db8",
+        "revision_commit": "964025a2bc492af955327eacc9eaa41d9642afdc",
+        "revision_date": "2026-09-11",
+        "commit_message": "fix: preserve sequence starts at batch boundaries (#733)",
+        "changed_files": [
+          "sae_lens/tokenization_and_batching.py",
+          "tests/training/test_tokenization_and_batching.py"
+        ],
+        "source_url": "https://github.com/decoderesearch/SAELens/commit/964025a2bc492af955327eacc9eaa41d9642afdc",
+        "semantic_effect": "The revision preserves begin-sequence tokens when a separator fills the last slot of a batch; the regression test shows that the next sequence must still begin with its start token rather than losing sequence structure.",
+        "benchmark_task": "Create a training fixture with a separator exactly filling the previous batch and bind a training conclusion to both dataset integrity and correct boundary tokenization.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH08_COMPASS_PENALTY_PCA",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "COMPASS_PCA_DIM"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "COMPASS_PCA_DIM",
+              "E_PENALTY",
+              "R_PENALTY",
+              "T_PENALTY"
+            ],
+            "dead_evidence": [
+              "E_PENALTY"
+            ],
+            "claims": [
+              "C_REACTION"
+            ],
+            "decisions": [
+              "D_REACTION"
+            ],
+            "assertions": [
+              "AS_REACTION"
+            ],
+            "claims_valid_before": [
+              "C_REACTION"
+            ],
+            "claims_unaffected": []
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0018020000425167382,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "latency_ms": 0.001532999704068061,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "latency_ms": 0.00902399960978073,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": []
+              },
+              "latency_ms": 0.007230999926832737,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "latency_ms": 0.010836000001290813,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_REACTION"
+                ],
+                "decisions": [
+                  "D_REACTION"
+                ],
+                "assertions": [
+                  "AS_REACTION"
+                ]
+              },
+              "latency_ms": 0.5532569998649706,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "YosefLab/Compass",
+        "base_commit": "d684c70def5beadddf77b8d562ff7303ce8a7452",
+        "revision_commit": "b0cc0bae420d437019fa17d84e7957c86853aba4",
+        "revision_date": "2021-04-05",
+        "commit_message": "Fixed a bug in penalties (fixed a bad copy paste from microcluster code)",
+        "changed_files": [
+          "compass/compass/penalties.py"
+        ],
+        "source_url": "https://github.com/YosefLab/Compass/commit/b0cc0bae420d437019fa17d84e7957c86853aba4",
+        "semantic_effect": "The PCA component count used dimensions from log_expression_filtered while fitting PCA to log_expression; the fix derives the component count from the actual matrix being transformed.",
+        "benchmark_task": "Evaluate reaction penalties on a fixture where filtered and unfiltered expression dimensions differ; the scientific claim requires both valid expression input and valid PCA-derived penalties.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH09_SCVI_DUPLICATED_PBMC_BATCH",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "SCVI_PBMC_DUP_BATCH"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_DATA",
+              "R_DATA",
+              "SCVI_PBMC_DUP_BATCH",
+              "T_DATA"
+            ],
+            "dead_evidence": [
+              "E_DATA"
+            ],
+            "claims": [
+              "C_BENCH"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_BENCH"
+            ],
+            "claims_valid_before": [
+              "C_BENCH"
+            ],
+            "claims_unaffected": []
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0017329998627246823,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "latency_ms": 0.0013919998309575021,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "latency_ms": 0.0059389999478298705,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.006740000117133604,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "latency_ms": 0.010725999800342834,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_BENCH"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_BENCH"
+                ]
+              },
+              "latency_ms": 0.7526579997829685,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "scverse/scvi-tools",
+        "base_commit": "2d720671cb994ae117192de952146c06cb48e81a",
+        "revision_commit": "f20be750893b55944ca6a68e3603141aa73c30de",
+        "revision_date": "2026-09-02",
+        "commit_message": "fix(data): drop duplicated cd4_t_helper batch in purified_pbmc_dataset (#3985)",
+        "changed_files": [
+          "src/scvi/data/_built_in_data/_pbmc.py",
+          "src/scvi/data/_datasets.py"
+        ],
+        "source_url": "https://github.com/scverse/scvi-tools/commit/f20be750893b55944ca6a68e3603141aa73c30de",
+        "semantic_effect": "The loader returned a duplicated cd4_t_helper batch; the fix removes raw batch 7, documented as a byte-for-byte duplicate of batch 0 from a copy-paste bug in the original dataset packaging.",
+        "benchmark_task": "Load the purified PBMC fixture and fit a fixed model; downstream performance claims require both a non-duplicated dataset and the fixed model configuration.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    },
+    {
+      "schema": "prr-results-1",
+      "trajectory_id": "RH10_SEURAT_NFEATURES_DEFAULT",
+      "events": [
+        {
+          "mutation": {
+            "id": "M1",
+            "kind": "artifact_supersession",
+            "targets": [
+              "SEURAT_NFEATURES_DEFAULT"
+            ]
+          },
+          "truth": {
+            "dead_operational": [
+              "E_DEFAULT",
+              "R_DEFAULT",
+              "SEURAT_NFEATURES_DEFAULT",
+              "T_DEFAULT"
+            ],
+            "dead_evidence": [
+              "E_DEFAULT"
+            ],
+            "claims": [
+              "C_DEFAULT"
+            ],
+            "decisions": [],
+            "assertions": [
+              "AS_DEFAULT"
+            ],
+            "claims_valid_before": [
+              "C_DEFAULT",
+              "C_REPLICATED"
+            ],
+            "claims_unaffected": [
+              "C_REPLICATED"
+            ]
+          },
+          "systems": {
+            "no_revision_state": {
+              "label": "Executable agent, no persistent revision state",
+              "identified": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "updated": {
+                "claims": [],
+                "decisions": [],
+                "assertions": []
+              },
+              "latency_ms": 0.0018030000319413375,
+              "ops": 0,
+              "note": "no persistent revision state"
+            },
+            "full_rebuild": {
+              "label": "Invalidate/rebuild all scientific state",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.0015820000953681301,
+              "ops": 0,
+              "note": "invalidate/rebuild all scientific state"
+            },
+            "downstream_reachability": {
+              "label": "Naive downstream invalidation",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT",
+                  "C_REPLICATED"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT",
+                  "AS_REPLICATED"
+                ]
+              },
+              "latency_ms": 0.006800999926781515,
+              "ops": 0,
+              "note": "full downstream closure"
+            },
+            "binary_edges": {
+              "label": "Flat binary-edge revision",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.008292000075016404,
+              "ops": 0,
+              "note": "flat OR-of-positive-edges semantics"
+            },
+            "support_set_provenance": {
+              "label": "AND/OR support provenance without transactions",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.08108200017886702,
+              "ops": 0,
+              "note": "AND/OR support provenance; no transaction/state-machine layer"
+            },
+            "trl_v14": {
+              "label": "TRL v14 artifact/tool/run-aware revision",
+              "identified": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "updated": {
+                "claims": [
+                  "C_DEFAULT"
+                ],
+                "decisions": [],
+                "assertions": [
+                  "AS_DEFAULT"
+                ]
+              },
+              "latency_ms": 0.7455879999724857,
+              "ops": 1,
+              "note": "committed"
+            }
+          }
+        }
+      ],
+      "source": {
+        "tier": "A-historical-semantic-revision",
+        "repository": "satijalab/seurat",
+        "base_commit": "c4b718c54b08b372bf07e7a6e687850c7ffea942",
+        "revision_commit": "a61cd8b12242bc448d96ab54cd16eca4dc978bfd",
+        "revision_date": "2026-09-09",
+        "commit_message": "Fix default for nfeatures parameter in FindSpatiallyVariableFeatures.Assay",
+        "changed_files": [
+          "R/preprocessing.R"
+        ],
+        "source_url": "https://github.com/satijalab/seurat/commit/a61cd8b12242bc448d96ab54cd16eca4dc978bfd",
+        "semantic_effect": "The function default changed from self-referential nfeatures=nfeatures to nfeatures=2000; calls relying on the default are revision-sensitive while calls that explicitly pass nfeatures=2000 are not dependent on the changed default expression.",
+        "benchmark_task": "Run spatially variable feature selection with the implicit default and with nfeatures=2000 explicitly supplied.",
+        "execution_status": "graph-level pilot; upstream code was not re-executed in this environment"
+      }
+    }
+  ],
+  "summary": {
+    "no_revision_state": {
+      "events": 10,
+      "exact_event_match": 0,
+      "exact_event_rate": 0.0,
+      "mean_latency_ms": 0.0020060000224475516,
+      "mean_ops": 0.0,
+      "claims": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 10,
+        "tn": 6,
+        "precision": null,
+        "recall": 0.0,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 1.0
+      },
+      "decisions": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "tn": 0,
+        "precision": null,
+        "recall": 0.0,
+        "false_invalidation_rate": null,
+        "escape_rate": 1.0
+      },
+      "assertions": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 10,
+        "tn": 6,
+        "precision": null,
+        "recall": 0.0,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 1.0
+      }
+    },
+    "full_rebuild": {
+      "events": 10,
+      "exact_event_match": 4,
+      "exact_event_rate": 0.4,
+      "mean_latency_ms": 0.0018508999801269965,
+      "mean_ops": 0.0,
+      "claims": {
+        "tp": 10,
+        "fp": 6,
+        "fn": 0,
+        "tn": 0,
+        "precision": 0.625,
+        "recall": 1.0,
+        "false_invalidation_rate": 1.0,
+        "escape_rate": 0.0
+      },
+      "decisions": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": null,
+        "escape_rate": 0.0
+      },
+      "assertions": {
+        "tp": 10,
+        "fp": 6,
+        "fn": 0,
+        "tn": 0,
+        "precision": 0.625,
+        "recall": 1.0,
+        "false_invalidation_rate": 1.0,
+        "escape_rate": 0.0
+      }
+    },
+    "downstream_reachability": {
+      "events": 10,
+      "exact_event_match": 4,
+      "exact_event_rate": 0.4,
+      "mean_latency_ms": 0.009718699993754853,
+      "mean_ops": 0.0,
+      "claims": {
+        "tp": 10,
+        "fp": 6,
+        "fn": 0,
+        "tn": 0,
+        "precision": 0.625,
+        "recall": 1.0,
+        "false_invalidation_rate": 1.0,
+        "escape_rate": 0.0
+      },
+      "decisions": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": null,
+        "escape_rate": 0.0
+      },
+      "assertions": {
+        "tp": 10,
+        "fp": 6,
+        "fn": 0,
+        "tn": 0,
+        "precision": 0.625,
+        "recall": 1.0,
+        "false_invalidation_rate": 1.0,
+        "escape_rate": 0.0
+      }
+    },
+    "binary_edges": {
+      "events": 10,
+      "exact_event_match": 6,
+      "exact_event_rate": 0.6,
+      "mean_latency_ms": 0.009222000016961829,
+      "mean_ops": 0.0,
+      "claims": {
+        "tp": 6,
+        "fp": 0,
+        "fn": 4,
+        "tn": 6,
+        "precision": 1.0,
+        "recall": 0.6,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 0.4
+      },
+      "decisions": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": null,
+        "escape_rate": 0.0
+      },
+      "assertions": {
+        "tp": 6,
+        "fp": 0,
+        "fn": 4,
+        "tn": 6,
+        "precision": 1.0,
+        "recall": 0.6,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 0.4
+      }
+    },
+    "support_set_provenance": {
+      "events": 10,
+      "exact_event_match": 10,
+      "exact_event_rate": 1.0,
+      "mean_latency_ms": 0.052048600036869175,
+      "mean_ops": 0.0,
+      "claims": {
+        "tp": 10,
+        "fp": 0,
+        "fn": 0,
+        "tn": 6,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 0.0
+      },
+      "decisions": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": null,
+        "escape_rate": 0.0
+      },
+      "assertions": {
+        "tp": 10,
+        "fp": 0,
+        "fn": 0,
+        "tn": 6,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 0.0
+      }
+    },
+    "trl_v14": {
+      "events": 10,
+      "exact_event_match": 10,
+      "exact_event_rate": 1.0,
+      "mean_latency_ms": 0.7490739998956997,
+      "mean_ops": 1.0,
+      "claims": {
+        "tp": 10,
+        "fp": 0,
+        "fn": 0,
+        "tn": 6,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 0.0
+      },
+      "decisions": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": null,
+        "escape_rate": 0.0
+      },
+      "assertions": {
+        "tp": 10,
+        "fp": 0,
+        "fn": 0,
+        "tn": 6,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_invalidation_rate": 0.0,
+        "escape_rate": 0.0
+      }
+    }
+  }
+}

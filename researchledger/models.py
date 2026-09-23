@@ -67,6 +67,37 @@ V1_TO_V2_CLAIM_STATUS_SEED = {
 SCHEMA_VERSION = "2.0"
 
 
+def parse_support_sets(value) -> list[list[str]]:
+    """Parse alternative sufficient evidence sets from claim frontmatter.
+
+    Canonical v2.1 form is a YAML list of lists, e.g.::
+
+        support_sets:
+          - [E001, E002]   # conjunction
+          - [E003]         # alternative sufficient path
+
+    For hand-edited/legacy files we also accept a list of delimiter-separated
+    strings (``"E001|E002"``) or a semicolon-separated string of groups.
+    Empty groups are ignored.
+    """
+    if value is None:
+        return []
+    if isinstance(value, list):
+        groups: list[list[str]] = []
+        for item in value:
+            if isinstance(item, list):
+                g = [str(x).strip() for x in item if str(x).strip()]
+            else:
+                g = split_ids(item)
+            if g:
+                groups.append(g)
+        return groups
+    text = str(value).strip()
+    if not text or text.lower() in ("none", "(none)"):
+        return []
+    return [split_ids(group) for group in text.split(";") if split_ids(group)]
+
+
 @dataclass
 class Evidence:
     id: str
@@ -146,6 +177,7 @@ class Claim:
     name: str = ""
     status: str = "hypothesis"
     evidence: list[str] = field(default_factory=list)
+    support_sets: list[list[str]] = field(default_factory=list)
     contradicts: list[str] = field(default_factory=list)
     required_evidence: str | None = None
     paper: str | None = None
@@ -163,6 +195,7 @@ class Claim:
             name=fm.get("name", ""),
             status=fm.get("status", "hypothesis"),
             evidence=split_ids(fm.get("evidence")),
+            support_sets=parse_support_sets(fm.get("support_sets")),
             contradicts=split_ids(fm.get("contradicts")),
             required_evidence=fm.get("required_evidence"),
             paper=fm.get("paper"),
@@ -185,6 +218,8 @@ class Claim:
             "evidence": self.evidence,
             "contradicts": self.contradicts,
         }
+        if self.support_sets:
+            fm["support_sets"] = self.support_sets
         if self.required_evidence:
             fm["required_evidence"] = self.required_evidence
         if self.paper:
@@ -298,35 +333,62 @@ _STRONG_CONTRADICTION = {"verified", "checked"}
 
 
 def recompute_claim_status(claim: Claim, evidence_map: dict[str, Evidence]) -> str:
-    """Deterministically derive what a claim's status *should* be from its
-    evidence, ignoring superseded evidence. `withdrawn` is manual-only (a
-    human/agent decision to retire a claim) and is never produced here —
-    if the claim is already withdrawn, recomputation leaves it alone.
+    """Derive claim status from declared evidence with AND/OR support semantics.
 
-    This is the guard against "a claim is not verified merely because one
-    experiment supports it": only evidence.status == 'verified' counts as
-    strong support, and any live (non-superseded), at-least-'checked'
-    contradiction pulls the claim back to 'mixed' or 'contradicted'.
+    Backward compatibility: every entry in ``claim.evidence`` is a singleton
+    sufficient path unless it also appears inside ``claim.support_sets``.
+    ``support_sets`` are alternatives to one another, while members inside a
+    set are conjunctive.  ``required_evidence`` is parsed with ``split_ids``
+    and is conjoined with every sufficient path.
+
+    This makes the operational distinction that the journal-validation study
+    needs: losing one member of a conjunction defeats that support path, while
+    losing one alternative path does not defeat the claim if another complete
+    path remains.  Contradicting evidence retains the v2 mixed/contradicted
+    behavior.
     """
     if claim.status == "withdrawn":
         return "withdrawn"
 
-    def _live(ids: list[str]) -> list[Evidence]:
-        return [evidence_map[e] for e in ids if e in evidence_map and evidence_map[e].status != "superseded"]
+    grouped = {eid for group in claim.support_sets for eid in group}
+    support_sets: list[list[str]] = [[eid] for eid in claim.evidence if eid not in grouped]
+    support_sets.extend([list(group) for group in claim.support_sets if group])
+    required = split_ids(claim.required_evidence)
 
-    supporting = _live(claim.evidence)
-    contradicting = _live(claim.contradicts)
+    def _support_level(ids: list[str]) -> int:
+        # 0 = no admissible support; 1 = observed/checked; 2 = verified.
+        # Missing, proposed, contradicted, invalidated, or superseded members
+        # make a conjunctive path unavailable.
+        levels: list[int] = []
+        for eid in ids:
+            ev = evidence_map.get(eid)
+            if ev is None or ev.status in {"proposed", "contradicted", "invalidated", "superseded"}:
+                return 0
+            if ev.status == "verified":
+                levels.append(2)
+            elif ev.status in {"observed", "checked"}:
+                levels.append(1)
+            else:
+                return 0
+        return min(levels, default=0)
 
-    strong_support = any(e.status in _STRONG_SUPPORT for e in supporting)
-    weak_support = any(e.status in _WEAK_SUPPORT for e in supporting)
-    strong_contradiction = any(e.status in _STRONG_CONTRADICTION for e in contradicting)
+    best = 0
+    for group in support_sets:
+        best = max(best, _support_level(group + required))
 
-    if strong_contradiction and (strong_support or weak_support):
+    strong_contradiction = False
+    for eid in claim.contradicts:
+        ev = evidence_map.get(eid)
+        if ev is not None and ev.status != "superseded" and ev.status in _STRONG_CONTRADICTION:
+            strong_contradiction = True
+            break
+
+    if strong_contradiction and best > 0:
         return "mixed"
     if strong_contradiction:
         return "contradicted"
-    if strong_support:
+    if best >= 2:
         return "supported"
-    if weak_support:
+    if best == 1:
         return "provisional"
     return "hypothesis"

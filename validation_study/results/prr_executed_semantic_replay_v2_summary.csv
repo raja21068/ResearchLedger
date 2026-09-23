@@ -1,0 +1,14 @@
+case_id,repository,replay_mode,semantic_change_observed
+RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT,qlu-lab/POP-TOOLS,direct-argument-semantics,true
+RH02_SCANPY_SPARSE_NORMALIZE_TOTAL,scverse/scanpy,numeric-formula-replay,true
+RH03_SCANPY_HARMONY_DEFAULTS,scverse/scanpy,configuration-replay,true
+RH04_SQUIDPY_GEARY_VARIANCE,scverse/squidpy,numeric-formula-replay,true
+RH05_TABPFN_PRIOR_SHIFT,PriorLabs/TabPFN,numeric-prior-correction-replay,true
+RH06_TABPFN_FEATURE_SUBSAMPLING,PriorLabs/TabPFN,numeric-feature-coverage-replay,true
+RH07_SAELENS_SEQUENCE_BOUNDARY,decoderesearch/SAELens,direct-code-replay,true
+RH08_COMPASS_PENALTY_PCA,YosefLab/Compass,direct-expression-replay,true
+RH09_SCVI_DUPLICATED_PBMC_BATCH,scverse/scvi-tools,loader-filter-semantics-replay,true
+RH10_SEURAT_NFEATURES_DEFAULT,satijalab/seurat,source-level-configuration-replay,true
+RH11_SQUIDPY_PERMUTATION_NJOBS,scverse/squidpy,direct-rng-semantics-replay,true
+RH12_SKLEARN_SPARSE_QUANTILE_SUBSAMPLING,scikit-learn/scikit-learn,package-runtime-old-plus-commit-patched-new,true
+RH13_SAELENS_ZERO_BOS,decoderesearch/SAELens,direct-branch-semantics-replay,true

@@ -1,0 +1,53 @@
+{
+  "case_id": "RH13_SAELENS_ZERO_BOS",
+  "repository": "decoderesearch/SAELens",
+  "base_commit": "78f3db823428bc84e44ac41cada6777f44057436",
+  "revision_commit": "48c0ea92aac5b3684d2c4cafd8b8dc3c19c9349a",
+  "replay_mode": "direct-branch-semantics-replay",
+  "trajectory_mode": "ledger-integrated-paper-agent-proxy",
+  "harness_git_commit": "9b495fcf016344f806f8c70e006be1e1aacaae8f",
+  "old_run_id": "R0001",
+  "new_run_id": "R0002",
+  "old_output_sha256": "8f996a7a5699882cc2a23db51e5469dc755a8757618899542d30f2c862351060",
+  "new_output_sha256": "3de02ba8f7c0a007e391c56785cc3b3934d69e9ee821e118d493880f104f77be",
+  "output_changed": true,
+  "old_evidence": "E001",
+  "new_evidence": "E002",
+  "claim_state_before_revision": "supported",
+  "claim_state_after_old_evidence_superseded": "hypothesis",
+  "claim_state_after_recovery": "supported",
+  "paper_audit_before": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "paper_audit_after_invalidation": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 0,
+    "backed_by_reproducible_runs": 0,
+    "unsupported": 0,
+    "stale_evidence_usage": 1
+  },
+  "paper_audit_after_recovery": {
+    "quantitative_assertions": 1,
+    "linked_to_claims": 1,
+    "backed_by_verified_evidence": 1,
+    "backed_by_reproducible_runs": 1,
+    "unsupported": 0,
+    "stale_evidence_usage": 0
+  },
+  "promotion_transaction": "REV20260923T080327-cccb259c",
+  "invalidation_transaction": "REV20260923T080330-8e692e3d",
+  "recovery_transaction": "REV20260923T080330-e2ddd53b",
+  "old_tool_seconds": 3.0396094970001286,
+  "new_tool_seconds": 2.949834056000327,
+  "time_to_safe_state_seconds": 0.009854396999799064,
+  "recovery_seconds_excluding_tool_execution": 0.015474023000933812,
+  "final_validation_errors": 0,
+  "final_validation_warnings": 1,
+  "lifecycle_ok": true
+}

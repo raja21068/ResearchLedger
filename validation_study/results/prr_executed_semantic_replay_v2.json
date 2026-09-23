@@ -1,0 +1,443 @@
+{
+  "schema": "prr-executed-semantic-replay-2",
+  "scope": "Thirteen genuine historical commits with the changed semantics replayed locally. The first ten are the prior pilot; RH11-RH13 broaden reproducibility, sparse-statistic, and tokenization failure modes. This remains narrower than full old/new repository + Paper2Agent re-execution and is not independent human-adjudicated external validation.",
+  "n_cases": 13,
+  "n_semantic_changes_observed": 13,
+  "repositories": [
+    "PriorLabs/TabPFN",
+    "YosefLab/Compass",
+    "decoderesearch/SAELens",
+    "qlu-lab/POP-TOOLS",
+    "satijalab/seurat",
+    "scikit-learn/scikit-learn",
+    "scverse/scanpy",
+    "scverse/scvi-tools",
+    "scverse/squidpy"
+  ],
+  "n_repositories": 9,
+  "cases": [
+    {
+      "case_id": "RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT",
+      "repository": "qlu-lab/POP-TOOLS",
+      "base_commit": "abc373b7a42c9dc7196436766eaba1a0a2aa3c92",
+      "revision_commit": "e5e3c9281e93b43b91da2dae1880acc3e29d6cc2",
+      "replay_mode": "direct-argument-semantics",
+      "old_result": {
+        "implicit": false,
+        "explicit": true
+      },
+      "new_result": {
+        "implicit": true,
+        "explicit": true
+      },
+      "semantic_change_observed": true,
+      "interpretation": "The historical default change is behaviorally observable when the flag is omitted; an explicitly enabled overlap correction is invariant."
+    },
+    {
+      "case_id": "RH02_SCANPY_SPARSE_NORMALIZE_TOTAL",
+      "repository": "scverse/scanpy",
+      "base_commit": "e59622e5d3a4a637b30b74f5112ebe798620b96a",
+      "revision_commit": "8f76101f14b85b9a59cec2d2a970fe3b85c1cce7",
+      "replay_mode": "numeric-formula-replay",
+      "old_result": {
+        "target_sum": 15.0,
+        "row_sums": [
+          0.0,
+          15.0,
+          15.0,
+          15.0
+        ]
+      },
+      "new_result": {
+        "target_sum": 20.0,
+        "row_sums": [
+          0.0,
+          20.0,
+          20.0,
+          20.0
+        ]
+      },
+      "semantic_change_observed": true,
+      "interpretation": "On the regression fixture from the commit, the old sparse-path target is 15 while the corrected non-zero median is 20; every non-empty normalized row changes accordingly.",
+      "absolute_change": 5.0
+    },
+    {
+      "case_id": "RH03_SCANPY_HARMONY_DEFAULTS",
+      "repository": "scverse/scanpy",
+      "base_commit": "d8bcdae3f92803a8b36ee7117b2584f834ddb4dc",
+      "revision_commit": "2f3bdd263ef030c06a486eea78baf2189443a3b8",
+      "replay_mode": "configuration-replay",
+      "old_result": {
+        "implicit_harmony2": {
+          "max_iter_clustering": 200,
+          "tol_clustering": 1e-05,
+          "tol_harmony": 0.0001
+        },
+        "explicit_old_values": {
+          "max_iter_clustering": 200,
+          "tol_clustering": 1e-05,
+          "tol_harmony": 0.0001
+        }
+      },
+      "new_result": {
+        "implicit_harmony2": {
+          "max_iter_clustering": 4,
+          "tol_clustering": 0.001,
+          "tol_harmony": 0.01
+        },
+        "explicit_old_values": {
+          "max_iter_clustering": 200,
+          "tol_clustering": 1e-05,
+          "tol_harmony": 0.0001
+        }
+      },
+      "semantic_change_observed": true,
+      "interpretation": "Unset Harmony2 stopping rules change substantially, whereas explicitly pinned old stopping values remain invariant. This replay verifies configuration semantics, not the downstream embedding."
+    },
+    {
+      "case_id": "RH04_SQUIDPY_GEARY_VARIANCE",
+      "repository": "scverse/squidpy",
+      "base_commit": "55572c4c194247888e384f281522c0cb9b57c737",
+      "revision_commit": "40307c8885e5e3060ef646f5088df45d720e455f",
+      "replay_mode": "numeric-formula-replay",
+      "old_result": {
+        "geary_C": 0.2,
+        "var_norm": 0.15833333333333333,
+        "z": -2.0104987598001385,
+        "p_two_sided": 0.04437842734548687
+      },
+      "new_result": {
+        "geary_C": 0.2,
+        "var_norm": 0.12,
+        "z": -2.3094010767585034,
+        "p_two_sided": 0.020921335337794014
+      },
+      "semantic_change_observed": true,
+      "interpretation": "The corrected Geary variance materially changes the analytic p-value on the same spatial graph. In this fixture both old and new p-values remain below 0.05, so this is an inferential calibration shift rather than a threshold crossing.",
+      "threshold_crossing_0_05": false
+    },
+    {
+      "case_id": "RH05_TABPFN_PRIOR_SHIFT",
+      "repository": "PriorLabs/TabPFN",
+      "base_commit": "9f0c45c63da3216564f804398020705a5b70b86d",
+      "revision_commit": "12862a5723d3f64de04d28588a5925eb2303a26b",
+      "replay_mode": "numeric-prior-correction-replay",
+      "old_result": {
+        "context_probability_class1": 0.7,
+        "reported_probability_class1": 0.7
+      },
+      "new_result": {
+        "context_probability_class1": 0.7,
+        "corrected_probability_class1": 0.20588235294117643
+      },
+      "semantic_change_observed": true,
+      "interpretation": "A 50/50 downsampled context applied to a 90/10 training prior can make an apparently 0.70 minority-class probability correspond to about 0.206 after prior correction.",
+      "train_prior": [
+        0.9,
+        0.1
+      ],
+      "context_prior": [
+        0.5,
+        0.5
+      ],
+      "correction_weights": [
+        1.8,
+        0.2
+      ]
+    },
+    {
+      "case_id": "RH06_TABPFN_FEATURE_SUBSAMPLING",
+      "repository": "PriorLabs/TabPFN",
+      "base_commit": "8b35121b0cad8dfca542d521e2310636a453ded7",
+      "revision_commit": "02a9978acfd538b058362257f885d173a366f79c",
+      "replay_mode": "numeric-feature-coverage-replay",
+      "old_result": {
+        "estimator_features": [
+          [
+            0,
+            1,
+            2,
+            3,
+            6,
+            8,
+            4,
+            5
+          ],
+          [
+            0,
+            1,
+            2,
+            3,
+            6,
+            4,
+            10,
+            8
+          ]
+        ],
+        "covered_features": 9
+      },
+      "new_result": {
+        "estimator_features": [
+          [
+            0,
+            1,
+            2,
+            3,
+            10,
+            9,
+            11,
+            6
+          ],
+          [
+            0,
+            1,
+            2,
+            3,
+            7,
+            8,
+            4,
+            5
+          ]
+        ],
+        "covered_features": 12
+      },
+      "semantic_change_observed": true,
+      "interpretation": "With the documented combined feature budget, independent draws can overlap and leave features unseen; the shared pool guarantees full coverage in this fixture.",
+      "seed": 2
+    },
+    {
+      "case_id": "RH07_SAELENS_SEQUENCE_BOUNDARY",
+      "repository": "decoderesearch/SAELens",
+      "base_commit": "ee45e7406165ce267b33d33b7371bbb63ef24db8",
+      "revision_commit": "964025a2bc492af955327eacc9eaa41d9642afdc",
+      "replay_mode": "direct-code-replay",
+      "old_result": [
+        [
+          1,
+          10,
+          11,
+          12,
+          13,
+          2
+        ]
+      ],
+      "new_result": [
+        [
+          1,
+          10,
+          11,
+          12,
+          13,
+          2
+        ],
+        [
+          1,
+          20,
+          21,
+          22,
+          23,
+          24
+        ]
+      ],
+      "semantic_change_observed": true,
+      "interpretation": "Replaying the changed batching logic reproduces the historical boundary defect: the corrected second batch preserves the begin-sequence token and all five tokens of the new sequence."
+    },
+    {
+      "case_id": "RH08_COMPASS_PENALTY_PCA",
+      "repository": "YosefLab/Compass",
+      "base_commit": "d684c70def5beadddf77b8d562ff7303ce8a7452",
+      "revision_commit": "b0cc0bae420d437019fa17d84e7957c86853aba4",
+      "replay_mode": "direct-expression-replay",
+      "old_result": {
+        "status": "error",
+        "error": "NameError: name 'log_expression_filtered' is not defined"
+      },
+      "new_result": {
+        "status": "ok",
+        "n_components": 5,
+        "output_shape": [
+          5,
+          5
+        ]
+      },
+      "semantic_change_observed": true,
+      "interpretation": "The old copied expression references log_expression_filtered in a branch where the fetched function defines log_expression, while the revised expression derives PCA dimensionality from the matrix actually transformed."
+    },
+    {
+      "case_id": "RH09_SCVI_DUPLICATED_PBMC_BATCH",
+      "repository": "scverse/scvi-tools",
+      "base_commit": "2d720671cb994ae117192de952146c06cb48e81a",
+      "revision_commit": "f20be750893b55944ca6a68e3603141aa73c30de",
+      "replay_mode": "loader-filter-semantics-replay",
+      "old_result": {
+        "rows": 33,
+        "batches": 11,
+        "batch0_equals_batch7": true
+      },
+      "new_result": {
+        "rows": 30,
+        "batches": 10,
+        "batch7_present": false
+      },
+      "semantic_change_observed": true,
+      "interpretation": "Applying the exact new loader predicate removes the duplicated batch-7 rows while preserving the other batches. The real H5AD itself was not downloaded in this environment."
+    },
+    {
+      "case_id": "RH10_SEURAT_NFEATURES_DEFAULT",
+      "repository": "satijalab/seurat",
+      "base_commit": "c4b718c54b08b372bf07e7a6e687850c7ffea942",
+      "revision_commit": "a61cd8b12242bc448d96ab54cd16eca4dc978bfd",
+      "replay_mode": "source-level-configuration-replay",
+      "old_result": {
+        "signature_default": "nfeatures=nfeatures",
+        "implicit": {
+          "resolves": false,
+          "reason": "self-referential default promise"
+        },
+        "explicit_2000": {
+          "resolves": true,
+          "nfeatures": 2000
+        }
+      },
+      "new_result": {
+        "signature_default": "nfeatures=2000",
+        "implicit": {
+          "resolves": true,
+          "nfeatures": 2000
+        },
+        "explicit_2000": {
+          "resolves": true,
+          "nfeatures": 2000
+        }
+      },
+      "semantic_change_observed": true,
+      "interpretation": "The source-level default changes from self-reference to 2000; an explicit nfeatures=2000 call is invariant. Full Seurat execution was not possible because R is absent from this runtime."
+    },
+    {
+      "case_id": "RH11_SQUIDPY_PERMUTATION_NJOBS",
+      "repository": "scverse/squidpy",
+      "base_commit": "005c9056fea7c5432fb220abc9b48a384fb8c090",
+      "revision_commit": "8dd3bf4ee5b0a0ff789cbf8d346f75d2eb92cdee",
+      "source_url": "https://github.com/scverse/squidpy/commit/8dd3bf4ee5b0a0ff789cbf8d346f75d2eb92cdee",
+      "replay_mode": "direct-rng-semantics-replay",
+      "old_result": {
+        "same_seed_one_vs_two_chunks_per_permutation": [
+          true,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "all_permutations_identical_across_chunkings": false
+      },
+      "new_result": {
+        "same_seed_one_vs_two_chunks_per_permutation": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "all_permutations_identical_across_chunkings": true
+      },
+      "semantic_change_observed": true,
+      "interpretation": "The old chunk-local RandomState makes later permutations depend on how work is split. The revised SeedSequence design assigns an independent generator to each permutation, so the same seed yields identical permutation states under one- and two-chunk execution."
+    },
+    {
+      "case_id": "RH12_SKLEARN_SPARSE_QUANTILE_SUBSAMPLING",
+      "repository": "scikit-learn/scikit-learn",
+      "base_commit": "9bafc1c9cab99aa036aba8207125637c39fd22db",
+      "revision_commit": "cfb2977609132206cecb6000b2e0e27a04b5b983",
+      "source_url": "https://github.com/scikit-learn/scikit-learn/commit/cfb2977609132206cecb6000b2e0e27a04b5b983",
+      "replay_mode": "package-runtime-old-plus-commit-patched-new",
+      "old_result": {
+        "second_column_degenerate": true,
+        "second_column_range": 0.0,
+        "old_formula_selected_nonzeros": 0
+      },
+      "new_result": {
+        "second_column_degenerate": false,
+        "second_column_range": 1.0,
+        "new_formula_selected_nonzeros": 500,
+        "similar_columns_have_similar_quantiles_rtol_0_1": true
+      },
+      "semantic_change_observed": true,
+      "interpretation": "On the upstream regression fixture, the pre-fix sparse path chooses zero non-zero observations for the 501-entry column and yields degenerate quantiles. Patching only the changed method with the commit logic samples 500 non-zero values and restores a non-degenerate, column-consistent quantile estimate."
+    },
+    {
+      "case_id": "RH13_SAELENS_ZERO_BOS",
+      "repository": "decoderesearch/SAELens",
+      "base_commit": "78f3db823428bc84e44ac41cada6777f44057436",
+      "revision_commit": "48c0ea92aac5b3684d2c4cafd8b8dc3c19c9349a",
+      "source_url": "https://github.com/decoderesearch/SAELens/commit/48c0ea92aac5b3684d2c4cafd8b8dc3c19c9349a",
+      "replay_mode": "direct-branch-semantics-replay",
+      "old_result": [
+        [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        [
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      ],
+      "new_result": [
+        [
+          0,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          0,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "expected_new_result": [
+        [
+          0,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          0,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "semantic_change_observed": true,
+      "interpretation": "Token id 0 is a valid BOS id. The pre-fix truthiness test treats it as absent, so the emitted chunks begin with data tokens. The revised explicit None check preserves BOS=0."
+    }
+  ],
+  "supplemental_source_diagnostics": [
+    {
+      "case_id": "SD01_PYMC_LOGPOW_UNDERFLOW",
+      "repository": "pymc-devs/pymc",
+      "base_commit": "fddbacb19c91dda2b79fa0d736f3632ec1079708",
+      "revision_commit": "fad6a0abbb5b2883920bc9aece37db5df7a5cd14",
+      "source_url": "https://github.com/pymc-devs/pymc/commit/fad6a0abbb5b2883920bc9aece37db5df7a5cd14",
+      "replay_mode": "source-equivalent-numeric-diagnostic-not-counted",
+      "old_result": -Infinity,
+      "new_result": -2400.0,
+      "upstream_expected_new": -2400.0,
+      "semantic_change_observed": true,
+      "limitation": "PyMC package runtime not executed because the installed PyMC/ArviZ combination is incompatible in this container."
+    }
+  ]
+}

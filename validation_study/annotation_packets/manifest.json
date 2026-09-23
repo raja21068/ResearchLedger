@@ -1,0 +1,17 @@
+{
+  "schema": "prr-annotation-packet-manifest-1",
+  "n_packets": 10,
+  "packets": [
+    "RH01_POP_TOOLS_SAMPLE_OVERLAP_DEFAULT.blind.json",
+    "RH02_SCANPY_SPARSE_NORMALIZE_TOTAL.blind.json",
+    "RH03_SCANPY_HARMONY_DEFAULTS.blind.json",
+    "RH04_SQUIDPY_GEARY_VARIANCE.blind.json",
+    "RH05_TABPFN_PRIOR_SHIFT.blind.json",
+    "RH06_TABPFN_FEATURE_SUBSAMPLING.blind.json",
+    "RH07_SAELENS_SEQUENCE_BOUNDARY.blind.json",
+    "RH08_COMPASS_PENALTY_PCA.blind.json",
+    "RH09_SCVI_DUPLICATED_PBMC_BATCH.blind.json",
+    "RH10_SEURAT_NFEATURES_DEFAULT.blind.json"
+  ],
+  "note": "Packets contain no system predictions or gold labels. Completion requires independent annotators; blank packets are not evidence of agreement."
+}

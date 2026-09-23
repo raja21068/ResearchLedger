@@ -1,0 +1,122 @@
+{
+  "schema": "researchledger-transaction-fault-injection-1",
+  "scope": "Local deterministic fault injection against the application-level revision transaction; not a distributed database durability claim.",
+  "n_checks": 6,
+  "n_passed": 6,
+  "checks": {
+    "normal_commit": {
+      "passed": true,
+      "phase": "committed",
+      "files": [
+        "research/claims/C001.md",
+        "research/evidence/E001.md"
+      ]
+    },
+    "mid_write_failure_rolls_back": {
+      "passed": true,
+      "error": "OSError: injected second-entity write failure",
+      "preimage_hashes_restored": true,
+      "manifest_phase": "rolled_back"
+    },
+    "crash_recovery_restores": {
+      "passed": true,
+      "recovered": [
+        "REV-crash-fixture"
+      ],
+      "preimage_hash_restored": true,
+      "manifest_phase": "rolled_back"
+    },
+    "alternative_support_selectivity": {
+      "passed": true,
+      "claim_status_after": "supported",
+      "claim_changes": []
+    },
+    "exhaustive_write_position_rollback": {
+      "passed": true,
+      "n_positions": 11,
+      "n_restored": 11,
+      "trials": [
+        {
+          "fail_at": 1,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 2,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 3,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 4,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 5,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 6,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 7,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 8,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 9,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 10,
+          "restored": true,
+          "phase": "rolled_back"
+        },
+        {
+          "fail_at": 11,
+          "restored": true,
+          "phase": "rolled_back"
+        }
+      ]
+    },
+    "concurrent_independent_writers": {
+      "passed": true,
+      "processes": [
+        {
+          "returncode": 0,
+          "stdout": "{\n  \"txid\": \"REV20260923T081020-2f89755a\",\n  \"status\": \"committed\",\n  \"reason\": \"concurrent-1\",\n  \"evidence_changes\": [\n    {\n      \"entity_id\": \"E001\",\n      \"before\": \"verified\",\n      \"after\": \"superseded\"\n    }\n  ],\n  \"claim_changes\": [\n    {\n      \"entity_id\": \"C001\",\n      \"before\": \"supported\",\n      \"after\": \"hypothesis\"\n    }\n  ],\n  \"files\": [\n    \"research/claims/C001.md\",\n    \"research/evidence/E001.md\"\n  ],\n  \"recovered_before_apply\": []\n}\n",
+          "stderr_nonempty": false
+        },
+        {
+          "returncode": 0,
+          "stdout": "{\n  \"txid\": \"REV20260923T081020-68e0a302\",\n  \"status\": \"committed\",\n  \"reason\": \"concurrent-2\",\n  \"evidence_changes\": [\n    {\n      \"entity_id\": \"E002\",\n      \"before\": \"verified\",\n      \"after\": \"superseded\"\n    }\n  ],\n  \"claim_changes\": [\n    {\n      \"entity_id\": \"C002\",\n      \"before\": \"supported\",\n      \"after\": \"hypothesis\"\n    }\n  ],\n  \"files\": [\n    \"research/claims/C002.md\",\n    \"research/evidence/E002.md\"\n  ],\n  \"recovered_before_apply\": []\n}\n",
+          "stderr_nonempty": false
+        }
+      ],
+      "final_statuses": {
+        "E001": "superseded",
+        "E002": "superseded",
+        "C001": "hypothesis",
+        "C002": "hypothesis"
+      },
+      "transaction_phases": [
+        "committed",
+        "committed"
+      ]
+    }
+  }
+}
