@@ -1,11 +1,23 @@
 # Paper Factory × ResearchLedger — Evidence-first v2.0.1 (audited)
 
-
 > **v2.0 engineering update:** The new opt-in `science_mode="validation"` requires a locked prospective research protocol, verified bibliographic *metadata* and a manually evaluated prior-art matrix, explicit measured metric/claim bindings, registered-seed arithmetic, and an isolated Docker repeat before S5 can finalize a manuscript. These are machine-checkable integrity gates, **not** independent proof of scientific validity. The legacy S1→S2→S3→S4→S5 workflow is retained for compatibility. For the code and release audit see [docs/DEEP_CODE_AUDIT_2026-10-08.md](docs/DEEP_CODE_AUDIT_2026-10-08.md). See [the full operator guide](docs/EVIDENCE_FIRST_V2.md) and [START_HERE.md](START_HERE.md).
 
 **One project workspace, two complementary responsibilities:** Paper Factory runs the five-stage idea → draft → review → Docker experiment → measured revision pipeline, while ResearchLedger records scientific hypotheses, immutable experiment manifests, evidence status, and claim relationships. **A successful experiment is only checked pilot evidence, not independent scientific verification or reproduction.**
 
 This is a working software integration for research prototyping, **not an automatic Q1-paper or scientific correctness certifier**. Full Claude Code, Docker, LaTeX, and research-domain validation must run on the user's own machine.
+
+## Overview
+
+AutoResearch is designed around a simple principle: generated research artifacts should be constrained by **execution**, **verification**, and **iteration**, not only by text generation.
+
+The framework combines:
+- **planning and orchestration** for multi-stage task control,
+- **code generation and self-healing** for iterative experiment repair,
+- **retrieval and verification** for grounded citations and supporting evidence,
+- **paper writing and review** for structured manuscript generation,
+- **memory and meta-learning** for cross-run improvement.
+
+## Install and start
 
 ## Install and start
 
