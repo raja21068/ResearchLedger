@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "required": ["ideas"],
+  "properties": {
+    "ideas": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "hypothesis", "method", "falsifier"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "hypothesis": {"type": "string"},
+          "method": {"type": "string"},
+          "falsifier": {
+            "type": "object",
+            "required": ["statement", "metric", "threshold"],
+            "properties": {
+              "statement": {"type": "string"},
+              "metric": {"type": "string"},
+              "threshold": {"type": "number"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

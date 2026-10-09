@@ -1,0 +1,28 @@
+{
+  "validation_release": "Referee-Validation-v1",
+  "freeze_policy": "Protocol/gold/evaluator/code hashes are frozen before official benchmark result interpretation. Any material change creates a new experimental configuration.",
+  "created_at": "2026-09-25T15:56:07.708322+00:00",
+  "code_commit": "uncommitted-source-bundle",
+  "peer_review_prompt_sha256": "b689202890a042ab5b325deefd00fc671803e1f136206b646d113945dbc549b5",
+  "verifier_prompt_sha256": "9860f9f9b4849ed1c58a113321d824555909c417b62b30fdfa29a985e2a1a625",
+  "evaluator_prompt_sha256": "22b17a2e61ab26fecb6527f09e78b0a0472351f34c16b74ac9629facade62190",
+  "adjudicator_prompt_sha256": "d90799a550a1385e9bbae8999b62ff7a3446836c6be08bb0dcfa5dfaf2dd9a98",
+  "schemas_sha256": "bdb7b4f047d9aaeb99e0984b694639c5f616ba314a626b756c254b12a9cb57b4",
+  "benchmark_manifest_sha256": "48624c5183eaf27c7a0915e90c4577f0648552ce0c488151df462b965f6cd1b3",
+  "benchmark_gold_sha256": "6597eab2fe66a6493cf01653a0b8cc1137936bca7dad4a1f21c43ff4941b2a4f",
+  "success_criteria_sha256": "466c578692edfc9f527a59a39e81f997132e55994f55b1866848865c9296cf3b",
+  "runtime_code_sha256": "a33dbeb6ceebe9a09c8a4c0c75b0994018e7d6c40f9cd4830086ce2773dd5ddf",
+  "runtime_defaults_sha256": "7b2650fbec11799fb897bf9fb9bbb10fd843ab4224d552c0abc49004fcebdd5d",
+  "temperature": 0.0,
+  "required_model_configuration_fields": [
+    "review_model",
+    "verifier_model",
+    "judge_model_a",
+    "judge_model_b",
+    "adjudicator_model"
+  ],
+  "required_search_configuration_fields": [
+    "search_backend",
+    "scholarly_providers"
+  ]
+}

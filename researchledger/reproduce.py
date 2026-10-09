@@ -162,6 +162,8 @@ def reproduce(
         raise ValueError("repeat must be >= 1")
 
     manifest = _load_manifest(ws, run_id)
+    if manifest.get("external_execution") or manifest.get("replay_supported") is False:
+        raise ValueError("Imported sandbox execution cannot be replayed as a host command. Re-run the experiment through Paper Factory Docker and compare its metrics independently.")
     command = manifest["command_argv"]
     seed = (manifest.get("randomness") or {}).get("seed")
     targets = manifest.get("targets") or {}

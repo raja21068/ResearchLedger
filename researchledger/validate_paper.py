@@ -120,7 +120,9 @@ def audit_paper(ws: Workspace, paper_path: Path) -> PaperAuditResult:
                         verified = True
                     for rid in ev.runs:
                         manifest = runs.get(rid)
-                        if manifest and manifest.get("exit_code") == 0 and (manifest.get("git") or {}).get("commit"):
+                        if (manifest and manifest.get("exit_code") == 0
+                                and not manifest.get("external_execution")
+                                and (manifest.get("git") or {}).get("commit")):
                             reproducible = True
             if verified:
                 result.backed_by_verified_evidence += 1
@@ -139,7 +141,7 @@ def render(result: PaperAuditResult) -> str:
         f"Quantitative assertions found:      {result.quantitative_assertions}",
         f"Linked to claim records:            {result.linked_to_claims}",
         f"Backed by verified evidence:        {result.backed_by_verified_evidence}",
-        f"Backed by reproducible runs:        {result.backed_by_reproducible_runs}",
+        f"Backed by recorded runs (NOT replay-verified): {result.backed_by_reproducible_runs}",
         f"Unsupported:                        {result.unsupported}",
         f"Stale/superseded evidence used:     {result.stale_evidence_usage}",
     ]

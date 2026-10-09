@@ -285,3 +285,72 @@ def run_command(
         "exit_code": exit_code,
     }
     return _seal_run(ws, run_dir, manifest)
+
+
+def record_external_execution(
+    ws: Workspace,
+    *,
+    command: list[str],
+    metrics_path: Path,
+    artifact_paths: list[Path],
+    execution: dict,
+    claims: list[str] | None = None,
+) -> dict:
+    """Import a *finished* externally verified execution without executing on host.
+
+    Intended for Paper Factory's isolated Docker experiments. The importing
+    application verifies success and expected output before calling this API.
+    We record it as an observed run, never an independent reproduction.
+    """
+    import shutil
+
+    if not command or not all(isinstance(arg, str) and arg for arg in command):
+        raise ValueError('a non-empty command argv is required')
+    if execution.get('exit_code') != 0 or execution.get('status') != 'PASS':
+        raise ValueError('external execution must have a verified successful exit')
+    metrics_path = Path(metrics_path)
+    if not metrics_path.is_file() or metrics_path.is_symlink():
+        raise ValueError('metrics must be a real file')
+    checked = []
+    for item in artifact_paths:
+        item = Path(item)
+        if not item.is_file() or item.is_symlink():
+            raise ValueError(f'artifact missing or symlinked: {item}')
+        checked.append(item)
+    # Validate all inputs prior to allocating an immutable run ID.
+    json.loads(metrics_path.read_text(encoding='utf-8'))
+    run_id, run_dir = _allocate_run_dir(ws)
+    (run_dir / 'artifacts').mkdir(exist_ok=True)
+    atomic_write_text(run_dir / 'command.txt', shlex.join(command) + '\n')
+    shutil.copyfile(metrics_path, run_dir / 'metrics.json')
+    imported = []
+    for i, path in enumerate(checked):
+        destination = run_dir / 'artifacts' / f'{i:02d}-{path.name}'
+        shutil.copyfile(path, destination)
+        imported.append({'path': destination.relative_to(run_dir).as_posix(),
+                         'sha256': sha256_file(destination),
+                         'source': path.relative_to(ws.root).as_posix()
+                         if path.is_relative_to(ws.root) else path.name})
+    # This is the IMPORTING host environment, not a claim that it is the
+    # container environment. The container image/metadata are in execution.
+    environment = capture_environment()
+    atomic_write_json(run_dir / 'environment.json', environment)
+    finished = _now()
+    manifest = {
+        'schema_version': SCHEMA_VERSION, 'run_id': run_id, 'status': 'completed',
+        'started_at': execution.get('started_at') or finished, 'finished_at': finished,
+        'command': shlex.join(command), 'command_argv': command,
+        'working_directory': '.', 'git': git_info(ws.root),
+        'randomness': {'seed': execution.get('seed')},
+        'targets': {'claims': claims or [], 'plan': None},
+        'environment': 'environment.json', 'environment_digest': environment_digest(environment),
+        'hardware': capture_hardware(), 'env_vars': {}, 'metrics': 'metrics.json',
+        'metrics_sha256': sha256_file(run_dir / 'metrics.json'),
+        'inputs': [], 'artifacts': [{k: v for k, v in a.items() if k != 'source'} for a in imported],
+        'timeout': execution.get('timeout'),
+        'attempts': [{'attempt': 1, 'exit_code': 0, 'timed_out': False}], 'exit_code': 0,
+        'external_execution': True, 'replay_supported': False,
+        'external_provenance': {**execution, 'source_artifacts': imported},
+        'reproducibility_status': 'NOT_INDEPENDENTLY_REPRODUCED',
+    }
+    return _seal_run(ws, run_dir, manifest)
