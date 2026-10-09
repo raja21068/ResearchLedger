@@ -1,0 +1,91 @@
+{
+  "classification": {
+    "field": "demonstration",
+    "study_design": "single-cohort pre-post observational study",
+    "inference_type": "causal",
+    "specialists": ["methods_design", "statistics_causal", "numerical_equation_auditor"]
+  },
+  "claim_registry": {
+    "claims": [
+      {
+        "claim_id": "C001",
+        "text": "Intervention X causes a 20% improvement in outcome Y.",
+        "claim_type": "causal",
+        "centrality": "primary",
+        "scope": "study cohort",
+        "proof_burden": ["credible counterfactual", "temporal ordering", "control of alternative explanations"]
+      }
+    ],
+    "evidence_anchors": [
+      {
+        "anchor_id": "A0001",
+        "source_type": "manuscript",
+        "document_id": "D1",
+        "locator": "Methods",
+        "quote_or_fact": "A single observational cohort of 80 participants received intervention X. There was no randomized control group.",
+        "supports": "C001",
+        "confidence": "high"
+      }
+    ]
+  },
+  "review_plan": {
+    "tasks": [
+      {"task_id": "T001", "specialist": "methods_design", "claim_ids": ["C001"], "objective": "Audit identification of the causal claim", "priority": "high", "evidence_needs": []},
+      {"task_id": "T002", "specialist": "statistics_causal", "claim_ids": ["C001"], "objective": "Audit causal and statistical interpretation", "priority": "high", "evidence_needs": []}
+    ]
+  },
+  "numerical_ledger": {"items": [], "concerns": [], "evidence_anchors": []},
+  "literature_plan": {"queries": []},
+  "literature_synthesis": {"concerns": [], "evidence_anchors": [], "novelty": {}, "pivotal_sources": []},
+  "specialist:methods_design": {
+    "concerns": [
+      {
+        "concern_id": "M001",
+        "title": "The design does not identify the headline causal effect",
+        "severity": "major",
+        "claim_ids": ["C001"],
+        "evidence_anchor_ids": ["A0001"],
+        "failure_mechanism": "A single-group pre-post comparison has no concurrent counterfactual and cannot separate intervention effects from time trends, regression to the mean, co-interventions, or other changes.",
+        "scientific_consequence": "The evidence can support a within-cohort pre-post association but not the stated causal conclusion.",
+        "minimum_resolution": "Reframe the central conclusion as associational unless a design or analysis that credibly identifies the treatment effect is available.",
+        "closure_criterion": "The title/abstract/conclusion no longer make a causal claim, or a defensible identification strategy with appropriate comparison data is demonstrated.",
+        "confidence": "high",
+        "source_agent": "methods_design",
+        "steelman_survives": true
+      }
+    ],
+    "evidence_anchors": [],
+    "notes": []
+  },
+  "specialist:statistics_causal": {"concerns": [], "evidence_anchors": [], "notes": []},
+  "redteam_steelman": {
+    "concerns": [
+      {
+        "concern_id": "M001",
+        "steelman_survives": true
+      }
+    ],
+    "evidence_anchors": []
+  },
+  "concern_verifier:M001": {
+    "status": "verified",
+    "rationale": "The cited methods anchor directly establishes the absence of a concurrent control group, and the concern is limited to causal identification rather than denying the observed pre-post change.",
+    "confidence": "high"
+  },
+  "reliability": {"status": "stable", "agreements": ["M001"], "disagreements": []},
+  "final_synthesis": {
+    "critical_gates": {
+      "claim_evidence_alignment": {"status": "fail", "reason": "The central causal claim exceeds what the design identifies."}
+    },
+    "final_review": {
+      "decision_brief": {
+        "central_scientific_issue": "The observed pre-post change is not sufficient to identify a causal treatment effect.",
+        "no_material_scientific_barriers": false
+      },
+      "minor_comments": [],
+      "strengths": ["The numerical pre-post result is stated clearly."],
+      "limitations": ["Causal identification is the decisive limitation."]
+    }
+  },
+  "journal_calibration": {"journals": []}
+}

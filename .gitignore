@@ -1,0 +1,16 @@
+# Isolated PaperOrchestra environment: built binaries, rebuild from its requirements.
+environments/
+
+# Per-project run state: outputs of the pipeline, not inputs to it.
+workspaces/
+
+# Build and editor noise
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Secrets. .env.example is tracked; .env never is.
+.env

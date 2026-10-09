@@ -1,0 +1,23 @@
+{
+  "release": "2.0.1",
+  "audit_date_utc": "2026-10-08",
+  "baseline": "PaperFactory_ResearchLedger_EvidenceFirst_v2.zip",
+  "full_test_command": "python -m pytest -q tests tests_researchledger",
+  "full_test_status": "PASS",
+  "full_tests_passed": 351,
+  "pytest_subtests_passed": 25,
+  "failures": 0,
+  "static_parse_files_by_type": {
+    "TOML": 2,
+    "Python": 416,
+    "JSON": 298,
+    "YAML": 6
+  },
+  "static_parse_errors": [],
+  "limitations": [
+    "Tests do not validate live Claude Code/Docker/LaTeX end-to-end operation",
+    "Third-party vendored code has not received a full manual line-by-line security review",
+    "Source checkout editable installation supported; standalone wheel lacks vendor resource bundles",
+    "Automated scientific checks are not scientific verification"
+  ]
+}

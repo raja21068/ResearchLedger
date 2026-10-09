@@ -1,0 +1,17 @@
+name: Package
+on:
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e '.[dev,office,pdf]'
+      - run: python scripts/rebuild_package_metadata.py
+      - run: python scripts/validate_package.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: referee-source
+          path: .

@@ -95,7 +95,13 @@ def create_evidence(
                             body_lines.append(f"- {key} = {value}")
                     except json.JSONDecodeError:
                         pass
-            body_lines += ["", "## Reproducibility", "", f"researchledger reproduce {from_run}", ""]
+            if manifest.get("external_execution"):
+                body_lines += ["", "## Reproducibility", "",
+                               "Imported external execution: NOT independently reproduced.",
+                               "Re-run through Paper Factory isolated Docker and compare results.",
+                               "Do not run this generated experiment on the host.", ""]
+            else:
+                body_lines += ["", "## Reproducibility", "", f"researchledger reproduce {from_run}", ""]
 
         evidence = Evidence(
             id=evidence_id,

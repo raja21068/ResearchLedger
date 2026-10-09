@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "required": ["reviews"],
+  "properties": {
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["idea_id", "novelty", "importance", "feasibility", "falsifiability", "evidence_fit"],
+        "properties": {
+          "idea_id": {"type": "string"},
+          "novelty": {"type": "number", "minimum": 0, "maximum": 10},
+          "importance": {"type": "number", "minimum": 0, "maximum": 10},
+          "feasibility": {"type": "number", "minimum": 0, "maximum": 10},
+          "falsifiability": {"type": "number", "minimum": 0, "maximum": 10},
+          "evidence_fit": {"type": "number", "minimum": 0, "maximum": 10}
+        }
+      }
+    }
+  }
+}

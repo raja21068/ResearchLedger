@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "required": ["slots"],
+  "properties": {
+    "slots": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "describe"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"type": "string", "enum": ["value", "series"]},
+          "describe": {"type": "string"},
+          "plot": {"type": "string", "enum": ["line", "bar"]},
+          "x_label": {"type": "string"},
+          "y_label": {"type": "string"},
+          "optional": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

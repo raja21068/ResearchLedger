@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["review_markdown", "scores", "weaknesses"],
+  "properties": {
+    "review_markdown": {"type": "string"},
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dimension", "score", "justification", "confidence"],
+        "properties": {
+          "dimension": {"type": "string"},
+          "score": {"type": ["integer", "null"], "minimum": 1, "maximum": 10},
+          "justification": {"type": "string"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["location", "issue", "fix"],
+        "properties": {
+          "location": {"type": "string"},
+          "issue": {"type": "string"},
+          "fix": {"type": "string"}
+        }
+      }
+    }
+  }
+}

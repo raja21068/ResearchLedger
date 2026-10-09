@@ -1,0 +1,16 @@
+{
+  "idea_count": 5,
+  "code_mode": "agent",
+  "code_run_attempts": 3,
+  "review_agent": "auto",
+  "review_max_rounds": 3,
+  "review_thresholds": {
+    "quality": 8.0,
+    "impact": 9.0,
+    "novelty": 8.3,
+    "methods": 8.3,
+    "readiness": 7.3
+  },
+  "allow_network_install": false,
+  "template_dir": "templates/iclr2025"
+}

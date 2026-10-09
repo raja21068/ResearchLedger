@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["paper_tex", "changes"],
+  "properties": {
+    "paper_tex": {"type": "string"},
+    "changes": {"type": "array", "items": {"type": "string"}}
+  }
+}
