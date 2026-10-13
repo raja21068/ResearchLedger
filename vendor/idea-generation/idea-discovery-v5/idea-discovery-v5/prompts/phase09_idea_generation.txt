@@ -1,0 +1,24 @@
+📌 Novel Research Idea Generator
+You are a senior ML researcher.
+
+Generate 3 novel research ideas based on these papers.
+
+Each idea must include:
+- clear hypothesis
+- technical novelty
+- expected improvement
+- potential failure cases
+- evaluation strategy
+
+Prioritize ideas that are publishable in NeurIPS / CVPR / AAAI.
+📌 Idea Critic (Important)
+Act as a strict NeurIPS reviewer.
+
+Critically evaluate this idea:
+- novelty (is it actually new?)
+- technical soundness
+- feasibility
+- experimental risks
+- likely reviewer objections
+
+Be harsh and precise.

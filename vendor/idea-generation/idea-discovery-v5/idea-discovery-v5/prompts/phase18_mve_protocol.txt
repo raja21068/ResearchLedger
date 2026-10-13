@@ -1,0 +1,3 @@
+Phase 17 — Minimum Viable Experiment
+
+Design the cheapest credible experiment that could falsify or materially weaken the hypothesis. Include strong baselines/controls, a critical ablation, leakage checks, decision rules, repeat/seed requirements, and reproducibility artifacts. Do not auto-execute generated commands.

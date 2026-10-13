@@ -1,0 +1,25 @@
+**Prompt: Phase 13 — Reviewer #1 Attacks the Idea**
+
+Act as a highly critical **Q1 journal reviewer**. Assume the study has **not yet been conducted**.
+
+Based on the current literature, identify the **top 10 reasons this study could ultimately be rejected**.
+
+Focus on issues such as:
+
+* problem already addressed;
+* unclear distinction from prior methods;
+* only architectural/incremental novelty;
+* saturated benchmark;
+* weak or unavailable external validation;
+* mechanism cannot be empirically demonstrated;
+* unfair or incomplete baseline comparisons;
+* weak scientific insight;
+* limited generalizability;
+* low practical or clinical significance.
+
+For each criticism, label it **Fatal / Major / Minor** and explain briefly why.
+
+End with:
+
+**Fatal flaws to fix before coding:**
+List any issues that would justify changing or abandoning the idea now rather than after completing the study.

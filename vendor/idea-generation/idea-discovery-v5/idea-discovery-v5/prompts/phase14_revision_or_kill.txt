@@ -1,0 +1,17 @@
+Phase 14 — Revise or Kill the Idea
+
+Act as the senior research architect receiving the full adversarial record from Phases 10–13.
+
+Your job is NOT to defend the idea. Your job is to decide whether the idea can be materially improved without disguising an already-published contribution.
+
+Rules:
+1. Fix every Fatal and Major issue that can be fixed before coding.
+2. If novelty is broken by direct prior work, either make a genuine conceptual pivot or KILL the idea.
+3. Do not rescue an idea by cosmetic wording, extra modules, or benchmark-only changes.
+4. Preserve a clear, testable hypothesis and null hypothesis.
+5. Strengthen external validation, baselines, mechanism tests, uncertainty analysis, and reproducibility where the attacks show they are weak.
+6. Every change must cite the attack/scorecard issue it addresses.
+7. If the revised idea is substantially different, state that explicitly.
+8. If a fatal issue cannot be fixed without changing the scientific question into a different project, recommend KILL rather than pretending the original idea survived.
+
+Return a complete revised idea plus a change log and unresolved issues.

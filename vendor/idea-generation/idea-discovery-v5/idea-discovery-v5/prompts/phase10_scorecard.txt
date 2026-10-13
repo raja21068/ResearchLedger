@@ -1,0 +1,105 @@
+Act as a rigorous scientific reviewer evaluating a proposed research idea.
+
+Your task is to assess whether the idea represents an important, evidence-backed, novel, scientifically insightful, feasible, impactful, and reproducible research opportunity.
+
+Evaluate the proposal using the weighted rubric below. For each criterion, assign a score from **0 up to the maximum weight**. Do not give high scores unless they are supported by specific evidence or reasoning.
+
+| Criterion                     | Maximum score |
+| ----------------------------- | ------------: |
+| Problem importance            |            15 |
+| Evidence that the gap exists  |            15 |
+| Novelty vs. recent literature |            20 |
+| Scientific insight            |            15 |
+| Experimental feasibility      |            10 |
+| Potential impact              |            10 |
+| Evaluation strength possible  |            10 |
+| Reproducibility               |             5 |
+| **Total**                     |       **100** |
+
+### Evaluation criteria
+
+**1. Problem importance — 15 points**
+Assess whether the research problem is scientifically or practically important. Consider the scale of the problem, who or what is affected, and whether solving it would meaningfully advance the field.
+
+**2. Evidence that the gap exists — 15 points**
+Determine whether there is convincing evidence that the claimed research gap is real. Distinguish between an actual unresolved problem and a gap created only by incomplete literature review or framing.
+
+**3. Novelty vs. recent literature — 20 points**
+Compare the idea against the most relevant recent research. Assess whether similar methods, hypotheses, systems, datasets, or findings have already been published. Penalize incremental repackaging unless the proposed work offers a meaningful conceptual or technical advance.
+
+**4. Scientific insight — 15 points**
+Assess whether the project could generate new understanding, mechanisms, principles, explanations, or generalizable knowledge rather than merely improving a benchmark or producing an engineering result.
+
+**5. Experimental feasibility — 10 points**
+Assess whether the proposed experiments are realistically executable given likely requirements for data, compute, equipment, expertise, time, and other resources.
+
+**6. Potential impact — 10 points**
+Assess the likely importance of the results if the project succeeds. Consider scientific influence, practical usefulness, downstream applications, and whether the findings could change how researchers think about or approach the problem.
+
+**7. Evaluation strength possible — 10 points**
+Assess whether the central claims can be tested convincingly. Look for clear hypotheses, appropriate baselines, meaningful metrics, controls, ablations, statistical tests, and experiments capable of distinguishing competing explanations.
+
+**8. Reproducibility — 5 points**
+Assess whether independent researchers could realistically reproduce and verify the work. Consider availability of data, code, models, experimental procedures, computational resources, and clearly specified methodology.
+
+### Scoring discipline
+
+Use the following interpretation relative to each criterion's maximum score:
+
+* **0–20%:** essentially unsupported or seriously deficient
+* **21–40%:** weak
+* **41–60%:** moderate
+* **61–80%:** strong
+* **81–100%:** exceptional
+
+Be skeptical of unsupported novelty or impact claims. A compelling idea should not receive a high score merely because it sounds interesting.
+
+When assessing novelty and the existence of the research gap, prioritize literature from approximately the **last 3–5 years**, while including older seminal work when relevant.
+
+If sufficient evidence is unavailable, explicitly state the uncertainty rather than assuming the proposal's claims are correct.
+
+### Required output
+
+First, provide a scoring table:
+
+| Criterion                    |  Weight |  Score | Rationale |
+| ---------------------------- | ------: | -----: | --------- |
+| Problem importance           |      15 |      X | ...       |
+| Evidence that gap exists     |      15 |      X | ...       |
+| Novelty vs recent literature |      20 |      X | ...       |
+| Scientific insight           |      15 |      X | ...       |
+| Experimental feasibility     |      10 |      X | ...       |
+| Potential impact             |      10 |      X | ...       |
+| Evaluation strength possible |      10 |      X | ...       |
+| Reproducibility              |       5 |      X | ...       |
+| **Total**                    | **100** | **XX** |           |
+
+Then provide:
+
+### Strongest aspects
+
+Identify the 2–4 strongest aspects of the proposal and explain why they matter.
+
+### Major weaknesses
+
+Identify the 2–4 most important weaknesses, risks, or unsupported assumptions.
+
+### Novelty check
+
+Explain what appears genuinely new versus what is likely incremental or already explored in the literature.
+
+### Evidence needed
+
+List the specific literature, preliminary experiments, analyses, or data that would most increase confidence in the proposal.
+
+### How to improve the score
+
+Recommend concrete changes to the research question, hypothesis, methodology, experiments, evaluation design, or positioning that could materially strengthen the proposal.
+
+### Final assessment
+
+Give the **total score out of 100** and summarize in 3–5 sentences how promising the research direction is, what currently limits it, and what would need to be demonstrated for it to become a substantially stronger research project.
+
+Research idea to evaluate:
+
+[PASTE RESEARCH IDEA / PROPOSAL HERE]

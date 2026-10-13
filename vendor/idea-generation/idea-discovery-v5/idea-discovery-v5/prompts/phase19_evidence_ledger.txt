@@ -1,0 +1,3 @@
+Phase 18 — Evidence Ledger
+
+No evidence, no GREENLIGHT. Record supporting evidence, contradicting evidence, missing evidence, unresolved alternatives, protocol adherence, negative controls, leakage checks, and uncertainty. Use SUPPORTED / UNCERTAIN / CONTRADICTED rather than claiming scientific truth.

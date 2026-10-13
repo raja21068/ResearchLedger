@@ -4,8 +4,8 @@ Two things happen, both under your Claude Code login (no API key anywhere):
 
 1. A results spec is drafted from the idea: every number a results table would hold
    and every results figure, as named slots (`factory/results.py`).
-2. Claude Code runs the PaperOrchestra skills from `~/.claude/skills` to write the
-   paper. Every empirical number is the macro `\\PFVAL{slot}` and every results
+2. An authenticated Claude Code or Codex CLI follows bundled PaperOrchestra
+   skills in `skills/` and upstream vendor prompts to write the paper. Every empirical number is the macro `\\PFVAL{slot}` and every results
    figure is `\\PFFIG{slot}`, so the draft has complete tables and plots, all empty.
 
 The empty draft is the requirement document for the next stage: the code step reads
@@ -21,10 +21,11 @@ import shutil
 from factory import results
 from factory.agents.loop import AgentLoop, LoopExhausted
 from factory.agents.session import run_session
+from factory.integrations import paper_orchestra
 from factory.steps.review import DECIMAL, compile_pdf
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-SKILLS_DIR = pathlib.Path.home() / ".claude" / "skills"
+SKILLS_DIR = paper_orchestra.BUNDLED_SKILLS
 DEFAULT_TEMPLATE = ROOT / "templates" / "iclr2025"
 SPEC_SCHEMA = pathlib.Path(__file__).resolve().parent / "review_assets" / "results_spec.schema.json"
 TOOLS = ["Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch",
@@ -83,9 +84,11 @@ def plan_log(spec, notes):
 def draft_prompt(skills_dir):
     return (
         "Write a first-draft research paper with the PaperOrchestra skill.\n\n"
-        f"The skills are in {skills_dir} (use `paper-orchestra`, and the outline, "
-        "literature-review, section-writing and content-refinement skills it loads; their "
-        "scripts are under that directory). The workspace is ./workspace and its inputs/ folder "
+        f"The skills are in {skills_dir}. READ `paper-orchestra/SKILL.md` first, "
+        "then follow its outline, literature, sections, figures and refinement skills. "
+        "Use the original source prompts under vendor/paperorchestra/methods/prompts/ "
+        "as references, not as runnable API-backed Python agents. "
+        "The workspace is ./workspace and its inputs/ folder "
         "is already complete, including template.tex and conference_guidelines.md. Run the "
         "pipeline from outline to final/paper.tex.\n\n"
         "RESULTS CONTRACT (overrides anything in the skills that conflicts):\n"
@@ -148,9 +151,8 @@ def run(project, context=None, agent_factory=None, session=run_session, build_pd
     """Draft the results spec and the empty-results paper; publish to 2_paper/."""
     project = pathlib.Path(project).resolve()
     context = context or {}
-    skills_dir = pathlib.Path(skills_dir or context.get("skills_dir") or SKILLS_DIR)
-    if not (skills_dir / "paper-orchestra" / "SKILL.md").is_file():
-        raise ValueError(f"PaperOrchestra skills not found in {skills_dir}")
+    skills_dir = paper_orchestra.resolve_skills_dir(skills_dir or context.get("skills_dir"))
+    access_dirs = paper_orchestra.writing_access_dirs(skills_dir)
     idea = project / "1_idea" / "idea.md"
     if not idea.is_file():
         raise ValueError("no 1_idea/idea.md; run the idea step first")
@@ -198,7 +200,8 @@ def run(project, context=None, agent_factory=None, session=run_session, build_pd
                 shutil.copyfile(item, workspace / sub / item.name)
 
     # 3. the session, then deterministic checks with up to two repair sessions
-    options = {"cwd": paper, "tools": TOOLS, "add_dirs": [skills_dir],
+    options = {"cwd": paper, "tools": TOOLS, "add_dirs": access_dirs,
+               "provider": context.get("writer_provider", "claude"),
                "model": context.get("writer_model"), "timeout": int(context.get("writer_timeout", 5400))}
     session(draft_prompt(skills_dir), **options)
     attempts = []

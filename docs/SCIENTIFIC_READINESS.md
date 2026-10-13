@@ -7,6 +7,7 @@
 | PROVISIONAL | Derived | Claim has checked supporting evidence, still requires external validation |
 | VERIFIED evidence | **No** | Separate explicit verification of methods, data and independent support |
 | INDEPENDENTLY REPRODUCED | **No** | Requires a separate controlled repeat and documented metric comparisons |
+| NATIVE_NO_ADMITTED_MAJOR_CONCERNS | Yes, only in opt-in native review mode | Referee admitted zero major concerns in its automated pass and no rejected candidate concerns remained; **not** a claim of accurate reviewing or scientific readiness |
 | PUBLICATION_READY | **Never** | Requires human/venue checks beyond this tool |
 
 Integrity checks do not replace hypothesis feasibility assessment, sound split protocols, sample-size and power analyses, missing-data treatment, fair baselines, ablations, robustness studies, ethics and licensing, or citation verification. A run on a synthetic dataset must not be reported as clinical or real-world generalization. All quantitative sentences in manuscripts should be linked to explicit result IDs and to evidence that supports the exact claim strength.

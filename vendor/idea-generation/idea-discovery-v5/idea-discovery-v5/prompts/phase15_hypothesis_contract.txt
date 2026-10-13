@@ -1,0 +1,3 @@
+Phase 14 — Hypothesis Contract
+
+Turn the idea into a falsifiable scientific contract. State the central and null hypotheses, mechanism claim, observable predictions, falsifiers, confounders, competing explanations, boundary conditions, and the minimum decisive experiment. Reject vague claims that cannot be disproven.

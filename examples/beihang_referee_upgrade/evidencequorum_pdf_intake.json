@@ -1,0 +1,20 @@
+{
+  "files": [
+    {
+      "path": "/mnt/data/EvidenceQuorum_Research_Paper.pdf",
+      "name": "EvidenceQuorum_Research_Paper.pdf",
+      "extension": ".pdf",
+      "role": "manuscript",
+      "bytes": 427446,
+      "sha256": "8e2055072709fe7ef157bc795e169ff6d37173a75500e372345b8aa65bfd2a8b"
+    }
+  ],
+  "roles": {
+    "manuscript": [
+      "/mnt/data/EvidenceQuorum_Research_Paper.pdf"
+    ]
+  },
+  "warnings": [],
+  "total_bytes": 427446,
+  "sha256": "1070c3c14423b009a34ec073f0db42cc3eb9474cacc9f787978e584b3fdb0fdb"
+}

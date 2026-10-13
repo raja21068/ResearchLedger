@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import shlex
 import subprocess
 import sys
@@ -47,14 +48,38 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-def _pump(pipe, file_handle, echo_stream) -> None:
-    for line in iter(pipe.readline, ""):
-        file_handle.write(line)
-        try:
-            echo_stream.write(line)
-        except (ValueError, OSError):
-            pass
-    pipe.close()
+def _pump(pipe, file_handle, echo_stream, max_chars: int = 8_000_000) -> None:
+    """Drain a process stream without unbounded line allocation or unbounded logs.
+
+    Keep reading even when the log limit is reached; otherwise a noisy child
+    could block forever on its full stdout/stderr OS pipe. The bounded read
+    also handles programs that print gigabytes without a newline.
+    """
+    remaining = max_chars
+    truncated = False
+    try:
+        while True:
+            chunk = pipe.readline(65_536)
+            if not chunk:
+                break
+            if remaining > 0:
+                visible = chunk[:remaining]
+                file_handle.write(visible)
+                try:
+                    echo_stream.write(visible)
+                except (ValueError, OSError):
+                    pass
+                remaining -= len(visible)
+            if remaining <= 0 and not truncated:
+                marker = "\n[ResearchLedger: output truncated; stream drained safely]\n"
+                file_handle.write(marker)
+                try:
+                    echo_stream.write(marker)
+                except (ValueError, OSError):
+                    pass
+                truncated = True
+    finally:
+        pipe.close()
 
 
 def _execute_once(
@@ -76,6 +101,9 @@ def _execute_once(
         stderr=subprocess.PIPE,
         text=True,
         bufsize=1,
+        start_new_session=(os.name == "posix"),
+        creationflags=(getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+                       if os.name == "nt" else 0),
     )
     with open(stdout_path, "w", encoding="utf-8") as out_f, open(
         stderr_path, "w", encoding="utf-8"
@@ -88,7 +116,16 @@ def _execute_once(
         try:
             exit_code = process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
-            process.kill()
+            # A child that inherited stdout/stderr can keep the log-pump threads
+            # alive even after the direct process exits. Kill the POSIX session,
+            # not just the immediate process, then reap it before joining pumps.
+            if os.name == "posix":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            else:
+                process.kill()
             exit_code = process.wait()
             timed_out = True
         t_out.join()

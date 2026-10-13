@@ -1,0 +1,36 @@
+{
+  "ideas": [
+    {
+      "idea_id": "MRI-01",
+      "source_gap": "G-MRI-001",
+      "title": "Multi-level leakage stress test for brain MRI segmentation",
+      "hypothesis": {
+        "statement": "Compared with random-slice splitting, patient- and acquisition-site-disjoint evaluation yields a mean Dice decrease exceeding 0.03 on sufficiently heterogeneous, legitimately obtained datasets; a preregistered study would test this prediction.",
+        "null_hypothesis": "No preregistered improvement or degradation beyond the threshold"
+      },
+      "method_sketch": {
+        "steps": "On licensed multi-site segmentation data, compare random-slice, patient-disjoint and site-holdout splits with the same architecture and fixed tuning budget. Report bootstrapped site-cluster intervals and repeat seeds."
+      },
+      "experiment_design": {
+        "falsifier": {
+          "statement": "Reject the preregistered overoptimism hypothesis if the paired mean Dice gap is at most 0.03.",
+          "metric": "paired_mean_dice_gap_random_slice_minus_site_holdout",
+          "threshold": 0.03
+        },
+        "status": "NOT_EXECUTED"
+      },
+      "expected_outcomes": {
+        "if_negative": "Reject or narrow the hypothesis and document the negative result without altering the preregistration."
+      },
+      "scoring": {
+        "kind": "SCRIPTED_DEMONSTRATION_ONLY"
+      }
+    }
+  ],
+  "traceability_matrix": [
+    {
+      "gap_id": "G-MRI-001",
+      "source": "PROPOSED_NOT_VERIFIED"
+    }
+  ]
+}

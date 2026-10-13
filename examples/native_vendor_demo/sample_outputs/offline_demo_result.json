@@ -1,0 +1,20 @@
+{
+  "status": "OFFLINE_INTEGRATION_SMOKE_PASSED",
+  "scientific_novelty_verified": false,
+  "human_scientific_review_completed": false,
+  "live_llm_invoked": false,
+  "experiment_executed": false,
+  "sample_topic": "Detecting evaluation leakage in brain-tumor MRI segmentation studies",
+  "selected_idea": "MRI-01",
+  "idea_aggregate_score": 7.9,
+  "idea_scoring": "SCRIPTED_PERSONAS_NOT_EVALUATED_SCIENTIFICALLY",
+  "v5_schema_validation": "PASS",
+  "v5_pipeline_execution": "NOT_EXECUTED",
+  "referee_review_engine": "REAL_VENDOR_ENGINE_WITH_SCRIPTED_MODEL_RESPONSES",
+  "manuscript_revision_mode": "PREPARED_EXAMPLE_DRAFTS, NOT AUTONOMOUS EDITING",
+  "major_concerns_by_round": [
+    1,
+    1,
+    0
+  ]
+}

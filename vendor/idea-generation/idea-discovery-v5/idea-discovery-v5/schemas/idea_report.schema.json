@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["ideas"],
+  "properties": {
+    "ideas": {"type": "array", "items": {"type": "object", "required": ["idea_id", "source_gap", "title", "hypothesis", "method_sketch", "experiment_design", "expected_outcomes", "scoring"], "properties": {
+      "idea_id": {"type": "string"}, "source_gap": {"type": "string"}, "title": {"type": "string"},
+      "hypothesis": {"type": "object", "required": ["statement", "null_hypothesis"]},
+      "method_sketch": {"type": "object"}, "experiment_design": {"type": "object"}, "expected_outcomes": {"type": "object"}, "scoring": {"type": "object"}
+    }}}
+  },
+  "additionalProperties": true
+}

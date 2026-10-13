@@ -35,15 +35,25 @@ def doctor():
     checks = {"python": {"status": "PASS", "detail": sys.version.split()[0]}}
     path = shutil.which("pdflatex")
     checks["pdflatex"] = {"status": "PASS" if path else "BLOCK", "detail": path or "not found"}
-    health = AgentLoop("claude").healthcheck()
-    checks["claude_cli"] = {
-        "status": health["status"],
-        "detail": health.get("detail", health.get("authentication", "unavailable")),
-        "remedy": health.get("remedy", "")}
-    skill = write.SKILLS_DIR / "paper-orchestra" / "SKILL.md"
-    checks["paperorchestra_skills"] = {
-        "status": "PASS" if skill.is_file() else "BLOCK", "detail": str(write.SKILLS_DIR),
-        "remedy": "" if skill.is_file() else "install the paper-orchestra skills into ~/.claude/skills"}
+    for provider in ("claude", "codex"):
+        health = AgentLoop(provider).healthcheck()
+        checks[f"{provider}_cli"] = {
+            "status": health["status"],
+            "detail": health.get("detail", health.get("authentication", "unavailable")),
+            "remedy": health.get("remedy", "")}
+    from factory.integrations.paper_orchestra import (resolve_skills_dir,
+                                                       bundled_vendor_present)
+    try:
+        resolved_skills = resolve_skills_dir()
+        ready = bundled_vendor_present() if resolved_skills == write.SKILLS_DIR.resolve() else True
+        checks["paperorchestra_skills"] = {
+            "status": "PASS" if ready else "BLOCK",
+            "detail": str(resolved_skills),
+            "remedy": "" if ready else "restore vendored PaperOrchestra source prompts"}
+    except ValueError as exc:
+        checks["paperorchestra_skills"] = {
+            "status": "BLOCK", "detail": str(exc),
+            "remedy": "restore the bundled skills/paper-orchestra directory"}
     lean = (review.REFEREE_DIR / "core" / "LEAN_CORE_REVIEWER_PROMPT.md").is_file()
     checks["referee_agent"] = {
         "status": "PASS" if lean else "WARN",
@@ -68,11 +78,12 @@ def doctor():
     except ImportError:
         checks["matplotlib"] = {"status": "WARN", "detail": "missing; figures stay as placeholders",
                                 "remedy": "pip install matplotlib"}
-    claude = checks["claude_cli"]["status"] == "PASS"
+    has_writer_cli = any(checks[f"{p}_cli"]["status"] == "PASS"
+                         for p in ("claude", "codex"))
     steps = {
-        "S1-S3 (idea, draft, review)": claude and all(
+        "S1-S3 (idea, draft, review)": has_writer_cli and all(
             checks[k]["status"] == "PASS" for k in ("pdflatex", "paperorchestra_skills")),
-        "S4-S5 (code, refine)": claude and all(
+        "S4-S5 (code, refine)": has_writer_cli and all(
             checks[k]["status"] == "PASS" for k in ("papercompiler", "docker", "pdflatex")),
     }
     return {"factory_status": "READY" if all(steps.values()) else "BLOCKED",
@@ -161,6 +172,66 @@ def main(argv=None):
     reproduce_cmd.add_argument('--rel-tol', type=float, default=1e-5)
     science_cmd = commands.add_parser('science-audit', help='inspect automated scientific integrity gates')
     science_cmd.add_argument('project_id')
+    idea_cmd = commands.add_parser('idea-discovery', help='inspect or safely prepare the bundled V5 research agent')
+    idea_cmd.add_argument('operation', choices=['inspect', 'prepare', 'run', 'adopt', 'phase-audit'])
+    idea_cmd.add_argument('project_id', nargs='?', help='project ID required for prepare/run')
+    idea_cmd.add_argument('--topic', help='research question for the native V5 run')
+    idea_cmd.add_argument('--paper', action='append', default=[], help='source article PDF/TXT/MD; repeat flag')
+    idea_cmd.add_argument('--no-quality', action='store_true', help='disable optional vendor quality prompts')
+    idea_cmd.add_argument('--with-embeddings', action='store_true', help='enable heavier embedding model dependencies')
+    idea_cmd.add_argument('--provider', choices=['api','claude','codex'], default='api', help='API or existing Claude Code/Codex CLI login')
+    idea_cmd.add_argument('--dry-run', action='store_true', help='validate setup and report command without model calls')
+    idea_cmd.add_argument('--timeout', type=int, default=3600)
+    idea_cmd.add_argument('--idea-id', help='V5 survivor ID for explicit S1 adoption')
+    idea_cmd.add_argument('--metric', help='observable used for falsification in Factory')
+    idea_cmd.add_argument('--threshold', type=float, help='numeric rejection threshold from your protocol')
+    idea_cmd.add_argument('--falsifier-statement', help='concrete result that rejects the hypothesis')
+    idea_cmd.add_argument('--strict-phases', action='store_true', help='require recorded valid Phase 10-16 artifacts for adoption')
+    idea_cmd.add_argument('--acknowledge-manual', action='store_true', help='operator checked the V5 proposal, its science and numeric falsifier')
+    referee_cmd = commands.add_parser('referee', help='run the actual bundled Referee engine (separate from Factory reviewer)')
+    referee_sub = referee_cmd.add_subparsers(dest='referee_operation', required=True)
+    referee_inspect = referee_sub.add_parser('inspect', help='offline native manuscript/package inspection')
+    referee_inspect.add_argument('paths', nargs='+')
+    referee_inspect.add_argument('--output')
+    referee_review = referee_sub.add_parser('review', help='run full native Referee review')
+    referee_review.add_argument('project_id')
+    referee_review.add_argument('manuscript')
+    referee_review.add_argument('--provider', choices=['openai-compatible', 'scripted'], default='openai-compatible')
+    referee_review.add_argument('--model')
+    referee_review.add_argument('--scripted-responses')
+    referee_review.add_argument('--mode', choices=['standard', 'deep', 'exhaustive'], default='deep')
+    referee_review.add_argument('--pipeline', choices=['lean', 'legacy'], default='lean')
+    referee_review.add_argument('--profile')
+    referee_review.add_argument('--search-backend', choices=['none','federated','scripted'])
+    referee_review.add_argument('--prior-manuscript')
+    referee_review.add_argument('--timeout', type=int, default=1200)
+    referee_iterate = referee_sub.add_parser('iterate', help='re-review a sequence of human/Factory-edited drafts')
+    referee_iterate.add_argument('project_id')
+    referee_iterate.add_argument('manuscripts', nargs='+')
+    referee_iterate.add_argument('--provider', choices=['openai-compatible', 'scripted'], default='openai-compatible')
+    referee_iterate.add_argument('--model')
+    referee_iterate.add_argument('--fixture', action='append', default=[], help='one scripted JSON fixture per round; DEMO ONLY')
+    referee_iterate.add_argument('--mode', choices=['standard', 'deep', 'exhaustive'], default='deep')
+    referee_iterate.add_argument('--pipeline', choices=['lean', 'legacy'], default='lean')
+    referee_iterate.add_argument('--search-backend', choices=['none','federated','scripted'])
+    referee_iterate.add_argument('--timeout', type=int, default=1200)
+    referee_cycle = referee_sub.add_parser('cycle', help='review successive drafts with the NEW Beihang Referee core/full engine and your rubric')
+    referee_cycle.add_argument('project_id')
+    referee_cycle.add_argument('manuscripts', nargs='+', help='one or more distinct manuscript versions')
+    referee_cycle.add_argument('--provider', choices=['openai-compatible','scripted','claude','codex'], default='openai-compatible')
+    referee_cycle.add_argument('--model')
+    referee_cycle.add_argument('--pipeline', choices=['core','full'], default='core')
+    referee_cycle.add_argument('--mode', choices=['standard','deep','exhaustive'], default='deep')
+    referee_cycle.add_argument('--rubric', help='supplemental trusted reviewer prompt file; defaults to bundled Prompt(3).txt rubric')
+    referee_cycle.add_argument('--scorecard', action='store_true')
+    referee_cycle.add_argument('--search-backend', choices=['none','federated','scripted'])
+    referee_cycle.add_argument('--fixture', action='append', default=[], help='scripted responses JSON: one per draft, offline tests only')
+    referee_cycle.add_argument('--max-rounds', type=int, default=6)
+    referee_cycle.add_argument('--timeout', type=int, default=1800)
+    referee_compare = referee_sub.add_parser('compare', help='native manuscript revision difference')
+    referee_compare.add_argument('old')
+    referee_compare.add_argument('new')
+    referee_compare.add_argument('--output', required=True)
     method_parser = commands.add_parser("methodology", help="show stage-specific research method")
     method_parser.add_argument("stage", choices=["idea", "experiment", "review"])
     run = commands.add_parser(
@@ -226,6 +297,55 @@ def main(argv=None):
             from factory.science.gates import audit
             workspace = workspace_for(args.project_id)
             result = audit(workspace, load_context(workspace))
+        elif args.command == 'idea-discovery':
+            from factory.integrations.idea_discovery import inspect, prepare, run as run_v5
+            if args.operation == 'inspect':
+                result = inspect()
+            else:
+                if not args.project_id:
+                    raise ValueError('idea-discovery prepare/run requires a project ID')
+                workspace = workspace_for(args.project_id)
+                if args.operation == 'prepare':
+                    result = prepare(workspace)
+                elif args.operation == 'phase-audit':
+                    from factory.integrations.idea_discovery import phase_audit
+                    if not args.idea_id:
+                        raise ValueError('phase-audit requires --idea-id')
+                    result = phase_audit(workspace, idea_id=args.idea_id)
+                elif args.operation == 'adopt':
+                    from factory.integrations.idea_discovery import adopt
+                    result = adopt(workspace, idea_id=args.idea_id, metric=args.metric,
+                        threshold=args.threshold, falsifier_statement=args.falsifier_statement,
+                        operator_acknowledgement=args.acknowledge_manual, strict_phases=args.strict_phases)
+                else:
+                    result = run_v5(workspace, topic=args.topic, papers=args.paper,
+                        skip_embeddings=not args.with_embeddings, no_quality=args.no_quality,
+                        dry_run=args.dry_run, timeout=args.timeout, provider=args.provider)
+        elif args.command == 'referee':
+            from factory.integrations import referee_native as native
+            if args.referee_operation == 'inspect':
+                result = native.inspect(args.paths, output=args.output)
+            elif args.referee_operation == 'compare':
+                result = native.compare(args.old, args.new, output=args.output)
+            elif args.referee_operation == 'cycle':
+                from factory.integrations.referee_beihang import review_cycle
+                result = review_cycle(workspace_for(args.project_id), args.manuscripts,
+                    provider=args.provider, model=args.model, pipeline=args.pipeline,
+                    mode=args.mode, rubric=args.rubric, scorecard=args.scorecard,
+                    search_backend=args.search_backend, fixtures=args.fixture,
+                    max_rounds=args.max_rounds, timeout=args.timeout)
+            elif args.referee_operation == 'iterate':
+                result = native.iterate(workspace_for(args.project_id), args.manuscripts,
+                    provider=args.provider, model=args.model, scripted_responses=args.fixture,
+                    mode=args.mode, pipeline=args.pipeline, search_backend=args.search_backend,
+                    timeout=args.timeout)
+            else:
+                result = native.review(workspace_for(args.project_id), args.manuscript,
+                    provider=args.provider, model=args.model,
+                    scripted_responses=args.scripted_responses, mode=args.mode,
+                    pipeline=args.pipeline, profile=args.profile,
+                    search_backend=args.search_backend, timeout=args.timeout,
+                    prior_manuscript=args.prior_manuscript)
         elif args.command == "methodology":
             from factory.integrations.methodology import brief
             result = {"stage": args.stage, "methodology": brief(args.stage)}

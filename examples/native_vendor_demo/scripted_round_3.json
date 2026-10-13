@@ -1,0 +1,59 @@
+{
+  "lean_core_review": {
+    "review_version": "referee-lean-v2",
+    "classification": {
+      "field": "methodology",
+      "domain": "behavioral science",
+      "design": "observational",
+      "inference_type": "causal",
+      "study_type": "empirical"
+    },
+    "manuscript_summary": {
+      "research_question": "Does intervention X improve outcome Y?",
+      "approach": "uncontrolled pre-post case series",
+      "main_results": "A hypothetical 50 to 60 unit change among 80 observations",
+      "claimed_contribution": "descriptive change in Y",
+      "developmental_stage": "synthetic demonstration"
+    },
+    "minor_concerns": [],
+    "strengths": [],
+    "observations": [],
+    "literature_queries": [],
+    "specialist_requests": [],
+    "remaining_uncertainties": [],
+    "overall_scientific_confidence": 0.7,
+    "claims": [
+      {
+        "claim_id": "C001",
+        "text": "The observed difference is descriptive and limited to the measured cohort.",
+        "claim_type": "interpretive",
+        "centrality": "central",
+        "scope": "synthetic sample",
+        "proof_burden": [
+          "appropriate study design"
+        ],
+        "evidence_anchor_ids": [
+          "A001"
+        ],
+        "support_status": "descriptive",
+        "confidence": "moderate",
+        "alternatives": []
+      }
+    ],
+    "evidence_anchors": [
+      {
+        "anchor_id": "A001",
+        "source_type": "manuscript",
+        "document_id": "D1",
+        "locator": "Conclusion",
+        "quote_or_fact": "The observed difference is descriptive and limited to the measured cohort.",
+        "supports": "C001",
+        "confidence": "high",
+        "url": null,
+        "content_status": null,
+        "content_sha256": null
+      }
+    ],
+    "candidate_concerns": []
+  }
+}

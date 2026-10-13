@@ -1,4 +1,6 @@
 import json
+
+import pytest
 from pathlib import Path
 
 from researchledger.models import Claim, Evidence
@@ -30,6 +32,9 @@ def test_tracked_proxy_trajectories_cover_all_13_cases_and_recover():
 
 
 def test_tracked_workspaces_have_two_immutable_runs_and_committed_revision_journals():
+    if not (STUDY / "tracked_trajectory_workspaces").is_dir():
+        pytest.skip("executed trajectory workspaces are not shipped in this source archive; "
+                    "recreate them with validation_study/trajectory_runner.py before testing manifests")
     result = json.loads((STUDY / "results" / "tracked_trajectory_proxy.json").read_text())
     for row in result["cases"]:
         root = STUDY / "tracked_trajectory_workspaces" / row["case_id"]

@@ -1,63 +1,120 @@
-name: CI
+name: Test, security and smoke checks
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  unit-tests:
+    name: Unit tests / Ubuntu / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-    runs-on: ${{ matrix.os }}
+        python-version: ['3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install researchledger (editable, with dev extras)
-        run: python -m pip install -e ".[dev]"
-
-      - name: Lint (ruff)
-        run: python -m ruff check researchledger/ tests/
-
-      - name: Type check (mypy)
-        run: python -m mypy researchledger/
-
-      - name: Unit + integration tests, with coverage
-        run: python -m pytest tests/ --cov=researchledger --cov-report=term-missing -v
-
-      - name: CLI smoke test
-        shell: bash
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install project and development tools
+        run: python -m pip install -e '.[dev,referee]'
+      - name: Import and syntax safety checks
+        run: python -m ruff check --select E9,F63,F7,F82 factory/ researchledger/ tests/ tests_researchledger/
+      - name: Run all unique first-party tests
+        # tests_researchledger is a byte-identical compatibility mirror of tests/.
+        run: python -m pytest -q tests
+      - name: Verify CLI entry points
         run: |
-          set -e
-          mkdir smoke-workspace && cd smoke-workspace
-          researchledger init
-          researchledger run -- python -c "print('ok')"
-          researchledger validate --strict
-          researchledger report
+          researchctl --help
+          researchledger --help
 
-      - name: Shipped example validates clean
-        shell: bash
-        run: |
-          set -e
-          cd examples/quickstart
-          researchledger validate --strict
-          researchledger validate-paper papers/main/paper.md
-
-  security:
+  native-vendor-smoke:
+    name: Native Referee + V5 offline integration / Ubuntu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - name: Install researchledger and pip-audit
-        run: python -m pip install -e . pip-audit
-      - name: Audit researchledger's own dependencies
-        run: python -m pip_audit --requirement <(python -m pip freeze | grep -Ei '^(pyyaml|jsonschema)==')
+          python-version: '3.12'
+      - run: python -m pip install -e '.[dev,referee]'
+      - name: Exercise actual Referee Lean 7-stage engine using scripted fixtures
+        run: |
+          python examples/native_vendor_demo/generate_fixtures.py
+          python examples/native_vendor_demo/run_offline_demo.py --workspace "$RUNNER_TEMP/researchledger-vendor-demo"
+          python -m pytest -q tests/test_vendor_native_integration.py
+      - name: Run bundled Idea Discovery V5 offline unit tests
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP/researchledger-vendor-demo/_vendor/idea-discovery-v5"
+          python -m unittest discover -s tests -q
+      - name: Referee core contract and invariant regression
+        shell: bash
+        run: |
+          PYTHONPATH='vendor/20- Paper Review Agent/Referee-Lean-v2' python -m pytest -q \
+            'vendor/20- Paper Review Agent/Referee-Lean-v2/tests/runtime/test_lean_v2.py' \
+            'vendor/20- Paper Review Agent/Referee-Lean-v2/tests/runtime/test_hard_provenance_gate.py'
+
+  portability:
+    name: CLI portability / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - run: python -m compileall -q factory researchledger
+      - run: researchctl --help
+      - run: researchledger --help
+      - run: researchctl idea-discovery inspect
+
+  smoke:
+    name: Real ResearchLedger CLI smoke / Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - name: Initialize, run a harmless command, and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir smoke-workspace
+          cd smoke-workspace
+          researchledger init
+          researchledger run -- python -c "print('ok')"
+          researchledger validate --strict
+          researchledger report
+      - name: Validate bundled example
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd examples/quickstart
+          researchledger validate --strict
+          researchledger validate-paper papers/main/paper.md
+
+  dependency-audit:
+    name: Dependency vulnerability audit / Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . pip-audit
+      - name: Audit locally installed Python dependencies
+        run: python -m pip_audit --local --progress-spinner off

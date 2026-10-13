@@ -1,0 +1,11 @@
+V4 SURVIVOR-ONLY ELO
+
+ELO is a relative-ranking layer, never a scientific-validity gate.
+Only ideas already marked GREENLIGHT by the same-round Phase 10 -> 11 -> 12 -> 13 survival loop may enter.
+Compare each survivor pair on:
+- Novelty
+- Feasibility
+- Relevance
+- Clarity
+Score each 1-10, compute the mean composite, and update Elo ratings (default start 1500, K=32).
+A killed, unresolved, or merely revised idea must never enter ELO.

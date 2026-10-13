@@ -32,6 +32,7 @@ import json
 import pathlib
 import shutil
 import subprocess
+import tempfile
 import time
 
 
@@ -134,35 +135,44 @@ class AgentLoop:
             return self._replay(turn_index), {"replayed": True}
         if not self.executable:
             raise AgentUnavailable(f"{self.provider} CLI is not installed")
-        if self.provider == "claude":
-            command = [self.executable, "-p", "--output-format", "json",
-                       "--no-session-persistence", "--permission-mode", "plan",
-                       "--disallowedTools", "Bash", "Edit", "Write"]
-            if schema_path:
-                command += ["--json-schema", str(schema_path)]
-            if self.model:
-                command += ["--model", self.model]
-            # The prompt goes on stdin: a whole manuscript does not fit in a
-            # Windows command line (about 32k characters).
-            stdin_text = prompt
-        else:
-            command = [self.executable, "exec", "--sandbox", "read-only", "--ephemeral",
-                       "--skip-git-repo-check"]
-            if schema_path:
-                command += ["--output-schema", str(schema_path)]
-            if self.workdir:
-                command += ["-C", str(self.workdir)]
-            command.append(prompt)
-            stdin_text = None
-        completed = subprocess.run(
-            command, input=stdin_text, capture_output=True, text=True, encoding="utf-8",
-            errors="replace", shell=False, timeout=self.budget_seconds,
-            cwd=str(self.workdir) if self.workdir else None)
-        if completed.returncode != 0:
-            raise AgentUnavailable(
-                f"{self.provider} CLI exited {completed.returncode}: "
-                f"{(completed.stderr or completed.stdout)[:400]}")
-        return completed.stdout, {"returncode": completed.returncode}
+        with tempfile.TemporaryDirectory(prefix="researchledger-cli-") as temp:
+            directory = pathlib.Path(temp)
+            if self.provider == "claude":
+                command = [self.executable, "-p", "--output-format", "json",
+                           "--no-session-persistence", "--permission-mode", "plan",
+                           "--disallowedTools", "Bash", "Edit", "Write"]
+                if schema_path:
+                    # Claude expects the schema JSON text, not its filename.
+                    command += ["--json-schema", pathlib.Path(schema_path).read_text(encoding="utf-8")]
+                if self.model:
+                    command += ["--model", self.model]
+                stdin_text = prompt
+            else:
+                # Codex accepts '-' to read from stdin; passing a large paper as an
+                # argv string may exceed operating-system command-length limits.
+                output_path = directory / "last_message.txt"
+                command = [self.executable, "exec", "--sandbox", "read-only",
+                           "--ephemeral", "--skip-git-repo-check",
+                           "--output-last-message", str(output_path)]
+                if schema_path:
+                    command += ["--output-schema", str(pathlib.Path(schema_path).resolve())]
+                if self.model:
+                    command += ["--model", self.model]
+                command.append("-")
+                stdin_text = prompt
+            completed = subprocess.run(
+                command, input=stdin_text, capture_output=True, text=True, encoding="utf-8",
+                errors="replace", shell=False, timeout=self.budget_seconds,
+                cwd=str(self.workdir) if self.workdir else None)
+            if completed.returncode != 0:
+                raise AgentUnavailable(
+                    f"{self.provider} CLI exited {completed.returncode}: "
+                    f"{(completed.stderr or completed.stdout)[:400]}")
+            if self.provider == "codex":
+                if not output_path.is_file():
+                    raise AgentUnavailable("Codex CLI did not produce --output-last-message")
+                return output_path.read_text(encoding="utf-8"), {"returncode": completed.returncode}
+            return completed.stdout, {"returncode": completed.returncode}
 
     @staticmethod
     def _unwrap(raw):

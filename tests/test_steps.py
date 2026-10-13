@@ -144,6 +144,19 @@ class DraftStepTests(Temp):
         self.assertIn("\\PFFIG{loss_curve}", plan)
         self.assertEqual(len(self.prompts), 1)
 
+    def test_codex_writer_provider_is_forwarded_to_file_writing_session(self):
+        write.run(self.project, {"writer_provider": "codex"},
+                  agent_factory=lambda: FakeAgent(SPEC),
+                  session=self.make_session([DRAFT]),
+                  build_pdf=self.build_pdf, skills_dir=self.skills)
+        self.assertEqual(self.options["provider"], "codex")
+
+    def test_default_bundled_skills_work_without_external_installation(self):
+        from factory.integrations.paper_orchestra import BUNDLED_SKILLS, VENDOR_DIR
+        write.run(self.project, {}, agent_factory=lambda: FakeAgent(SPEC),
+                  session=self.make_session([DRAFT]), build_pdf=self.build_pdf)
+        self.assertEqual(self.options["add_dirs"], [BUNDLED_SKILLS.resolve(), VENDOR_DIR.resolve()])
+
     def test_the_number_check_ignores_our_own_macro_constants_but_flags_real_decimals(self):
         self.assertEqual(self.go([DRAFT])["numbers_to_check"], [])
         shutil.rmtree(self.project / "2_paper")

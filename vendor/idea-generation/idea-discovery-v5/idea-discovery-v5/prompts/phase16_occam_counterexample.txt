@@ -1,0 +1,3 @@
+Phase 15 — Occam + Counterexample Attack
+
+Try to make the idea fail cheaply. Remove components, test simpler explanations, construct counterexamples, design positive/negative controls, and identify leakage or shortcut paths. If a simpler mechanism explains the same predicted result, the extra complexity is not a contribution.

@@ -1,0 +1,25 @@
+Use this:
+
+**Prompt:**
+Create a **novelty matrix** comparing my research idea with the 3–5 strongest competing papers.
+
+Use ✓ = addressed, △ = partial, ✗ = not addressed.
+
+| Feature             | My Work | Paper A | Paper B | Paper C |
+| ------------------- | ------- | ------- | ------- | ------- |
+| Feature 1           |         |         |         |         |
+| Feature 2           |         |         |         |         |
+| Feature 3           |         |         |         |         |
+| External validation |         |         |         |         |
+| Mechanism analysis  |         |         |         |         |
+| Uncertainty         |         |         |         |         |
+
+Then answer:
+
+1. Which parts are already covered by prior work?
+2. Which parts are genuinely novel?
+3. What is the closest competing paper?
+4. Is the novelty conceptual, methodological, empirical, or just a new combination?
+5. Most importantly: **What intellectual contribution does my work make that these papers do not already make?**
+
+Do **not** judge novelty by simply counting checkmarks.

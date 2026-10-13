@@ -166,9 +166,19 @@ def compile_pdf(build_dir, tex_name="paper.tex"):
         raise ValueError(f"LaTeX build failed:\n{tail}")
     bibtex = shutil.which("bibtex")
     aux = build_dir / f"{stem}.aux"
-    if bibtex and aux.is_file() and "\\bibdata" in aux.read_text(encoding="utf-8", errors="replace"):
-        subprocess.run([bibtex, stem], cwd=build_dir, capture_output=True, shell=False, timeout=300)
-        tex()
+    if aux.is_file() and "\\bibdata" in aux.read_text(encoding="utf-8", errors="replace"):
+        if not bibtex:
+            raise ValueError("LaTeX bibliography requires bibtex, but it is not installed")
+        bibliography = subprocess.run([bibtex, stem], cwd=build_dir, capture_output=True,
+                                      text=True, encoding="utf-8", errors="replace",
+                                      shell=False, timeout=300)
+        if bibliography.returncode != 0:
+            raise ValueError("BibTeX failed: " + "\n".join(
+                (bibliography.stdout + "\n" + bibliography.stderr).splitlines()[-15:]))
+        intermediate = tex()
+        if intermediate.returncode != 0:
+            raise ValueError("LaTeX rebuild after BibTeX failed: " + "\n".join(
+                intermediate.stdout.splitlines()[-15:]))
     final = tex()
     pdf = build_dir / f"{stem}.pdf"
     if final.returncode != 0 or not pdf.is_file():
@@ -339,6 +349,10 @@ def _agent(settings, workdir):
 def _settings(context):
     given = {k[len("review_"):]: v for k, v in (context or {}).items() if k.startswith("review_")}
     settings = {**DEFAULTS, **given}
+    # One local subscription CLI can serve both reviewer and manuscript reviser.
+    if (context or {}).get('review_agent') == 'beihang-native' and 'review_provider' not in (context or {}):
+        if (context or {}).get('referee_provider') in {'claude', 'codex'}:
+            settings['provider'] = context['referee_provider']
     settings["thresholds"] = {**THRESHOLDS, **(given.get("thresholds") or {})}
     return settings
 
@@ -380,6 +394,11 @@ def run(project, context=None, out_name="3_review", revise=True, seed_weaknesses
     """
     project = pathlib.Path(project).resolve()
     settings = _settings(context)
+    if settings["agent"] in {"referee-native", "beihang-native"}:
+        return run_native_review(project, context or {}, out_name=out_name, revise=revise,
+                                 seed_weaknesses=seed_weaknesses, log_text=log_text,
+                                 guard_text=guard_text, source_dir=source_dir,
+                                 agent_factory=agent_factory, build=build)
     from factory.integrations.ledger import enabled
     from factory.integrations.methodology import brief
     methodology = brief("review") if enabled(context) else ""
@@ -487,4 +506,146 @@ def run(project, context=None, out_name="3_review", revise=True, seed_weaknesses
               "seed": seed_note, "final_paper": f"{out_name}/final/paper.pdf"}
     (out / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n",
                                      encoding="utf-8")
+    return report
+
+
+def run_native_review(project, context, *, out_name, revise, seed_weaknesses=(),
+                      log_text=None, guard_text=None, source_dir=None,
+                      agent_factory=None, build=compile_pdf):
+    """Opt-in S3/S5: actual bundled Referee Lean engine + guarded Factory revision.
+
+    Scientific concern counts are **not scores**. They are used only as a
+    cautious automated stopping heuristic and never certify readiness.
+    """
+    from factory.integrations import referee_native, referee_beihang
+    settings = _settings(context)
+    paper = pathlib.Path(source_dir) if source_dir else project / "2_paper"
+    build_src = paper / "build"
+    source_tex = paper / "paper.tex"
+    if not source_tex.is_file():
+        raise ValueError(f"native Referee input is missing: {source_tex}")
+    current_tex = source_tex.read_text(encoding="utf-8")
+    current_pdf = paper / "paper.pdf"
+    if not current_pdf.is_file():
+        if not build_src.is_dir():
+            raise ValueError("no PDF or build directory for native Referee input")
+        current_pdf = pathlib.Path(build(build_src, "paper.tex"))
+    out = project / out_name
+    out.mkdir(parents=True, exist_ok=True)
+    if log_text is None:
+        log_path = project / "_inputs" / "experimental_log.md"
+        log_text = log_path.read_text(encoding="utf-8") if log_path.is_file() else ""
+    guard_text = log_text if guard_text is None else guard_text
+    editor = (agent_factory or _agent)(settings, project) if revise else None
+    seed_note = None
+    if revise and seed_weaknesses:
+        try:
+            current_tex, current_pdf, changes = _revise(
+                editor, current_tex, list(seed_weaknesses), log_text, guard_text, build_src,
+                paper, out / 'build_00', build)
+            seed_note = f"seed revision: {changes}"
+        except ValueError as exc:
+            seed_note = f"seed revision rejected: {exc}"
+    rounds, best, previous_signature = [], None, None
+    status = "NATIVE_MAX_ROUNDS"
+    model = context.get("referee_model")
+    mode = context.get("referee_mode", "deep")
+    search = context.get("referee_search_backend", "none")
+    prev_document = None
+    prev_concerns = None
+    # Full Referee uses its own OpenAI-compatible provider. Do not leak creds
+    # into pipeline JSON, CLI args or audit receipts.
+    for number in range(1, int(settings['max_rounds']) + 1 if revise else 2):
+        directory = out / f'round_{number:02d}'
+        directory.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(current_pdf, directory / 'paper.pdf')
+        (directory / 'paper.tex').write_text(current_tex, encoding='utf-8')
+        closure_expected = settings['agent'] == 'beihang-native' and prev_concerns is not None
+        if settings['agent'] == 'beihang-native':
+            result = referee_beihang.review_one(project, current_pdf,
+                provider=context.get('referee_provider','openai-compatible'),model=model, mode=mode,
+                pipeline=context.get('referee_pipeline', 'core'),
+                rubric=context.get('referee_rubric'),
+                scorecard=bool(context.get('referee_scorecard', False)),
+                search_backend=context.get('referee_search_backend', 'federated'),
+                prior_manuscript=prev_document, prior_concerns=prev_concerns)
+        else:
+            result = referee_native.review(project, current_pdf, provider='openai-compatible',
+                                           model=model, mode=mode, pipeline='lean',
+                                           search_backend=search)
+        state_file = pathlib.Path(result['run_directory']) / 'state.json'
+        state = json.loads(state_file.read_text(encoding='utf-8'))
+        if not result['review_exportable'] or result['hard_invariant_failures']:
+            raise ValueError('native Referee failed evidence/invariant gates: ' + str(state.get('hard_invariant_failures'))[:700])
+        concerns = state.get('admitted_concerns') or []
+        weaknesses = [{
+            'location': ', '.join(str(anchor) for anchor in c.get('evidence_anchor_ids', [])) or 'manuscript',
+            'issue': str(c.get('title', 'Concern')) + ': ' + str(c.get('failure_mechanism', '')),
+            'fix': str(c.get('minimum_resolution', '')),
+        } for c in concerns]
+        rejected = state.get('rejected_concerns') or []
+        signature = tuple(sorted(str(c.get('title', '')) for c in concerns))
+        shutil.copyfile(result['review_markdown'], directory / 'review.md')
+        (directory / 'review.json').write_text(json.dumps({
+            'native_engine': result, 'admitted_major_concerns': len(concerns),
+            'rejected_candidate_concerns': len(rejected), 'weaknesses': weaknesses,
+            'source_run': result['run_directory']}, indent=2) + '\n', encoding='utf-8')
+        prev_document = str(directory / 'paper.pdf')
+        prev_concerns = result.get('prior_concerns')
+        row = {'round': number, 'admitted_major_concerns': len(concerns),
+               'rejected_candidate_concerns': len(rejected),
+               'directory': directory.name, 'referee_run': result['run_directory']}
+        rounds.append(row)
+        if best is None or len(concerns) < best['concern_count']:
+            best = {'concern_count': len(concerns), 'tex': current_tex, 'pdf': directory / 'paper.pdf',
+                    'round': number, 'concerns': weaknesses}
+        if not concerns:
+            # A separate reviewer must evaluate closure of earlier comments.
+            # For Beihang revision mode, missing/failed closure evidence cannot
+            # be silently transformed into a clean scientific outcome.
+            closure = result.get('revision_closure') if settings['agent'] == 'beihang-native' else None
+            if closure_expected and not closure:
+                status = 'NATIVE_REVISION_CLOSURE_UNVERIFIED'
+            elif settings['agent'] == 'beihang-native' and closure and (closure.get('new_regressions') or any(
+                str(x.get('status',x.get('resolution_status',''))).lower() not in
+                {'resolved','verified','verified_closed'}
+                for x in (closure.get('closure_rows') or []) if isinstance(x,dict))):
+                status = 'NATIVE_REVISION_CONCERNS_OPEN'
+            else:
+                status = ('NATIVE_REJECTED_CONCERNS_REQUIRE_HUMAN_REVIEW' if rejected
+                          else 'NATIVE_NO_ADMITTED_MAJOR_CONCERNS')
+            break
+        if not revise:
+            status = 'NATIVE_SINGLE_PASS'
+            break
+        if previous_signature == signature:
+            status = 'NATIVE_STALLED'
+            break
+        if number == int(settings['max_rounds']):
+            break
+        previous_signature = signature
+        try:
+            current_tex, current_pdf, changes = _revise(
+                editor, current_tex, weaknesses, log_text, guard_text, build_src,
+                paper, out / f'build_{number:02d}', build)
+        except ValueError as exc:
+            row['outcome'] = 'revision rejected: ' + str(exc)
+            status = 'NATIVE_REVISION_REJECTED'
+            break
+        row['outcome'] = 'revised: ' + changes
+    if best is None:
+        raise ValueError('native Referee did not produce a review')
+    final = out / 'final'
+    final.mkdir(exist_ok=True)
+    (final / 'paper.tex').write_text(best['tex'], encoding='utf-8')
+    shutil.copyfile(best['pdf'], final / 'paper.pdf')
+    report = {'schema_version': 1, 'generated_at': now(), 'status': status,
+              'review_backend': settings['agent'], 'final_scores': {},
+              'final_admitted_major_concerns': best['concern_count'],
+              'final_round': best['round'], 'rounds': rounds,
+              'seed': seed_note, 'final_paper': f'{out_name}/final/paper.pdf',
+              'caveat': 'Native Referee concerns are model-generated, not independently verified. '
+                        'No reported concern does not imply publishability or scientific correctness. '
+                        'Guarded manuscript revisions require independent human inspection.'}
+    (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     return report

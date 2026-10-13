@@ -1,0 +1,90 @@
+{
+  "method": "REAL_REFEREE_ENGINE_SCRIPTED_FIXTURE_NOT_LIVE_MODEL",
+  "rounds": [
+    {
+      "round": 1,
+      "manuscript_file": "v1_original.md",
+      "native_pipeline": "lean",
+      "stages_completed": 7,
+      "major_admitted": 1,
+      "major_rejected": 0,
+      "final_review_exportable": true,
+      "critical_concern_titles": [
+        "Causal identification is not established"
+      ]
+    },
+    {
+      "round": 2,
+      "manuscript_file": "v2_reframed.md",
+      "native_pipeline": "lean",
+      "stages_completed": 7,
+      "major_admitted": 1,
+      "major_rejected": 0,
+      "final_review_exportable": true,
+      "critical_concern_titles": [
+        "Unjustified population generalization"
+      ]
+    },
+    {
+      "round": 3,
+      "manuscript_file": "v3_limited.md",
+      "native_pipeline": "lean",
+      "stages_completed": 7,
+      "major_admitted": 0,
+      "major_rejected": 0,
+      "final_review_exportable": true,
+      "critical_concern_titles": []
+    }
+  ],
+  "comparisons": [
+    {
+      "from_round": 1,
+      "to_round": 2,
+      "similarity": 0.8141,
+      "diff": [
+        "--- ",
+        "+++ ",
+        "@@ -1,4 +1,4 @@",
+        "-# Demonstration manuscript \u2014 version 1",
+        "+# Demonstration manuscript \u2014 version 2",
+        " ",
+        " This is a **synthetic example**, not a human study or measured intervention.",
+        " ",
+        "@@ -9,4 +9,4 @@",
+        " The illustrative mean Y was 50 before and 60 after (20% relative change). No uncertainty estimates or independent replication are available.",
+        " ",
+        " ## Conclusion",
+        "-Intervention X causes a 20% improvement in outcome Y.",
+        "+An observed 20% relative before-after difference in Y is described; causality cannot be established. This observed difference generalizes to all populations."
+      ]
+    },
+    {
+      "from_round": 2,
+      "to_round": 3,
+      "similarity": 0.562,
+      "diff": [
+        "--- ",
+        "+++ ",
+        "@@ -1,12 +1,12 @@",
+        "-# Demonstration manuscript \u2014 version 2",
+        "+# Demonstration manuscript \u2014 version 3",
+        " ",
+        " This is a **synthetic example**, not a human study or measured intervention.",
+        " ",
+        " ## Methods",
+        "-A single hypothetical convenience cohort of 80 participants received intervention X. There was no randomized concurrent control group.",
+        "+A single hypothetical convenience cohort of 80 participants received intervention X. There was no randomized concurrent control group and the participants were not randomly sampled.",
+        " ",
+        " ## Results",
+        "-The illustrative mean Y was 50 before and 60 after (20% relative change). No uncertainty estimates or independent replication are available.",
+        "+The illustrative mean Y was 50 before and 60 after (20% relative difference). This is an arithmetic illustration, not an estimate of intervention effectiveness. Confidence intervals, source datasets, and independent replication were not provided.",
+        " ",
+        " ## Conclusion",
+        "-An observed 20% relative before-after difference in Y is described; causality cannot be established. This observed difference generalizes to all populations.",
+        "+The observed difference is descriptive and limited to the measured cohort. This single-group example does not support a causal or population-general claim."
+      ]
+    }
+  ],
+  "human_verified": false,
+  "scientific_acceptance": false
+}

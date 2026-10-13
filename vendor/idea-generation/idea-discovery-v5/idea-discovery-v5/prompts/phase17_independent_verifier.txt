@@ -1,0 +1,3 @@
+Phase 16 — Independent Blind Verifier
+
+The verifier must not receive the generator's private reasoning, enthusiasm, prior scores, or desired verdict. Judge only the hypothesis contract, falsification plan, and MVE protocol. Prefer disconfirmation and explicitly mark unresolved threats.

@@ -1,0 +1,10 @@
+Ask:
+"Find papers that make this idea NOT novel."
+Search:
+exact mechanism;
+conceptual synonyms;
+same problem under another terminology:
+adjacent domains;
+latest conference proceedings;
+arXiv:
+patents when relevant.

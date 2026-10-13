@@ -1,0 +1,13 @@
+V4 DISCOVERY GROUNDING
+
+Before idea generation:
+1. Ground the topic in 30-50 relevant papers when retrieval permits.
+2. Build a novelty tree: Type 1 new task/problem; Type 2 new paradigm/pipeline/representation; Type 3 new mechanism/module; Type 4 incremental modification.
+3. Build a challenge -> insight map.
+4. For every detected GAP-ID, run the well-established-solution check:
+   Level 1: same task already solved well -> SWITCH.
+   Level 2: same technical core solved across domains -> SWITCH.
+   Level 3: only limited/distant-domain solutions -> PROCEED.
+   Level 4: no known good solution -> PROCEED.
+5. Use quote-or-zero evidence: every solution-level claim must point to an exact supplied paper title and an exact short quote from the supplied abstract. Unsupported claims receive LOW confidence.
+6. If the grounded pool is below the configured minimum, fail closed unless the user explicitly relaxes the setting.

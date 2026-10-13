@@ -1,0 +1,141 @@
+{
+  "api": {
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 8096,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 5,
+    "json_repair_attempts": 2
+  },
+  "pipeline": {
+    "input_dir": "input_papers",
+    "output_dir": "output",
+    "log_dir": "logs",
+    "batch_size": 5,
+    "max_ideas_per_gap": 2,
+    "top_ideas": 3,
+    "version": "5.0.0"
+  },
+  "embeddings": {
+    "enabled": true,
+    "model": "all-MiniLM-L6-v2",
+    "preferred_model": "allenai/specter2",
+    "min_cluster_size": 3,
+    "umap_neighbors": 15,
+    "_comment": "Set enabled=false to skip (no ML deps needed)"
+  },
+  "knowledge_graph": {
+    "enabled": true,
+    "_comment": "Builds NetworkX graph of papers/methods/problems/datasets"
+  },
+  "quality_gates": {
+    "enabled": true,
+    "check_ingestion": true,
+    "check_clusters": true,
+    "simulate_reviewer": true,
+    "_comment": "Set enabled=false for faster runs without quality checks"
+  },
+  "multi_model": {
+    "enabled": false,
+    "models": [
+      "claude"
+    ],
+    "_comment": "Set enabled=true and add OPENAI_API_KEY / GOOGLE_API_KEY env vars for multi-model"
+  },
+  "citation_expansion": {
+    "enabled": true,
+    "max_hops": 1,
+    "max_papers_per_hop": 8,
+    "_comment": "Expands novelty search via Semantic Scholar citation graph"
+  },
+  "dashboard": {
+    "enabled": true,
+    "_comment": "Generates interactive HTML dashboard in output/"
+  },
+  "source_verification": {
+    "enabled": true,
+    "domain_profile": "auto",
+    "request_delay_seconds": 0,
+    "fail_closed_on_doi_mismatch": true
+  },
+  "scientific_governance": {
+    "adversarial_gate": false,
+    "methodology_blueprints": true,
+    "require_traceability": true,
+    "conservative_novelty": true,
+    "iterative_attack_loop": true
+  },
+  "novelty_search": {
+    "queries_per_claim": 3,
+    "semantic_scholar": true,
+    "arxiv": true,
+    "openalex": true,
+    "recent_months": 6
+  },
+  "attack_loop": {
+    "enabled": true,
+    "max_rounds": 4,
+    "greenlight_score": 80,
+    "min_novelty_component": 14,
+    "attacker_provider": "auto",
+    "openai_model": "gpt-4o",
+    "_comment": "Every revision restarts Phase 10\u219213. GREENLIGHT requires all four phases to survive in the same round. auto uses GPT as independent attacker when OPENAI_API_KEY exists, otherwise Claude."
+  },
+  "discovery_grounding": {
+    "enabled": true,
+    "target_min_papers": 30,
+    "target_max_papers": 50,
+    "max_search_rounds": 3,
+    "queries_per_round": 3,
+    "results_per_query": 8,
+    "semantic_scholar": true,
+    "arxiv": true,
+    "openalex": true,
+    "require_solution_level_3_or_4": true,
+    "fail_closed_if_no_eligible_gap": true,
+    "_comment": "Build novelty/challenge-insight trees and Level 1-4 well-established-solution checks before ideation.",
+    "fail_closed_under_min_papers": true
+  },
+  "idea_evolution": {
+    "enabled": true,
+    "directions": 3,
+    "iterations": 3,
+    "personas": [
+      "innovator",
+      "pragmatist",
+      "critic"
+    ],
+    "record_all_variants": true,
+    "use_ideation_memory": true,
+    "_comment": "Three directions evolve independently. Every round generates all three persona revisions, then selects one seed for the next round."
+  },
+  "survivor_elo": {
+    "enabled": true,
+    "starting_rating": 1500,
+    "k_factor": 32,
+    "dimensions": [
+      "novelty",
+      "feasibility",
+      "relevance",
+      "clarity"
+    ],
+    "_comment": "Relative ranking only. V5 ranks only FINAL GREENLIGHT ideas after falsification/MVE evidence; READY_FOR_MVE is not equivalent to validity."
+  },
+  "ideation_memory": {
+    "enabled": true,
+    "path": "memory/ideation_memory.json",
+    "top_k_relevant": 2,
+    "max_entries": 100,
+    "_comment": "Stores feasible directions and fundamental dead ends across runs."
+  },
+  "falsification": {
+    "enabled": true,
+    "max_rounds": 2,
+    "require_executed_mve_for_greenlight": true,
+    "evidence_dir": "output/mve_evidence",
+    "independent_verifier": true,
+    "blind_verifier": true,
+    "restart_phase10_after_scientific_revision": true,
+    "auto_execute_mve": false,
+    "_comment": "No empirical evidence => READY_FOR_MVE, never GREENLIGHT. Put executed evidence in output/mve_evidence/IDEA-xxx.json and rerun --falsification-only."
+  }
+}

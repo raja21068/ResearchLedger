@@ -27,7 +27,7 @@ Result: **13/13 old/new artifact hashes differ and 13/13 trajectories complete t
 
 This remains a conformance/bridge result. The executable command is `paper_agent_proxy.py`, a deterministic wrapper around the semantic fixtures, not a Paper2Agent-generated MCP server. The claim/evidence binding is study-authored rather than independently annotated.
 
-The per-case workspaces under `tracked_trajectory_workspaces/` retain the immutable run manifests and revision journals. `trajectory_runner.py` uses per-case result checkpoints so interrupted execution can resume without re-running completed cases.
+The per-case workspaces under `tracked_trajectory_workspaces/` hold immutable run manifests and revision journals **when they have been generated locally**. They are **not included in all source archives**, including the uploaded release used in this engineering audit. `results/tracked_trajectory_proxy.json` is a prior summary, not a substitute for inspectable on-disk run manifests. The dedicated manifest test explicitly skips when the workspaces are absent rather than representing their provenance as verified. Recreate the workspaces from the study runner, inspect its inputs and hashes, and rerun the test before citing run-level reproducibility. `trajectory_runner.py` uses per-case result checkpoints so interrupted execution can resume without re-running completed cases.
 
 ### Transaction fault injection
 

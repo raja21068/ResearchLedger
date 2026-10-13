@@ -114,6 +114,9 @@ def _load(path):
 
 
 def _score_line(report):
+    if report.get('review_backend') == 'referee-native':
+        return (f"{report.get('final_admitted_major_concerns')} admitted major concerns "
+                f"after {len(report['rounds'])} round(s), {report['status']}")
     scores = report["final_scores"]
     shown = ", ".join(f"{k} {v}" for k, v in scores.items())
     return f"{shown} after {len(report['rounds'])} round(s), {report['status']}"
@@ -144,7 +147,9 @@ def artifact_valid(project, stage_id):
               and report.get("status") and report.get("rounds"))
     if not ok:
         return False, "review report invalid"
-    if stage_id == "S5" and report["status"] != "TARGET_REACHED":
+    success_status = ('NATIVE_NO_ADMITTED_MAJOR_CONCERNS' if report.get('review_backend') == 'referee-native'
+                      else 'TARGET_REACHED')
+    if stage_id == "S5" and report["status"] != success_status:
         return False, "refinement did not reach its declared thresholds: " + _score_line(report)
     return True, _score_line(report)
 

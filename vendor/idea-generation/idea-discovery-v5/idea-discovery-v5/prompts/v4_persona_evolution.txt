@@ -1,0 +1,12 @@
+V4 MULTI-PERSONA EVOLUTION
+
+For each eligible research direction, run N refinement rounds (default N=3).
+Every round MUST generate all three complete variants before selecting one:
+- Innovator: maximize non-obvious novelty and allow genuine pivots.
+- Pragmatist: maximize feasibility, clean controls, and executable validation.
+- Critic: maximize scientific insight, falsifiability, and reviewer defensibility.
+
+Evaluate the current seed, produce all three variants, select one based on evidence, and carry it into the next round.
+If the mechanism is a dead end, pivot rather than cosmetically rewrite it.
+Do not lose GAP-ID, hypothesis, null hypothesis, negative-result value, or evaluation traceability.
+Only final track champions enter Phase 10.
