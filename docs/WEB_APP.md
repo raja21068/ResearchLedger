@@ -44,6 +44,19 @@ uses your own login.
 
 Or ask Claude Code in this repository to "run ResearchLedger" ([CLAUDE.md](../CLAUDE.md) tells it how).
 
+## One-click use: Autopilot and Approvals
+
+- **New task box (home):** type a goal and/or attach files and press Enter. `webapi/app/autopilot.py` decides:
+  a whole paper ("write a paper on…", "survey paper…", "thesis…", "reviewer comments…") → Paper Studio with
+  Autopilot; a single job (one manuscript → review, slides, code, …) → the matching ready-made agent (or its
+  upload page if a required file is missing); anything else → Research Director plan.
+- **Autopilot (Paper Studio):** on by default (`RL_PAPER_AUTOPILOT=0` turns the default off). Creating a paper starts
+  stage 1; approving a stage starts the next one. *Run experiments* never starts by itself. Switch per paper on
+  the paper page.
+- **Approvals (sidebar, with a badge):** `/inbox` lists every decision across projects — stages to approve
+  (with the agent's summary and files), Director plans, experiments waiting for a click, steps that did not finish
+  (Try again), and what is running now. `GET /api/v1/inbox`.
+
 ## Paper Studio (guided paper writing)
 
 Sidebar → **Paper Studio**, or *Use this idea for a paper* on a Brainstorm idea card. One stage path per paper

@@ -95,7 +95,17 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
           <div className="text-sm text-faint"><Link href="/paper" className="hover:text-ink">Paper Studio</Link> / {paper.type_label} · {paper.venue_label}</div>
           <h1 className="mt-1 font-serif text-2xl font-semibold">{paper.topic || "Untitled paper"}</h1>
         </div>
-        <Link className={btn2} href={`/projects/${id}?conv=${paper.conversation_id}`}>Open the chat for this paper</Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm"
+            title="When on, approving a stage starts the next one automatically (except running code on your PC).">
+            <input type="checkbox" checked={paper.autopilot ?? true} onChange={async (e) => {
+              try { setPaper(await api<PaperView>(`/projects/${id}/paper/autopilot`, { method: "PUT", body: JSON.stringify({ on: e.target.checked }) })); }
+              catch (err) { setError(err); }
+            }} />
+            Autopilot {paper.autopilot ?? true ? "on" : "off"}
+          </label>
+          <Link className={btn2} href={`/projects/${id}?conv=${paper.conversation_id}`}>Open the chat for this paper</Link>
+        </div>
       </div>
 
       {paper.inputs && (

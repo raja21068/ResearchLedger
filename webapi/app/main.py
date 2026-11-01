@@ -5,6 +5,7 @@ import asyncio
 import json
 import mimetypes
 import shutil
+from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (autopilot, inbox, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -232,6 +233,47 @@ def factory_doctor():
     if result is None:
         raise HTTPException(502, (done.stderr or done.stdout)[-1500:] or "doctor produced no output")
     return result
+
+
+# ---------------------------------------------------------------- One-click autopilot + approvals inbox
+class AutopilotIn(BaseModel):
+    goal: str = Field(default="", max_length=20_000)
+    files: list[str] = Field(default_factory=list, max_length=30)
+    model: str | None = Field(default=None, pattern=r"^[A-Za-z0-9._\-\[\]]{1,80}$")
+
+
+class AutopilotToggleIn(BaseModel):
+    on: bool
+
+
+@app.post("/api/v1/autopilot/classify")
+def autopilot_classify(body: AutopilotIn):
+    return autopilot.classify(body.goal, [Path(f).name for f in body.files])
+
+
+@app.post("/api/v1/projects/{project_id}/autopilot/start", status_code=201)
+def autopilot_start(project_id: str, body: AutopilotIn):
+    _project(project_id)
+    if not body.goal.strip() and not body.files:
+        raise HTTPException(400, "say what you want or upload a file")
+    try:
+        return autopilot.start(store, project_id, body.goal, body.files, body.model)
+    except (ValueError, workspace.PathError) as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.put("/api/v1/projects/{project_id}/paper/autopilot")
+def paper_autopilot(project_id: str, body: AutopilotToggleIn):
+    _project(project_id)
+    try:
+        return paper_studio.set_autopilot(store, project_id, body.on)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/inbox")
+def get_inbox():
+    return inbox.build(store)
 
 
 # ---------------------------------------------------------------- Smart recipes

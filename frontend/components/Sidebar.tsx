@@ -92,6 +92,12 @@ export function Sidebar() {
   const [docs, setDocs] = useState<{ path: string }[]>([]);
   const [worker, setWorker] = useState<{ executor: string; worker_connected: boolean; worker_state?: string } | null>(null);
   const projectId = path.match(/^\/projects\/(prj_[a-z0-9]+)/)?.[1] ?? null;
+  const [approvals, setApprovals] = useState(0);
+  useEffect(() => {
+    const tick = () => api<{ counts: { approve: number; retry: number } }>("/inbox")
+      .then((x) => setApprovals(x.counts.approve + x.counts.retry)).catch(() => {});
+    tick(); const t = setInterval(tick, 10000); return () => clearInterval(t);
+  }, [path]);
 
   useEffect(() => { setWide(readPref("rl-nav-wide", true)); setClosed(readPref("rl-nav-closed", {})); }, []);
   useEffect(() => {
@@ -143,6 +149,13 @@ export function Sidebar() {
         </Link>
         <button onClick={() => { setSearching(!searching); setQ(""); if (!wide) toggleWide(); }} aria-label="Search chats" title="Search chats"
           className="hidden h-9 w-9 flex-none items-center justify-center rounded-lg border border-line bg-white text-faint hover:text-ink lg:flex"><Icon d={I.search} /></button>
+      </div>
+      {/* Approvals: the one place where the user decides */}
+      <div className="px-2">
+        <Link href="/inbox" title="Approvals" className={`${row(path === "/inbox")} justify-between`}>
+          <span className="flex items-center gap-2.5"><Icon d={I.review} /><span className={wide ? "" : "lg:hidden"}>Approvals</span></span>
+          {approvals > 0 && <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold text-white">{approvals}</span>}
+        </Link>
       </div>
       {wide && searching && (
         <div className="hidden px-2 pb-2 lg:block">

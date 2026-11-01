@@ -9,6 +9,7 @@ State lives in the project at `paper/studio.json`, so it survives restarts.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from . import claude_runner, experiments, review_loop, workspace
@@ -297,9 +298,52 @@ def create(store: Store, project_id: str, paper_type: str, venue: str, topic: st
     store.exec("INSERT INTO conversations(id,project_id,title,created_at,updated_at) VALUES (?,?,?,?,?)",
                (cid, project_id, f"Paper Studio · {PAPER_TYPES[paper_type]['label']}", ts, ts))
     state = {"type": paper_type, "venue": venue, "topic": topic.strip(), "conversation_id": cid,
-             "created_at": ts, "stages": {s["id"]: {} for s in PAPER_TYPES[paper_type]["stages"]}}
+             "created_at": ts, "autopilot": os.environ.get("RL_PAPER_AUTOPILOT", "1") != "0",
+             "stages": {s["id"]: {} for s in PAPER_TYPES[paper_type]["stages"]}}
     _save(project_id, state)
     store.log_activity(project_id, "paper_created", paper_type)
+    autoadvance(store, project_id)  # Autopilot: start the first stage right away when it needs no uploads
+    return view(store, project_id)
+
+
+# Stages that never start by themselves: running code on the user's PC needs its own click.
+MANUAL_START = {"experiments"}
+
+
+def autoadvance(store: Store, project_id: str) -> str | None:
+    """Autopilot: start the first stage that is ready. The user's only job is to approve.
+
+    Returns the started stage id, or None (autopilot off, nothing ready, needs uploads, or a manual stage).
+    """
+    state = load(project_id)
+    if not state or not state.get("autopilot", True):
+        return None
+    view_stages = view(store, project_id)["stages"]
+    for s in view_stages:
+        if s["status"] in {"running", "needs_review", "incomplete", "failed"}:
+            return None  # something is in flight or waiting for the user
+        if s["status"] == "ready":
+            if s["id"] in MANUAL_START:
+                return None
+            try:
+                note = ("Started automatically by Autopilot after your approval." if s is not view_stages[0]
+                        else "Started automatically by Autopilot when the paper was created.")
+                run_stage(store, project_id, s["id"], notes=note)
+                return s["id"]
+            except ValueError as exc:  # e.g. uploads missing: leave it for the user
+                store.log_activity(project_id, "autopilot_waiting", f"{s['id']}: {exc}")
+                return None
+    return None
+
+
+def set_autopilot(store: Store, project_id: str, on: bool) -> dict:
+    state = load(project_id)
+    if not state:
+        raise ValueError("this project has no paper yet")
+    state["autopilot"] = bool(on)
+    _save(project_id, state)
+    if on:
+        autoadvance(store, project_id)
     return view(store, project_id)
 
 
@@ -361,6 +405,7 @@ def view(store: Store, project_id: str) -> dict | None:
     return {"type": state["type"], "type_label": PAPER_TYPES[state["type"]]["label"], "venue": state["venue"],
             "venue_label": VENUES[state["venue"]]["label"], "topic": state["topic"],
             "conversation_id": state["conversation_id"], "stages": out,
+            "autopilot": state.get("autopilot", True),
             "results": experiments.summary(root) if _has(state, "experiments") or state["type"] == "thesis_to_paper" else None,
             "collected": (state["stages"].get("experiments") or state["stages"].get("extract") or {}).get("collected"),
             "loop": _loop_view(store, state, root) if _has(state, "revise") and state["type"] != "revision_rebuttal" else None,
@@ -452,6 +497,7 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     st["approved_at"] = now()
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)
+    autoadvance(store, project_id)
     return view(store, project_id)
 
 

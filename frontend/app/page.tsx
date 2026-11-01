@@ -81,12 +81,9 @@ export default function NewChat() {
       const pid = await ensureProject();
       const parsed = parseCommand(prompt, commands);
       if (parsed) { router.push(await runCommand(pid, parsed.cmd, parsed.rest, workflows, attached, model || null)); return; }
-      // A new chat starts with the Research Director, which plans agents or answers directly.
-      const c = await post<{ id: string }>(`/projects/${pid}/conversations`, {});
-      const withFiles = attached.length
-        ? `${prompt}\n\nAttached files in the workspace:\n${attached.map((a) => `- \`${a}\``).join("\n")}` : prompt;
-      await post(`/conversations/${c.id}/director`, { prompt: withFiles, model: model || null });
-      router.push(`/projects/${pid}?conv=${c.id}`);
+      // Autopilot picks the pipeline: a whole paper (Paper Studio), a ready-made agent, or the Research Director.
+      const r = await post<{ url: string }>(`/projects/${pid}/autopilot/start`, { goal: prompt, files: attached, model: model || null });
+      router.push(r.url);
     } catch (e) { setError(e); setBusy(false); }
   }
 

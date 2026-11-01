@@ -8,7 +8,7 @@ export interface PaperStage {
 
 export interface PaperView {
   type: string; type_label: string; venue: string; venue_label: string; topic: string;
-  conversation_id: string; stages: PaperStage[];
+  conversation_id: string; stages: PaperStage[]; autopilot?: boolean;
   results?: { slots: number; measured: number; pending: number } | null;
   collected?: { slots: number; measured: number; pending: number; issues: string[] } | null;
   loop?: LoopView | null;
