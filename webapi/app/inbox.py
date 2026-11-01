@@ -32,7 +32,9 @@ def build(store: Store) -> dict:
             base = {"project_id": p["id"], "project": p["title"], "paper": v["topic"] or p["title"],
                     "stage_id": s["id"], "stage": s["title"], "step": f"{i + 1}/{len(stages)}",
                     "outputs": [o["path"] for o in s["outputs_found"] if o["exists"]],
-                    "next": stages[i + 1]["title"] if i + 1 < len(stages) else None,
+                    # Only name the next stage when approving really starts it (manual stages wait for a click).
+                    "next": stages[i + 1]["title"] if i + 1 < len(stages)
+                    and stages[i + 1]["id"] not in paper_studio.MANUAL_START else None,
                     "autopilot": v.get("autopilot", True)}
             if s["status"] == "needs_review":
                 approve.append({**base, "kind": "paper_stage", "summary": _summary(store, s["run_id"])})
