@@ -166,6 +166,7 @@ Passing tests and automated research gates does **not** substitute for domain-sp
 | Guide | Start here when… |
 | --- | --- |
 | [Getting started](START_HERE.md) | You want the shortest reliable installation path |
+| [Web app](docs/WEB_APP.md) | You want the local browser GUI (chat with Claude Code, PDF/Word panel) |
 | [Evidence-first operator guide](docs/EVIDENCE_FIRST_V2.md) | You need a locked-protocol validation workflow |
 | [Architecture](docs/ARCHITECTURE.md) | You want to understand each Factory stage |
 | [Integration](docs/INTEGRATION.md) | You want to understand the Factory–Ledger boundary |

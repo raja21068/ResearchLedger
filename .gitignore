@@ -14,3 +14,10 @@ venv/
 
 # Secrets. .env.example is tracked; .env never is.
 .env
+
+# Web app runtime data and frontend build output
+webapi_data/
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts
+frontend/tsconfig.tsbuildinfo

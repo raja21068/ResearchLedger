@@ -1,0 +1,229 @@
+# ResearchLedger web app (local)
+
+A browser GUI for the research engines in this repository. You type prompts in a chat; your
+locally installed **Claude Code CLI** does the work inside the project's workspace folder; the
+PDF and Word files it produces open in a tabbed panel beside the chat, and any file can be
+opened in its own browser tab.
+
+```
+frontend/  Next.js + TypeScript + Tailwind   http://localhost:3000
+webapi/    FastAPI (Python)                  http://127.0.0.1:8000/api/v1
+webapi_data/  SQLite database + one workspace folder per project (git-ignored)
+```
+
+## Run it
+
+Requirements: Python 3.10+, Node 20+, Claude Code installed **and logged in** (run `claude`
+once in a normal terminal). Optional: MiKTeX or TeX Live for PDF compilation.
+
+```bash
+python -m pip install -r webapi/requirements.txt
+```
+
+```bash
+python -m uvicorn webapi.app.main:app --host 127.0.0.1 --port 8000
+```
+
+In a second terminal:
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+Open http://localhost:3000 → **Projects → New project** → type a prompt.
+
+Run the backend from a normal terminal. If it is started from inside a Claude Code session,
+the server strips that session's routing/auth variables before launching the CLI, so the child
+uses your own login.
+
+## Quick start
+
+```powershell
+& .\start_web.ps1
+```
+
+Or ask Claude Code in this repository to "run ResearchLedger" ([CLAUDE.md](../CLAUDE.md) tells it how).
+
+## Paper Studio (guided paper writing)
+
+Sidebar → **Paper Studio**, or *Use this idea for a paper* on a Brainstorm idea card. One stage path per paper
+(`webapi/app/paper_studio.py`); state in the project's `paper/studio.json`.
+
+| Paper type | Stages |
+| --- | --- |
+| Research article | Idea → Literature → Method & experiment plan → Code → Write paper → Review → Revise |
+| Review (survey) paper | Scope & protocol → Search & screening → Taxonomy & synthesis → Write survey → Review → Revise |
+
+Each stage tells the agent to read the user's own engines first, then the earlier stages' files, and must write
+named outputs:
+- Idea: `vendor/idea-generation/idea-discovery-v5` (SKILL.md, LOOP_PROTOCOL.md) + idea skills → `paper/idea.md`
+- Literature: `skills/paper-orchestra-literature`, PaperOrchestra `literature_review_agent.py` → `paper/refs.bib`, `paper/literature.md`
+- Method: research-method/experiment/evaluation/baseline/ablation skills → `paper/protocol.md`, `paper/experimental_log.md` (declared slots, values `TBD`)
+- Code: PaperCompiler `3_architecting.py`, `4_contracting.py`, `5_engineering.py` as the recipe → `code/` (scripts write `results/<slot>.json`)
+- Write: `skills/paper-orchestra*` + PaperOrchestra prompts + venue template (`vendor/paperorchestra/templates/iclr2025|cvpr2025`) → `paper/main.tex`, `paper/main.pdf`
+- Review: Referee-Lean v2 core reviewer + independent verifier prompts → `review/review_report.md`, `review/concern_matrix.csv`
+- Revise: manuscript-revision + refine → `paper/main_revised.tex/.pdf`, `review/response_letter.md`
+
+A stage is *Waiting for your approval* only when its run succeeded and all outputs exist; approving unlocks the next
+stage. *Ask for changes* re-runs it with your feedback and re-locks later stages. Measured numbers enter the paper only
+from `results/*.json`; otherwise `\PFVAL{slot}` placeholders stay visible.
+
+## Where agents run: the Claude app bridge (default)
+
+The website does not need its own Claude login. Agent tasks wait in a queue until a Claude Code
+session in the **Claude app** picks them up:
+
+1. Start the website (`& .\start_web.ps1`).
+2. Claude app → **Code** tab → session in `D:\AutoResearch\ResearchLedger` → type **`/rl-worker`**.
+   Leave that session open; it loops on `python webapi/bridge_cli.py next`.
+3. Use the website. Each task appears in the Claude app session, runs there with the app's login and
+   tools, writes files into the project folder, and the reply, checklist, steps and files come back
+   to the website chat.
+
+Settings → *Where agents run* switches between the Claude app bridge and `claude.exe` in the
+background (which needs `claude auth login`). The Settings page and the chat show whether a worker is
+connected. Paper Factory engine tools that call `claude.exe` themselves (S1–S5, Beihang Referee)
+still need `claude.exe` to be logged in.
+
+## Research Director (default chat mode)
+
+A new chat starts with the **Research Director** (switch to *Direct chat* under the box). It answers
+small questions itself; for goals that need tools it writes `director/plan_<chat>.json` and explains the
+plan. Nothing runs until you press **Approve and run**. The executor then runs each step, one research
+tool at a time, in the same chat (`webapi/app/director.py`), stopping at the first failure or when you
+press Stop. Human-only gates (protocol lock) can never be planned.
+
+The right-hand **Activity** panel (collapsible) shows the plan and each step's status, the agents
+working now and their latest step, the current agent's checklist, and files produced in this chat.
+The left panel lists the current project's documents.
+
+## Claude-style layout and slash commands
+
+- **Sidebar:** New chat, Search (filters chats), Brainstorm ideas, Projects, Tools & skills, Library,
+  Research memory, Results; chat history grouped Today / Yesterday / Previous 7 days; settings at the bottom.
+- **Chat box** (home page and every chat): Enter sends, Shift+Enter adds a line, `+` attaches files,
+  `/` opens the command list. `/brainstorm Blockchain, LLM, VLM`, `/literature <topic>`, `/draft`, `/code`,
+  `/analyze`, `/review`, `/thesis`, `/referee`, `/cite`, plus every skill by its name (`/grant-proposal …`).
+  A command whose form needs more (e.g. a file) opens that form prefilled.
+- **In a chat:** the agent's checklist (its TodoWrite plan) shows as a card, tool calls fold into one
+  "Worked through N steps" line, and a Brainstorm run shows its idea cards inline.
+
+## Home: one box for any task
+
+The home page is a single prompt box. **Tools ▾** lists every research tool (opens its form) and
+every **skill** found in the skill folders; picking a skill runs your task through it. `+` attaches
+files, the project and model selectors sit in the box, and the chips below are shortcuts.
+
+Skills are discovered from every unpacked `SKILL.md` under `D:\AutoResearch\academic-research-skills-offline`
+and `skills/` (override with `RL_SKILL_ROOTS`, paths separated by `;`). `.claude/` worktrees and
+"previous version" folders are skipped; `.zip`/`.skill` packages are counted but not used until unpacked.
+A skill run copies the skill folder to the project's hidden `.skills/<id>/` and asks Claude Code to
+follow it; steps that need Python, Gemini or Codex are listed for you to run yourself.
+
+## Research tools
+
+Each research tool is a form
+
+Each tool is a form (options, *Upload file* / *From library*, **Generate**) defined in
+`webapi/app/workflows.py`. Generate creates a run and opens the project, where you watch
+progress live and the results open in the document panel.
+
+| Section | Tool | Engine |
+| --- | --- | --- |
+| Discover | Idea generation | Paper Factory S1 (`researchctl run --to S1`) |
+| Discover | Literature review, Research proposal, Research design & protocol | Claude Code task prompt |
+| Analyze | Code generation, Data analysis (code is written, not executed) | Claude Code task prompt |
+| Analyze | Run experiments (S4) | Paper Factory; needs Docker running |
+| Manuscripts | Write manuscript, Thesis to manuscript, Academic language editing | Claude Code task prompt |
+| Manuscripts | Paper Factory draft (S2), Idea → draft → review (S1–S3) | Paper Factory |
+| Manuscripts | Run experiments (S4), Evidence-bound revision (S5) | Paper Factory; needs Docker running |
+| Peer Review | Specialist review | Beihang Referee (`researchctl referee cycle --provider claude`) |
+| Peer Review | Paper Factory review (S3) | Paper Factory |
+| Peer Review | Quick four-reviewer review | Claude Code task prompt |
+| Evidence | Citation verification | Claude Code task prompt |
+| Evidence | Ledger report, Readiness audit, Integrity gates, Pipeline status | researchctl, no model calls |
+| Evidence | Lock research protocol | researchctl, requires an approval checkbox |
+
+Paper Factory tools use the project's workspace folder as the Factory project (`PAPERFACTORY_WORKSPACES`
+points at the project's folder; the project id is `workspace`). The home page's 01–05 progress shows a
+stage as Done only when its output file exists.
+
+## Research Memory and Results
+
+- **Research Memory** (`memory/research_memory.md` in each project): the research question and
+  decisions you write, plus a run log the server appends after every run (tool, status, summary,
+  files). Every Claude run is told to read it first and never edit it. Edit it on the Research Memory page.
+- **Results**: lists files under `results/`, `4_code/`, `analysis/`, `5_refine/` and `code/outputs/`, and
+  shows the measured `4_code/results.json` from S4 when it exists.
+
+## Troubleshooting
+
+`API Error: Unable to connect to API (ConnectionRefused)`: the Claude CLI itself cannot reach its API.
+Check `~/.claude/settings.json`: an `env.ANTHROPIC_BASE_URL` pointing at a local proxy (for example
+`http://127.0.0.1:15721`) requires that proxy to be running. Test with `claude -p "say OK"` in a terminal.
+
+## How a prompt runs
+
+1. `POST /api/v1/conversations/{id}/runs` stores the run (`queued`) and starts a worker thread.
+2. The worker launches `claude -p --output-format stream-json --verbose` with the project
+   workspace as its working directory, `--permission-mode acceptEdits`, an explicit tool
+   allowlist and an appended system prompt (no invented results or citations; placeholders
+   instead). The prompt goes over stdin. Follow-up prompts in the same chat pass `--resume`.
+3. Every stream-json line becomes a stored event; the browser follows them over SSE
+   (`GET /runs/{id}/events`, resumable with `Last-Event-ID`). Refreshing the page loses nothing.
+4. When the CLI exits, files created or modified during the run are recorded with SHA-256
+   hashes. A new `.pdf` or `.docx` opens automatically in the document panel.
+5. The run ends `succeeded` only if the CLI exited 0 **and** reported a non-error result.
+   Anything else is `failed`, with the CLI's message.
+
+## Documents
+
+| File | Panel view | Actions |
+| --- | --- | --- |
+| `.pdf` | Browser PDF viewer | Open in new tab, download |
+| `.docx` | Server-side mammoth → HTML in a script-less sandboxed frame | Conversion notes shown |
+| `.tex` | Source | **Compile PDF** (pdflatex + bibtex/biber, shell escape off) |
+| `.md` | Rendered / source | **Export Word** (python-docx; tables and equations copied as text, with a warning) |
+
+## Configuration (environment variables)
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `RL_WEB_DATA` | `./webapi_data` | Database and project workspaces |
+| `RL_CLAUDE_CMD` | `claude` on PATH | CLI command, JSON list form recommended |
+| `RL_CLAUDE_MODEL` | CLI default | Default model alias |
+| `RL_CLAUDE_ALLOWED_TOOLS` | see `webapi/app/config.py` | JSON list replacing the tool allowlist |
+| `RL_RUN_TIMEOUT_S` | `3600` | Kill a run after this long |
+| `RL_MAX_UPLOAD_MB` | `50` | Upload size limit |
+| `RL_FRONTEND_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` | CORS origins |
+| `NEXT_PUBLIC_API_URL` (frontend) | `http://127.0.0.1:8000` | Where the browser reaches the API |
+
+## Security model and known limits
+
+This is a **local, single-user** build (blueprint Phase 1–3). It is not ready to expose on a network.
+
+- No login. The API accepts only loopback `Host` headers (DNS-rebinding guard), allows CORS only
+  from the frontend origin, and rejects state-changing requests without the `x-rl-client`
+  header, so other websites in your browser cannot drive it.
+- The agent may Read/Write/Edit, search the web and run only `pdflatex`, `bibtex`, `biber` and
+  `latexmk`. It cannot run other shell commands. `Read` is not path-restricted by the CLI, so the
+  agent *could* read files outside the workspace if asked to; it is not given other projects'
+  files automatically.
+- Workspace paths are resolved server-side; `..`, absolute and drive paths are refused.
+  Uploads are type- and size-checked and never overwrite: an earlier version is kept as `name.vN.ext`.
+- Non-PDF files are served with `Content-Security-Policy: sandbox`; workspace HTML/SVG is served as text.
+- Prompts and manuscripts are sent to Anthropic by the Claude Code CLI under your account. Do not
+  use confidential manuscripts unless that is permitted.
+
+Not implemented yet (shown as **Planned** in the sidebar): Research Studio workflows, Peer Review
+Center (Referee Lean v2 / Beihang Referee adapters), Evidence Center views of the ledger,
+authentication, Codex provider, Docker-isolated execution from the web.
+
+## Tests
+
+```bash
+python -m pytest -q webapi/tests
+```
+
+The tests use `webapi/tests/fake_claude.py`, a scripted stand-in that emits the CLI's
+stream-json shapes; they make no model calls.
