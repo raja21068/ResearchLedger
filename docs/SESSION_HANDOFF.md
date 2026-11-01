@@ -36,6 +36,17 @@ using engines in `vendor/` and `skills/`. Progress on this is recorded below.
   paper from idea I2 *Checking DeFi contracts against the figures in their whitepapers*. Idea approved; Literature
   stage done (`paper/refs.bib` 10 verified refs, `paper/literature.md`) and **waiting for the user's approval**.
 
+- 2026-11-02 (user asleep): read the user's Claude memory export (`D:\claude-memory-2026-11-01*.zip`: terse,
+  wants finished deliverables, runs multi-prompt idea and review loops by hand, ChatGPT reviews → Claude Code fixes).
+  Built **Research Loops** (`webapi/app/loops.py`, `/loops`, loop detail page, Approvals cards): Idea forge
+  (attack ≥50 papers → Phase 10 score → redesign, server-checked references/scores, pass/plateau/max stop rules)
+  and Review → fix → re-review (quote check, surgical-diff check, template guard, clean/plateau/final-check stop).
+  **Standing instructions** (`prefs.py`, Settings) appended to every agent task. Autopilot routes idea/review-fix
+  goals to loops. Test env moved to `webapi/tests/__init__.py` so any single test file uses a temp data dir
+  (running `test_loops.py` alone once wrote test projects into the live DB; they were removed, nothing of the
+  user's was touched). 79 tests pass. Demo loop `lop_27eb2060cce8` (review_fix on `paper/main_revised.tex` of the
+  DeFi paper) was created and stopped before any work; "One more round" resumes it.
+
 ## Git
 Work is committed on branch `feature/web-app-paper-studio` (commit 328c4e4, not pushed). Leave the user's own
 uncommitted `Paper/`, zip and `__pycache__` changes alone; never stage them.

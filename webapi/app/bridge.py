@@ -145,7 +145,8 @@ def claim(store: Store) -> dict | None:
             history.append({"user": r["prompt"][:4000], "assistant": (r["result_text"] or "")[:4000],
                             "status": r["status"]})
         history.reverse()
-    instructions = SYSTEM_PROMPT + ("\n\n" + DIRECTOR_SYSTEM if run["kind"] == "director" else "")
+    from . import prefs
+    instructions = SYSTEM_PROMPT + prefs.system_block() + ("\n\n" + DIRECTOR_SYSTEM if run["kind"] == "director" else "")
     return {"run_id": run["id"], "claim": token, "kind": run["kind"], "project": project["title"],
             "workspace": str(workspace.project_root(run["project_id"])),
             "conversation": conv["title"], "instructions": instructions,

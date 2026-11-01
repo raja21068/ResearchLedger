@@ -5,6 +5,7 @@ import { api, API_URL } from "@/lib/api";
 import type { Provider } from "@/lib/types";
 import { type Bridge, useBridge, WorkerHowTo } from "@/components/BridgeStatus";
 import { btn2, Card, ErrorBox, PageHeader } from "@/components/ui";
+import { PreferencesCard } from "@/components/Preferences";
 
 const TONE: Record<string, string> = {
   installed: "bg-[#d4eee9] text-[#07423d]", unavailable: "bg-[#f3d9d9] text-[#7f1d1d]", planned: "bg-[#e6e9ed] text-[#3a4552]",
@@ -57,6 +58,8 @@ export default function Settings() {
           </div>
         )}
       </Card>
+
+      <PreferencesCard />
 
       <Card className="divide-y divide-[#e6eaee]">
         <div className="p-5 pb-3 font-semibold">Tools on this PC</div>

@@ -16,7 +16,7 @@ import time
 
 from .config import settings
 from .db import Store, TERMINAL_STATES, now
-from . import memory, workspace
+from . import memory, prefs, workspace
 
 SYSTEM_PROMPT = """You are the research agent inside the ResearchLedger web workspace.
 Your working directory is this project's workspace; keep every file you create inside it.
@@ -89,7 +89,7 @@ def build_command(resume_session: str | None, model: str | None, extra_system: s
         raise RuntimeError("Claude Code CLI not found on PATH (set RL_CLAUDE_CMD to override)")
     cmd = [*settings.claude_cmd, "-p", "--output-format", "stream-json", "--verbose",
            "--permission-mode", "acceptEdits",
-           "--append-system-prompt", SYSTEM_PROMPT + ("\n\n" + extra_system if extra_system else ""),
+           "--append-system-prompt", SYSTEM_PROMPT + prefs.system_block() + ("\n\n" + extra_system if extra_system else ""),
            "--allowedTools", *settings.allowed_tools, *EXTRA_TOOLS_BY_KIND.get(kind or "", [])]
     if resume_session:
         cmd += ["--resume", resume_session]

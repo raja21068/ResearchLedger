@@ -57,6 +57,44 @@ Or ask Claude Code in this repository to "run ResearchLedger" ([CLAUDE.md](../CL
   (with the agent's summary and files), Director plans, experiments waiting for a click, steps that did not finish
   (Try again), and what is running now. `GET /api/v1/inbox`.
 
+## Research Loops: the prompt rounds you used to type by hand
+
+Built from how the user actually works (memory export + recurring prompts): review a paper in ChatGPT, paste
+instructions into Claude Code, fix, recompile, review the PDF again; for ideas, "why is this not novel? search
+50–100 papers" → "score it again" → "design it again" → repeat. `webapi/app/loops.py` runs those rounds until a
+stop rule; the user only steers, approves the result, or asks for one more round. Page: **Research Loops**
+(`/loops`, detail at `/projects/<id>/loops/<loop>`); finished, paused and failed loops also appear in Approvals.
+
+| Loop | One round | Stops when |
+| --- | --- | --- |
+| **Idea forge** (`idea_forge`) | *attack* (≥50 recent papers → `competitors.csv`, `attack.md`, the user's Phase 11/13 prompts) → *score* (Phase 10 rubric /100 → `scorecard.json`, scorer reads only idea + attack) → *redesign* (`idea.md` + novelty matrix, Phase 12). Optional round 0 generates and ranks candidates when only a topic is given. | **pass**: total ≥ 75, novelty ≥ 14/20, no fatal flaw, evidence gate passed · **plateau**: < 3 points gained over two rounds · **max rounds** (4) |
+| **Review → fix → re-review** (`review_fix`) | *review* (Beihang/Lean reviewer + verifier, the user's "Reviewer simulation" prompt → `concerns.csv`, `scores.json`; an optional pasted ChatGPT review is verified point by point) → *plan* (`fix_instructions.md`: the detailed MD for the coding agent) → *fix* (`<stem>_loop<id>_rN.tex` + compiled PDF, original untouched) | **clean**: a fresh review finds no verified major concern · final check after 3 fix rounds · **plateau**: majors do not go down over two rounds |
+
+The server checks every move itself and never takes the agent's word for it:
+- **References:** competitor rows must reach the paper count, ≥80% with DOI/arXiv; a seeded sample is looked up at
+  Crossref/arXiv (`refcheck.check_entry`). One id that does not exist or names a different paper blocks a pass.
+- **Scores:** criteria are clamped to the rubric maximums and the total is recomputed (a wrong claimed total is shown).
+- **Review quotes:** a VERIFIED concern whose quoted passage is not in the .tex is downgraded to UNVERIFIED.
+- **Surgical fixes:** a changed `\documentclass` rejects the move; the share of changed lines, new citation keys and
+  keys missing from the .bib are recorded and shown as warnings.
+- A rejected move is retried once with the reason; then the loop waits in Approvals (*Try again*).
+- `report.md` in the loop folder holds the round table (numbers computed by the server).
+
+Modes: *auto* (default; run to the stop rule, then the user accepts) or *step* (pause after every round). Notes added
+with *Steer* go into the next move's prompt. Accepting an idea copies it to `ideas/final_idea_<loop>.md`.
+The New task box routes "why is this idea not novel / attack / redesign / generate ideas" to Idea forge and
+"review … fix" with a .tex attached to Review → fix. A background thread (`RL_LOOP_TICKER=0` turns it off)
+advances loops every 3 s; opening a loop page also advances it.
+
+API: `GET /api/v1/loop-types`, `GET|POST /api/v1/projects/{id}/loops`, `GET /api/v1/projects/{id}/loops/{loop}`,
+`POST …/loops/{loop}/steer|continue|stop|retry|accept`.
+
+**Standing instructions** (`webapi/app/prefs.py`, Settings → *Your standing instructions*): the instructions the
+user repeats in every session (verify every reference, never invent citations/DOIs, search 50+ recent papers,
+surgical edits, keep the template, finished deliverables, objective scoring, check everything again, plain
+explanation) are appended to the agent's system instructions for every task (CLI and Claude app worker).
+Stored in `webapi_data/preferences.json`; `GET|PUT /api/v1/preferences`, `POST /api/v1/preferences/reset`.
+
 ## Paper Studio (guided paper writing)
 
 Sidebar → **Paper Studio**, or *Use this idea for a paper* on a Brainstorm idea card. One stage path per paper
@@ -225,6 +263,8 @@ Check `~/.claude/settings.json`: an `env.ANTHROPIC_BASE_URL` pointing at a local
 | `RL_CLAUDE_ALLOWED_TOOLS` | see `webapi/app/config.py` | JSON list replacing the tool allowlist |
 | `RL_RUN_TIMEOUT_S` | `3600` | Kill a run after this long |
 | `RL_MAX_UPLOAD_MB` | `50` | Upload size limit |
+| `RL_LOOP_TICKER` | `1` | `0` stops the background thread that advances research loops |
+| `RL_PAPER_AUTOPILOT` | `1` | `0` makes new papers start with Autopilot off |
 | `RL_FRONTEND_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` | CORS origins |
 | `NEXT_PUBLIC_API_URL` (frontend) | `http://127.0.0.1:8000` | Where the browser reaches the API |
 

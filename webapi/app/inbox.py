@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from . import director, paper_studio
+from . import director, loops, paper_studio
 from .db import Store
 
 
@@ -47,6 +47,20 @@ def build(store: Store) -> dict:
                 approve.append({**base, "kind": "manual_start",
                                 "summary": "Run the generated code on this PC to produce real results. "
                                            "This step never starts by itself."})
+    # Research loops: finished (accept the result), paused between rounds, failed, or working.
+    for p in projects:
+        for lp in loops.list_view(store, p["id"]):
+            base = {"kind": "loop", "project_id": p["id"], "project": p["title"], "loop_id": lp["id"],
+                    "paper": lp["goal"], "stage": f"{lp['label']} · round {lp['round']}", "loop_type": lp["type"]}
+            if lp["status"] == "finished" and not lp["accepted"]:
+                approve.append({**base, "loop_state": "finished", "summary": "Loop finished — " + (lp["stop_reason"] or "")})
+            elif lp["status"] == "paused":
+                approve.append({**base, "loop_state": "paused", "summary": lp["paused_reason"]})
+            elif lp["status"] == "failed":
+                retry.append({**base, "status": "failed", "error": lp["stop_reason"]})
+            elif lp["status"] == "running":
+                running.append({**base, "status": "running", "stage": f"{lp['label']} · round {lp['round']} · "
+                                f"{loops.MOVE_LABELS.get(lp['move'] or '', '')}"})
     # Director plans proposed but not yet approved.
     for c in store.all("SELECT DISTINCT r.conversation_id, c.project_id, c.title, p.title project "
                        "FROM runs r JOIN conversations c ON c.id=r.conversation_id JOIN projects p ON p.id=c.project_id "
@@ -64,7 +78,7 @@ def build(store: Store) -> dict:
     cutoff = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat(timespec="milliseconds")
     for r in store.all("SELECT r.id, r.kind, r.status, r.error, r.project_id, r.conversation_id, c.title, p.title project "
                        "FROM runs r JOIN conversations c ON c.id=r.conversation_id JOIN projects p ON p.id=r.project_id "
-                       "WHERE r.kind NOT LIKE 'paper:%' AND (r.status IN ('queued','running') OR "
+                       "WHERE r.kind NOT LIKE 'paper:%' AND r.kind NOT LIKE 'loop:%' AND (r.status IN ('queued','running') OR "
                        "(r.status='failed' AND r.finished_at > ?)) ORDER BY r.created_at DESC LIMIT 30", (cutoff,)):
         item = {"kind": "run", "run_id": r["id"], "project_id": r["project_id"], "project": r["project"],
                 "conversation_id": r["conversation_id"], "paper": r["title"], "stage": r["title"]}

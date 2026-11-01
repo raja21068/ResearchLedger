@@ -32,6 +32,7 @@ const I = {
   tools: "M14 7l3-3 3 3-3 3M4 20l9-9M6 4h4v4H6z",
   gear: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4",
   menu: "M4 6h16M4 12h16M4 18h16",
+  loop: "M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4",
 };
 type IconName = keyof typeof I;
 interface Item { href: string; label: string; icon: IconName }
@@ -43,6 +44,7 @@ const GROUPS: { id: string; label: string; items: Item[] }[] = [
     { href: "/paper", label: "Paper Studio", icon: "pen" },
   ] },
   { id: "research", label: "Research", items: [
+    { href: "/loops", label: "Research Loops", icon: "loop" },
     { href: "/brainstorm", label: "Idea Discovery", icon: "spark" },
     { href: "/tools/literature_review", label: "Literature Review", icon: "lit" },
     { href: "/tools/research_design", label: "Research Design", icon: "design" },

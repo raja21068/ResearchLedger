@@ -1,18 +1,11 @@
 """API tests with the scripted Claude stand-in (no network, no model calls)."""
-import json
-import os
-import sys
-import tempfile
 import time
 from pathlib import Path
 
 import pytest
 
 HERE = Path(__file__).resolve().parent
-os.environ["RL_WEB_DATA"] = tempfile.mkdtemp(prefix="rl-web-test-")
-os.environ["RL_CLAUDE_CMD"] = json.dumps([sys.executable, str(HERE / "fake_claude.py")])
-os.environ["RL_EXECUTOR"] = "cli"
-os.environ["RL_PAPER_AUTOPILOT"] = "0"  # stage tests step manually; test_autopilot.py turns it on  # test_bridge.py switches to the Claude app bridge explicitly
+# Environment (temporary data folder, scripted Claude stand-in, CLI executor) is set in tests/__init__.py.
 
 from fastapi.testclient import TestClient  # noqa: E402
 

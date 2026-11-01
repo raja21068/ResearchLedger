@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import mimetypes
 import shutil
 from pathlib import Path
@@ -13,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (autopilot, inbox, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (autopilot, inbox, loops, prefs, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -274,6 +275,89 @@ def paper_autopilot(project_id: str, body: AutopilotToggleIn):
 @app.get("/api/v1/inbox")
 def get_inbox():
     return inbox.build(store)
+
+
+# ---------------------------------------------------------------- Research loops + standing preferences
+class LoopIn(BaseModel):
+    type: str
+    goal: str = Field("", max_length=4000)
+    idea_text: str | None = Field(None, max_length=60_000)
+    manuscript: str | None = None
+    external_review: str | None = Field(None, max_length=200_000)
+    params: dict = Field(default_factory=dict)
+    mode: str = "auto"
+
+
+class SteerIn(BaseModel):
+    text: str = Field(..., max_length=2000)
+
+
+class PrefsIn(BaseModel):
+    enabled: bool = True
+    rules: list[str] = Field(default_factory=list)
+
+
+def _loop_call(fn, *args):
+    try:
+        return fn(*args)
+    except (loops.LoopError, workspace.PathError) as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/loop-types")
+def loop_types():
+    return [{"id": k, "label": t["label"], "pitch": t["pitch"], "icon": t["icon"], "params": t["params"],
+             "moves": [{"id": m, "label": loops.MOVE_LABELS[m]} for m in t["moves"]]} for k, t in loops.TYPES.items()]
+
+
+@app.get("/api/v1/projects/{project_id}/loops")
+def list_loops(project_id: str):
+    _project(project_id)
+    return loops.list_view(store, project_id)
+
+
+@app.post("/api/v1/projects/{project_id}/loops", status_code=201)
+def create_loop(project_id: str, body: LoopIn):
+    _project(project_id)
+    return _loop_call(loops.create, store, project_id, body.type, body.goal, body.idea_text, body.manuscript,
+                      body.external_review, body.params, body.mode)
+
+
+@app.get("/api/v1/projects/{project_id}/loops/{loop_id}")
+def get_loop(project_id: str, loop_id: str):
+    _project(project_id)
+    _loop_call(loops.reconcile, store, project_id, loop_id)
+    return _loop_call(loops.view, store, project_id, loop_id)
+
+
+@app.post("/api/v1/projects/{project_id}/loops/{loop_id}/{action}")
+def loop_action(project_id: str, loop_id: str, action: str, body: SteerIn | None = None):
+    _project(project_id)
+    if action == "steer":
+        return _loop_call(loops.steer, store, project_id, loop_id, body.text if body else "")
+    fn = {"continue": loops.resume, "stop": loops.stop, "retry": loops.retry, "accept": loops.accept}.get(action)
+    if not fn:
+        raise HTTPException(404, "unknown loop action")
+    return _loop_call(fn, store, project_id, loop_id)
+
+
+@app.get("/api/v1/preferences")
+def get_prefs():
+    return {**prefs.load(), "defaults": prefs.DEFAULT_RULES}
+
+
+@app.put("/api/v1/preferences")
+def put_prefs(body: PrefsIn):
+    return {**prefs.save(body.enabled, body.rules), "defaults": prefs.DEFAULT_RULES}
+
+
+@app.post("/api/v1/preferences/reset")
+def reset_prefs():
+    return {**prefs.reset(), "defaults": prefs.DEFAULT_RULES}
+
+
+if os.environ.get("RL_LOOP_TICKER", "1") != "0":
+    loops.start_ticker(store)
 
 
 # ---------------------------------------------------------------- Smart recipes

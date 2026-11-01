@@ -11,10 +11,10 @@ import { Markdown } from "@/components/Markdown";
 import { btn, btn2, Empty, ErrorBox, PageHeader } from "@/components/ui";
 
 interface Item {
-  kind: "paper_stage" | "plan" | "manual_start" | "run"; project_id: string; project: string; paper: string;
+  kind: "paper_stage" | "plan" | "manual_start" | "run" | "loop"; project_id: string; project: string; paper: string;
   stage: string; stage_id?: string; step?: string; summary?: string | null; outputs?: string[]; next?: string | null;
   autopilot?: boolean; conversation_id?: string; steps?: string[]; blocked?: boolean; status?: string; error?: string | null;
-  run_id?: string;
+  run_id?: string; loop_id?: string; loop_state?: "finished" | "paused"; loop_type?: string;
 }
 interface Inbox { approve: Item[]; retry: Item[]; running: Item[]; counts: { approve: number; retry: number; running: number } }
 
@@ -52,7 +52,7 @@ export default function InboxPage() {
           <ul className="divide-y divide-line rounded-xl border border-line bg-white">
             {inbox.running.map((it, i) => (
               <li key={i}>
-                <Link href={it.kind === "paper_stage" ? `/projects/${it.project_id}/paper` : `/projects/${it.project_id}?conv=${it.conversation_id}`}
+                <Link href={it.kind === "paper_stage" ? `/projects/${it.project_id}/paper` : it.kind === "loop" ? `/projects/${it.project_id}/loops/${it.loop_id}` : `/projects/${it.project_id}?conv=${it.conversation_id}`}
                   className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-[#f7f5f1]">
                   <span className="rl-pulse h-2.5 w-2.5 flex-none rounded-full bg-[#3b6fd8]" />
                   <span className="min-w-0 flex-1 truncate"><b>{it.stage}</b> · {it.paper}</span>
@@ -75,7 +75,7 @@ function Header({ item }: { item: Item }) {
         <div className="text-lg font-semibold">{item.stage}</div>
         {item.paper && item.paper !== item.project && <div className="truncate text-sm text-muted">{item.paper}</div>}
       </div>
-      <Link className="text-sm text-accent underline" href={item.kind === "plan" ? `/projects/${item.project_id}?conv=${item.conversation_id}` : `/projects/${item.project_id}/paper`}>Open</Link>
+      <Link className="text-sm text-accent underline" href={item.kind === "plan" ? `/projects/${item.project_id}?conv=${item.conversation_id}` : item.kind === "loop" ? `/projects/${item.project_id}/loops/${item.loop_id}` : `/projects/${item.project_id}/paper`}>Open</Link>
     </div>
   );
 }
@@ -128,6 +128,15 @@ function ApproveCard({ item, onDone }: { item: Item; onDone: () => void }) {
         {item.kind === "manual_start" && (
           <button className={btn} disabled={busy} onClick={() => act(() => post(`${base}/run`, { notes: "Started from Approvals." }))}>Run experiments on this PC</button>
         )}
+        {item.kind === "loop" && item.loop_state === "finished" && (
+          <>
+            <button className={btn} disabled={busy} onClick={() => act(() => post(`/projects/${item.project_id}/loops/${item.loop_id}/accept`))}>Accept result</button>
+            <button className={btn2} disabled={busy} onClick={() => act(() => post(`/projects/${item.project_id}/loops/${item.loop_id}/continue`))}>One more round</button>
+          </>
+        )}
+        {item.kind === "loop" && item.loop_state === "paused" && (
+          <button className={btn} disabled={busy} onClick={() => act(() => post(`/projects/${item.project_id}/loops/${item.loop_id}/continue`))}>Continue</button>
+        )}
         {item.kind === "plan" && (
           <button className={btn} disabled={busy || item.blocked} onClick={() => act(() => post(`/conversations/${item.conversation_id}/plan/approve`))}>
             Approve plan and run
@@ -154,7 +163,13 @@ function RetryCard({ item, onDone }: { item: Item; onDone: () => void }) {
       <Header item={item} />
       <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#7f1d1d]">{item.error}</p>
       <div className="mt-3 flex gap-2">
-        {item.kind === "paper_stage" ? (
+        {item.kind === "loop" ? (
+          <button className={btn} disabled={busy} onClick={async () => {
+            setBusy(true); setError(null);
+            try { await post(`/projects/${item.project_id}/loops/${item.loop_id}/retry`); onDone(); }
+            catch (e) { setError(e); } finally { setBusy(false); }
+          }}>Try again</button>
+        ) : item.kind === "paper_stage" ? (
           <button className={btn} disabled={busy} onClick={async () => {
             setBusy(true); setError(null);
             try { await post(`/projects/${item.project_id}/paper/stages/${item.stage_id}/run`, { notes: "Retry from Approvals." }); onDone(); }
