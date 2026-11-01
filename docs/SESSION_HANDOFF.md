@@ -64,3 +64,4 @@ freely; newer models can verify a lot themselves, so keep deterministic checks l
 
 For each item: add backend tests (`python -m pytest -q webapi/tests`), `npx tsc --noEmit` in `frontend/`, update
 `docs/WEB_APP.md` and the progress log above, and commit to `feature/web-app-paper-studio` (no push).
+- 2026-11-02 ~02:00: **Smart recipes** added (webapi/app/recipes.py, /do/[recipe], home 'Ready-made agents' + drop zone): 9 upload-and-Start agents (review, pre-submission check, ideas with Phase 10-13 prompts, write paper, match reference style, respond to reviewers, code, understand papers, slides) using vendor engines, offline zipped agents (unpacked to webapi_data/engines) and the prompt library D:\AutoResearch\AI-LAB\07_PROMPTS\PAPER AGENT. 39 tests pass. Not yet browser-checked or live-run.

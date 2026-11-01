@@ -12,8 +12,8 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (bridge, claude_runner, director, memory, paper_studio, registry, skills_catalog, workflows,
-               workspace)
+from . import (bridge, claude_runner, director, memory, paper_studio, recipes, registry, skills_catalog,
+               workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
 
@@ -232,6 +232,48 @@ def factory_doctor():
     if result is None:
         raise HTTPException(502, (done.stderr or done.stdout)[-1500:] or "doctor produced no output")
     return result
+
+
+# ---------------------------------------------------------------- Smart recipes
+class SuggestIn(BaseModel):
+    filenames: list[str] = Field(default_factory=list, max_length=50)
+    text: str = Field(default="", max_length=4000)
+
+
+class RecipeRunIn(BaseModel):
+    files: dict[str, list[str]] = Field(default_factory=dict)
+    options: dict[str, str] = Field(default_factory=dict)
+
+
+@app.get("/api/v1/recipes")
+def list_recipes():
+    return [recipes.public(r) for r in recipes.R]
+
+
+@app.get("/api/v1/recipes/{recipe_id}")
+def get_recipe(recipe_id: str):
+    if recipe_id not in recipes.R:
+        raise HTTPException(404, "recipe not found")
+    return recipes.public(recipe_id)
+
+
+@app.post("/api/v1/recipes/suggest")
+def suggest_recipe(body: SuggestIn):
+    return recipes.suggest(body.filenames, body.text)
+
+
+@app.get("/api/v1/engines")
+def list_engines():
+    return recipes.engine_status()
+
+
+@app.post("/api/v1/projects/{project_id}/recipes/{recipe_id}/run", status_code=201)
+def run_recipe(project_id: str, recipe_id: str, body: RecipeRunIn):
+    _project(project_id)
+    try:
+        return recipes.run(store, project_id, recipe_id, body.files, body.options)
+    except (recipes.RecipeError, workspace.PathError) as exc:
+        raise HTTPException(400, str(exc))
 
 
 # ---------------------------------------------------------------- Paper Studio

@@ -10,6 +10,7 @@ import { parseCommand, runCommand, useCommands } from "@/lib/commands";
 import type { Project } from "@/lib/types";
 import { Composer } from "@/components/Composer";
 import { ErrorBox } from "@/components/ui";
+import { AgentsGrid } from "@/components/AgentsGrid";
 
 const CHIPS: [string, string][] = [
   ["✦ Brainstorm ideas", "/brainstorm Blockchain, LLM, VLM"],
@@ -116,6 +117,7 @@ export default function NewChat() {
           ))}
         </div>
       </div>
+      <AgentsGrid />
     </main>
   );
 }
