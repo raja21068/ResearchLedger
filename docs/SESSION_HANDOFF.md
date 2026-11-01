@@ -36,7 +36,31 @@ using engines in `vendor/` and `skills/`. Progress on this is recorded below.
   paper from idea I2 *Checking DeFi contracts against the figures in their whitepapers*. Idea approved; Literature
   stage done (`paper/refs.bib` 10 verified refs, `paper/literature.md`) and **waiting for the user's approval**.
 
-## Next steps
-1. User reviews and approves Literature, then runs Method → Code → Write (each via `/rl-worker` in the Claude app).
-2. Thesis-to-paper and revision/rebuttal paper types (planned, not built).
-3. Commit the work to a branch when the user asks (nothing committed yet).
+## Git
+Work is committed on branch `feature/web-app-paper-studio` (commit 328c4e4, not pushed). Leave the user's own
+uncommitted `Paper/`, zip and `__pycache__` changes alone; never stage them.
+
+## Accepted improvement backlog (user approved 2026-11-02 01:30; build in this order)
+The user said: use the many skills in `skills/`, `vendor/` and `D:\AutoResearch\academic-research-skills-offline`
+freely; newer models can verify a lot themselves, so keep deterministic checks lightweight.
+
+1. **Run experiments → real results.** Paper Studio stage "Run experiments" after Code: the agent (Claude app
+   worker or claude.exe) runs `code/` in the project folder after the user approves, writes `results/<slot>.json`,
+   updates `paper/experimental_log.md` values from those files, and records which run produced each value.
+   The Write stage then uses measured values; untouched slots stay `\PFVAL`.
+2. **Reference checking.** Backend checks each `paper/refs.bib` entry against Crossref (DOI) and arXiv (eprint)
+   APIs, fills missing authors/year/venue, flags entries not found; show results on the Literature stage.
+   Network failure must degrade gracefully (mark "not checked").
+3. **Review ↔ revise loop.** Up to 3 rounds (Master Auto-Review Loop skill in
+   `D:\AutoResearch\academic-research-skills-offline\3- paper-writing\Master_Auto_Review_Loop_SKILL.md`), stop when no
+   VERIFIED major concern remains; show each round's concerns as resolved/open.
+4. **Document editing.** Side-by-side LaTeX/PDF, select a paragraph → "revise this" request, compare old vs revised,
+   one-click submission package zip (PDF, LaTeX, figures, bib, response letter).
+5. **Journals and paper types.** Add IEEE, Elsevier, Springer, MDPI journal templates (generic LaTeX classes if the
+   official ones are not on disk); add paper types *Thesis to paper* and *Revision & rebuttal* (upload paper + reviewer
+   comments → revised paper + response letter).
+6. **Bridge robustness.** Re-queue runs claimed by a worker that stopped polling (stale > 15 min); show worker
+   busy/free in the sidebar.
+
+For each item: add backend tests (`python -m pytest -q webapi/tests`), `npx tsc --noEmit` in `frontend/`, update
+`docs/WEB_APP.md` and the progress log above, and commit to `feature/web-app-paper-studio` (no push).
