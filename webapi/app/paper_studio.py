@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import claude_runner, experiments, workspace
+from . import claude_runner, experiments, review_loop, workspace
 from .config import REPO_ROOT
 from .db import Store, new_id, now
 
@@ -116,10 +116,14 @@ RESEARCH_ARTICLE = [
      "engines": ["skills/manuscript-revision/SKILL.md", "skills/paper-orchestra-refine/SKILL.md",
                  f"{PO}/methods/prompts/content_refinement_agent.py"],
      "reads": ["paper/main.tex", "review/review_report.md", "review/concern_matrix.csv"],
-     "outputs": ["paper/main_revised.tex", "paper/main_revised.pdf", "review/response_letter.md"],
+     "outputs": ["paper/main_revised.tex", "paper/main_revised.pdf", "review/response_letter.md",
+                 "review/closure.csv"],
      "task": ("Address every VERIFIED concern (and UNVERIFIED ones where reasonable) in `paper/main_revised.tex`, keep "
               "`paper/main.tex` unchanged, compile to `paper/main_revised.pdf`, and write `review/response_letter.md` "
-              "answering each concern with what changed and where. Do not add results that were not measured.")},
+              "answering each concern with what changed and where. Also write `review/closure.csv` (id,status,evidence): "
+              "one row per concern id in `review/concern_matrix.csv`, status `resolved` or `open`, evidence = where it "
+              "changed. Do not add results that were not measured. (After you, the user can run up to two more "
+              "review rounds; the loop stops when no VERIFIED major concern is open.)")},
 ]
 
 REVIEW_PAPER = [
@@ -238,7 +242,19 @@ def view(store: Store, project_id: str) -> dict | None:
             "venue_label": VENUES[state["venue"]]["label"], "topic": state["topic"],
             "conversation_id": state["conversation_id"], "stages": out,
             "results": experiments.summary(root) if state["type"] == "research_article" else None,
-            "collected": state["stages"].get("experiments", {}).get("collected")}
+            "collected": state["stages"].get("experiments", {}).get("collected"),
+            "loop": _loop_view(store, state, root) if state["type"] == "research_article" else None}
+
+
+def _loop_view(store: Store, state: dict, root: Path) -> dict:
+    s = review_loop.summarize(root)
+    running = None
+    for n, info in (state.get("loop") or {}).items():
+        run = store.one("SELECT status FROM runs WHERE id=?", (info.get("run_id"),)) if info.get("run_id") else None
+        if run and run["status"] in {"queued", "running"}:
+            running = int(n)
+    return {**s, "max_rounds": review_loop.MAX_ROUNDS, "running_round": running,
+            "can_start": bool(s["rounds"]) and s["rounds"][0]["closed"] and not s["stop_reason"] and running is None}
 
 
 def _prompt(state: dict, stage: dict, project_root: Path, notes: str, feedback: str | None) -> str:
@@ -304,6 +320,18 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     st["approved_at"] = now()
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)
+    return view(store, project_id)
+
+
+def start_review_round(store: Store, project_id: str) -> dict:
+    """Queue review/revise round 2 or 3 (only after Revise is approved)."""
+    state = load(project_id)
+    if not state or state["type"] != "research_article":
+        raise ValueError("review rounds are available for research-article papers")
+    v = {s["id"]: s for s in view(store, project_id)["stages"]}
+    if v["revise"]["status"] != "approved":
+        raise ValueError("approve the Revise stage first")
+    review_loop.next_round(store, project_id, state, _save)
     return view(store, project_id)
 
 

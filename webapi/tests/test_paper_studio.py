@@ -159,3 +159,65 @@ def test_experiments_run_gets_python_tool_only_for_that_kind():
         pytest.skip("claude not installed")
     assert "Bash(python:*)" in claude_runner.build_command(None, None, kind="paper:experiments")
     assert "Bash(python:*)" not in claude_runner.build_command(None, None, kind="paper:code")
+
+
+# ---------------------------------------------------------------- review <-> revise loop
+MATRIX = ("id,reviewer,severity,location,concern,quote,verification,minimum_fix,closure_criterion\n"
+          "C1,R1,major,sec 3,Claim too strong,q,VERIFIED,fix,c\n"
+          "C2,R2,minor,sec 4,Typo,q,VERIFIED,fix,c\n"
+          "C3,R2,major,sec 5,Maybe wrong,q,UNVERIFIED,fix,c\n")
+
+
+def _approved_up_to_revise(pid):
+    root = _ws(pid)
+    st = json.loads((root / "paper" / "studio.json").read_text())
+    for sid in st["stages"]:
+        st["stages"][sid] = {"approved_at": "2026-01-01T00:00:00+00:00"}
+    (root / "paper" / "studio.json").write_text(json.dumps(st))
+    return root
+
+
+def test_review_loop_runs_until_no_verified_major_concern_is_open(bridge_mode):
+    from webapi.app import review_loop
+    while client.post("/api/v1/bridge/next", headers=H).status_code == 200:
+        pass
+    pid, _ = _paper()
+    root = _approved_up_to_revise(pid)
+    (root / "review").mkdir(exist_ok=True)
+    # Refused until round 1 has a closure file.
+    assert client.post(f"/api/v1/projects/{pid}/paper/review-rounds", headers=H).status_code == 400
+    (root / "review" / "concern_matrix.csv").write_text(MATRIX, encoding="utf-8")
+    (root / "review" / "closure.csv").write_text("id,status,evidence\nC1,open,x\nC2,resolved,y\nC3,open,z\n")
+    (root / "paper").mkdir(exist_ok=True)
+    (root / "paper" / "main_revised.tex").write_text("x")
+    s = review_loop.summarize(root)
+    assert s["rounds"][0]["open_verified_major"] == 1 and s["stop_reason"] is None  # C3 is UNVERIFIED: not counted
+
+    r = client.post(f"/api/v1/projects/{pid}/paper/review-rounds", headers=H)
+    assert r.status_code == 201
+    assert r.json()["loop"]["running_round"] == 2
+    assert client.post(f"/api/v1/projects/{pid}/paper/review-rounds", headers=H).status_code == 400  # already running
+    task = client.post("/api/v1/bridge/next", headers=H).json()
+    assert "round 2 of 3" in task["task"] and "review/round_2/closure.csv" in task["task"]
+    assert "paper/main_revised.tex" in task["task"] and "C1" in task["task"]
+    (root / "review" / "round_2").mkdir()
+    (root / "review" / "round_2" / "concern_matrix.csv").write_text(MATRIX, encoding="utf-8")
+    (root / "review" / "round_2" / "closure.csv").write_text("id,status,evidence\nC1,resolved,a\nC2,resolved,b\nC3,open,c\n")
+    client.post(f"/api/v1/bridge/runs/{task['run_id']}/done", json={"summary": "ok"}, headers=H)
+    v = client.get(f"/api/v1/projects/{pid}/paper").json()["loop"]
+    assert v["stop_reason"] == "no verified major concern is open" and v["can_start"] is False
+    assert [c["status"] for c in v["rounds"][1]["concerns"]] == ["resolved", "resolved", "open"]
+    assert client.post(f"/api/v1/projects/{pid}/paper/review-rounds", headers=H).status_code == 400
+
+
+def test_review_loop_stops_after_three_rounds():
+    from webapi.app import review_loop
+    pid, _ = _paper()
+    root = _ws(pid)
+    for n in (1, 2, 3):
+        f = review_loop.round_files(n)
+        (root / f["matrix"]).parent.mkdir(parents=True, exist_ok=True)
+        (root / f["matrix"]).write_text(MATRIX, encoding="utf-8")
+        (root / f["closure"]).write_text("id,status,evidence\nC1,open,x\n")
+    s = review_loop.summarize(root)
+    assert s["last_round"] == 3 and "3 rounds done" in s["stop_reason"]

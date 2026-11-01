@@ -44,7 +44,7 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
   useEffect(() => { load(); }, [load]);
 
   const stage = paper?.stages.find((s) => s.id === selected) ?? null;
-  const running = paper?.stages.some((s) => s.status === "running");
+  const running = paper?.stages.some((s) => s.status === "running") || !!paper?.loop?.running_round;
 
   // While anything runs, refresh the stage view and the selected run's events.
   const loadEvents = useCallback(async () => {
@@ -157,6 +157,30 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
                     </>
                   )}
                   {!refs && <p className="mt-1 text-faint">Looks up each DOI or arXiv id. If the network is down, entries are marked not checked.</p>}
+                </div>
+              )}
+
+              {stage.id === "revise" && paper.loop && paper.loop.rounds.length > 0 && (
+                <div className="mt-4 rounded-lg bg-[#f6f5f1] p-3 text-sm">
+                  <b>Review ↔ revise rounds</b> (up to {paper.loop.max_rounds}; stops when no verified major concern is open)
+                  {paper.loop.rounds.map((r) => (
+                    <div key={r.round} className="mt-2">
+                      <div className="font-medium">Round {r.round}{!r.closed && " · not closed yet"}{r.closed && ` · ${r.open_verified_major} verified major open`}</div>
+                      <ul className="space-y-0.5">
+                        {r.concerns.map((c) => (
+                          <li key={c.id} className="text-xs text-muted">
+                            <span className={c.status === "resolved" ? "text-accent" : "text-[#7f1d1d]"}>{c.status === "resolved" ? "✓ resolved" : "○ open"}</span>
+                            {" "}<span className="font-mono">{c.id}</span> · {c.severity} · {c.verification.toLowerCase()} · {c.concern}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  {paper.loop.stop_reason && <p className="mt-2 text-accent">Loop stopped: {paper.loop.stop_reason}.</p>}
+                  {paper.loop.running_round && <p className="mt-2 rl-pulse text-faint">Round {paper.loop.running_round} is running…</p>}
+                  {stage.status === "approved" && paper.loop.can_start && (
+                    <button className={`${btn2} mt-2`} disabled={busy} onClick={() => act("review-rounds")}>Run another review round</button>
+                  )}
                 </div>
               )}
 

@@ -11,6 +11,7 @@ export interface PaperView {
   conversation_id: string; stages: PaperStage[];
   results?: { slots: number; measured: number; pending: number } | null;
   collected?: { slots: number; measured: number; pending: number; issues: string[] } | null;
+  loop?: LoopView | null;
 }
 
 export interface PaperSummary {
@@ -42,4 +43,10 @@ export function engineName(path: string) {
 export interface RefReport {
   checked_at: string; total: number; counts: Record<string, number>;
   entries: { key: string; status: string; source: string | null; note: string; filled: Record<string, string> }[];
+}
+
+export interface LoopView {
+  rounds: { round: number; closed: boolean; open_verified_major: number;
+            concerns: { id: string; severity: string; verification: string; concern: string; status: string; evidence: string; verified_major: boolean }[] }[];
+  stop_reason: string | null; max_rounds: number; running_round: number | null; can_start: boolean;
 }

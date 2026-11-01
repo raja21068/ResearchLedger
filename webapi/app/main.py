@@ -353,6 +353,16 @@ def collect_paper_results(project_id: str):
     return experiments.collect(workspace.project_root(project_id), run_id)
 
 
+@app.post("/api/v1/projects/{project_id}/paper/review-rounds", status_code=201)
+def start_review_round(project_id: str):
+    """Run the next review <-> revise round (2 or 3) after Revise is approved."""
+    _project(project_id)
+    try:
+        return paper_studio.start_review_round(store, project_id)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
 @app.get("/api/v1/projects/{project_id}/paper/references")
 def paper_reference_report(project_id: str):
     _project(project_id)
