@@ -12,7 +12,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (bridge, claude_runner, director, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -361,6 +361,53 @@ def start_review_round(project_id: str):
         return paper_studio.start_review_round(store, project_id)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+
+
+class EditIn(BaseModel):
+    file: str = Field(min_length=1, max_length=300)
+    selection: str = Field(min_length=1, max_length=20000)
+    instruction: str = Field(default="", max_length=4000)
+
+
+def _doc_call(fn, *args):
+    try:
+        return fn(*args)
+    except (ValueError, workspace.PathError) as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/projects/{project_id}/paper/compare")
+def compare_paper_files(project_id: str, a: str, b: str):
+    _project(project_id)
+    return _doc_call(document_tools.compare, project_id, a, b)
+
+
+@app.get("/api/v1/projects/{project_id}/paper/edits")
+def list_paper_edits(project_id: str):
+    _project(project_id)
+    return document_tools.list_edits(store, project_id)
+
+
+@app.post("/api/v1/projects/{project_id}/paper/edits", status_code=201)
+def request_paper_edit(project_id: str, body: EditIn):
+    _project(project_id)
+    state = paper_studio.load(project_id)
+    if not state:
+        raise HTTPException(400, "this project has no paper yet")
+    return _doc_call(document_tools.request_edit, store, project_id, state["conversation_id"], body.file,
+                     body.selection, body.instruction)
+
+
+@app.post("/api/v1/projects/{project_id}/paper/edits/{edit_id}/apply")
+def apply_paper_edit(project_id: str, edit_id: str):
+    _project(project_id)
+    return _doc_call(document_tools.apply_edit, store, project_id, edit_id)
+
+
+@app.post("/api/v1/projects/{project_id}/paper/package", status_code=201)
+def build_paper_package(project_id: str):
+    _project(project_id)
+    return _doc_call(document_tools.build_package, project_id)
 
 
 @app.get("/api/v1/projects/{project_id}/paper/references")

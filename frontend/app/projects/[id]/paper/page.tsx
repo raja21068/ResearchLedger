@@ -11,6 +11,7 @@ import { engineName, STAGE_LABEL, type PaperStage, type PaperView, type RefRepor
 import type { Conversation, RunEvent } from "@/lib/types";
 import { BridgeBanner } from "@/components/BridgeStatus";
 import { Markdown } from "@/components/Markdown";
+import { PaperDocument } from "@/components/PaperDocument";
 import { btn, btn2, ErrorBox } from "@/components/ui";
 
 export default function PaperStudio({ params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +25,11 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [missing, setMissing] = useState(false);
+  const [files, setFiles] = useState<string[]>([]);
+  const approvedCount = paper?.stages.filter((s) => s.status === "approved").length ?? 0;
+  useEffect(() => {
+    api<{ path: string }[]>(`/projects/${id}/files`).then((f) => setFiles(f.map((x) => x.path).filter((p) => p.startsWith("paper/")))).catch(() => {});
+  }, [id, approvedCount, paper?.loop?.last_round]);
   const [refs, setRefs] = useState<RefReport | null>(null);
   const [checking, setChecking] = useState(false);
   useEffect(() => { api<RefReport | null>(`/projects/${id}/paper/references`).then(setRefs).catch(() => {}); }, [id]);
@@ -253,6 +259,7 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
           </section>
         )}
       </div>
+      <PaperDocument projectId={id} files={files} />
     </main>
   );
 }

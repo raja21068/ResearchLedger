@@ -48,5 +48,5 @@ export interface RefReport {
 export interface LoopView {
   rounds: { round: number; closed: boolean; open_verified_major: number;
             concerns: { id: string; severity: string; verification: string; concern: string; status: string; evidence: string; verified_major: boolean }[] }[];
-  stop_reason: string | null; max_rounds: number; running_round: number | null; can_start: boolean;
+  stop_reason: string | null; last_round: number; max_rounds: number; running_round: number | null; can_start: boolean;
 }
