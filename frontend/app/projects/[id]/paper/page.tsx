@@ -98,6 +98,34 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
         <Link className={btn2} href={`/projects/${id}?conv=${paper.conversation_id}`}>Open the chat for this paper</Link>
       </div>
 
+      {paper.inputs && (
+        <div className="mb-5 rounded-2xl border border-line bg-white p-4 text-sm">
+          <div className="font-semibold">Your files</div>
+          <p className="text-muted">{paper.inputs}</p>
+          <ul className="mt-1 text-xs text-muted">
+            {(paper.uploads ?? []).map((u) => <li key={u} className="font-mono">{u}</li>)}
+            {(paper.uploads ?? []).length === 0 && <li className="text-[#7f1d1d]">Nothing uploaded yet. The first stage needs it.</li>}
+          </ul>
+          <label className={`${btn2} mt-2 cursor-pointer`}>
+            Upload files
+            <input type="file" multiple className="sr-only" disabled={busy} onChange={async (e) => {
+              const list = Array.from(e.target.files ?? []); e.target.value = "";
+              setBusy(true); setError(null);
+              try {
+                for (const f of list) { const fd = new FormData(); fd.append("file", f); await api(`/projects/${id}/files?folder=uploads`, { method: "POST", body: fd }); }
+                await load();
+              } catch (err) { setError(err); } finally { setBusy(false); }
+            }} />
+          </label>
+        </div>
+      )}
+      {paper.coverage && paper.coverage.comments > 0 && (
+        <p className="mb-5 rounded-lg bg-[#f6f5f1] p-3 text-sm">
+          <b>{paper.coverage.resolved} of {paper.coverage.comments}</b> reviewer points resolved in the closure file
+          ({paper.coverage.answered} answered){paper.coverage.missing.length > 0 && <span className="text-[#7f1d1d]"> · not answered yet: {paper.coverage.missing.join(", ")}</span>}.
+        </p>
+      )}
+
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Stage rail */}
         <ol className="flex-none space-y-1 md:w-64">

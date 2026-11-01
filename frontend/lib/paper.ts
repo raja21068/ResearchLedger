@@ -12,6 +12,8 @@ export interface PaperView {
   results?: { slots: number; measured: number; pending: number } | null;
   collected?: { slots: number; measured: number; pending: number; issues: string[] } | null;
   loop?: LoopView | null;
+  inputs?: string | null; uploads?: string[];
+  coverage?: { comments: number; answered: number; resolved: number; missing: string[] } | null;
 }
 
 export interface PaperSummary {

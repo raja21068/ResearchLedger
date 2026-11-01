@@ -25,6 +25,22 @@ VENUES = {
     "journal": {"label": "Journal article (generic)", "template": None},
     "iclr2025": {"label": "ICLR 2025 (conference)", "template": f"{PO}/templates/iclr2025"},
     "cvpr2025": {"label": "CVPR 2025 (conference)", "template": f"{PO}/templates/cvpr2025"},
+    # Journal classes: IEEEtran, elsarticle and llncs are installed with MiKTeX; the Springer Nature journal class and
+    # the MDPI class are not, so those use a generic layout unless the user drops the official class into paper/.
+    "ieee": {"label": "IEEE journal / transactions", "template": None,
+             "latex": r"\documentclass[journal]{IEEEtran} with IEEEtran.bst (numeric citations, \IEEEauthorblockN authors, "
+                      "Index Terms)."},
+    "elsevier": {"label": "Elsevier journal", "template": None,
+                 "latex": r"\documentclass[preprint,12pt]{elsarticle} with elsarticle-num.bst; front matter in "
+                          r"\begin{frontmatter} (title, author, address, abstract, keyword)."},
+    "springer": {"label": "Springer (LNCS / journal)", "template": None,
+                 "latex": r"\documentclass{llncs} (Springer proceedings) with splncs04.bst; for a Springer Nature journal "
+                          "use `sn-jnl.cls` or `svjour3.cls` instead if the user placed it in paper/."},
+    "mdpi": {"label": "MDPI journal", "template": None,
+             "latex": r"`mdpi.cls` is not installed: use \documentclass[11pt,a4paper]{article} with numbered sections, "
+                      "Abstract (max 200 words), Keywords, Materials and Methods, Results, Discussion, Conclusions, "
+                      "Author Contributions / Funding / Conflicts of Interest statements, and numeric references; use "
+                      "`paper/mdpi.cls` instead if the user placed it there."},
 }
 
 _RULES = ("Rules: never invent data, results, statistics or citations. Empirical values that do not exist yet "
@@ -163,9 +179,92 @@ REVIEW_PAPER = [
     next(s for s in RESEARCH_ARTICLE if s["id"] == "revise"),
 ]
 
+def _stage(sid: str, title: str, purpose: str, engines: list[str], reads: list[str], outputs: list[str], task: str) -> dict:
+    return {"id": sid, "title": title, "purpose": purpose, "engines": engines, "reads": reads, "outputs": outputs,
+            "task": task}
+
+
+THESIS_TO_PAPER = [
+    _stage("extract", "Read the thesis", "Chapter map and the thesis's own measured results.",
+           ["skills/paper-orchestra-outline/SKILL.md", "skills/result-analysis/SKILL.md", "skills/paper-architecture/SKILL.md"],
+           ["uploads/"], ["paper/thesis_map.md", "paper/experimental_log.md"],
+           ("The user's thesis is in `uploads/` (use the thesis file; if several files could be the thesis, say which you used). "
+            "Write `paper/thesis_map.md`: chapters with page ranges, the contributions, the main claims, which figures and "
+            "tables carry the key evidence, and the thesis bibliography file if any. Then list every result the paper may "
+            "report in `paper/experimental_log.md` as a table slot_id | metric | unit | dataset | method | value, with "
+            "`TBD` in the value column. For each slot write `results/<slot_id>.json` as {\"slot_id\":…, \"value\":…, "
+            "\"unit\":…, \"source\":\"thesis\", \"location\":\"Table 4.2, p. 57\"}: the value must be copied exactly from "
+            "the thesis table/text at that location; if you cannot find it, do not create the file. The server fills the "
+            "log from these files when the user approves.")),
+    _stage("plan", "Paper plan", "What to keep, cut and reframe for one paper.",
+           ["skills/paper-orchestra-outline/SKILL.md", f"{PO}/methods/prompts/outline_agent.py",
+            "skills/venue-fit-decision/SKILL.md", "skills/research-narrative/SKILL.md"],
+           ["paper/thesis_map.md", "paper/experimental_log.md"], ["paper/paper_plan.md"],
+           ("Write `paper/paper_plan.md`: the single contribution this paper makes (a thesis holds several), working title, "
+            "section outline with a page/word budget for the venue, which thesis chapters feed each section, what is cut, "
+            "what must be reframed, and which declared result slots are used. Do not add experiments.")),
+    _stage("references", "References", "Bibliography carried over and verified.",
+           ["skills/paper-orchestra-literature/SKILL.md", f"{PO}/methods/prompts/literature_review_agent.py"],
+           ["paper/thesis_map.md", "paper/paper_plan.md", "uploads/"], ["paper/refs.bib", "paper/literature.md"],
+           ("Build `paper/refs.bib` from the thesis bibliography for the references this paper needs, and verify each entry "
+            "(WebSearch/WebFetch; DOI or URL required). Add recent work the thesis may have missed only if you found and "
+            "verified it. `paper/literature.md`: related-work notes and a section 'Unverified or not found'.")),
+    _stage("write", "Write paper", "Condensed manuscript and PDF.",
+           ["skills/paper-orchestra/SKILL.md", "skills/paper-orchestra-sections/SKILL.md",
+            "skills/paper-orchestra-refine/SKILL.md", f"{PO}/methods/prompts/section_writing_agent.py"],
+           ["paper/paper_plan.md", "paper/thesis_map.md", "paper/refs.bib", "paper/experimental_log.md", "results/", "uploads/"],
+           ["paper/main.tex", "paper/main.pdf", "paper/thesis_mapping.md"],
+           ("Write `paper/main.tex` following `paper/paper_plan.md`, condensing the thesis text (read the thesis in "
+            "`uploads/`). Every number comes from `results/*.json` (cite the slot id in a comment); every claim must be "
+            "traceable to the thesis. Do not add results. Write `paper/thesis_mapping.md` mapping each section to thesis "
+            "chapters/pages. Rewrite, do not copy long passages verbatim (self-plagiarism). Compile to `paper/main.pdf`.")),
+    next(s for s in RESEARCH_ARTICLE if s["id"] == "review"),
+    next(s for s in RESEARCH_ARTICLE if s["id"] == "revise"),
+]
+
+REVISION_REBUTTAL = [
+    _stage("intake", "Comments & triage", "Every reviewer comment split into numbered points.",
+           ["skills/manuscript-revision/SKILL.md", "skills/peer-review-panel/SKILL.md"],
+           ["uploads/"], ["review/comments.csv", "review/triage.md"],
+           ("The user's paper and the reviewers'/editor's comments are in `uploads/`. Split the comments into numbered "
+            "points and write `review/comments.csv` (id,reviewer,comment_text,type,severity) with the reviewer's words "
+            "exactly, one row per point (ids like R1.1, R2.3, E.1). `review/triage.md`: summary of the decision letter, "
+            "the recurring themes, and which points are about claims, evidence, writing, or missing experiments. "
+            "State which uploaded file is the paper. If the paper is only a PDF or Word file, extract it to "
+            "`paper/main.tex` (or `paper/main.md`) as faithfully as you can and say what was lost.")),
+    _stage("plan", "Response plan", "Decide how to answer each point (you approve this).",
+           ["skills/manuscript-revision/SKILL.md", "skills/evidence-assessment/SKILL.md"],
+           ["review/comments.csv", "review/triage.md", "paper/"], ["review/response_plan.csv"],
+           ("For every comment id write `review/response_plan.csv` (id,action,planned_change,location,needs_new_data,"
+            "honest_note). action is one of revise, clarify, rebut, new_experiment, decline. If a point needs data or "
+            "experiments that do not exist, set needs_new_data=yes and action new_experiment or decline — never plan to "
+            "invent results. Rebuttals must point to evidence in the paper.")),
+    _stage("revise", "Revise manuscript", "Revised paper with every change tracked.",
+           ["skills/manuscript-revision/SKILL.md", "skills/paper-orchestra-refine/SKILL.md",
+            f"{PO}/methods/prompts/content_refinement_agent.py"],
+           ["review/response_plan.csv", "review/comments.csv", "paper/"],
+           ["paper/main_revised.tex", "paper/main_revised.pdf", "review/changes.csv"],
+           ("Apply the approved plan to the paper source: write `paper/main_revised.tex` (keep the original unchanged) and "
+            "compile `paper/main_revised.pdf`. Mark nothing you did not do. `review/changes.csv` (comment_id,location,"
+            "change_summary). Points marked new_experiment/decline: leave the claim as it is or weaken it, and say so; "
+            "never add numbers that are not in `results/*.json` or the original paper.")),
+    _stage("response", "Response letter", "Point-by-point letter and closure check.",
+           ["skills/manuscript-revision/SKILL.md", f"{LEAN}/CLAIM_LANGUAGE_CALIBRATION.md"],
+           ["review/comments.csv", "review/response_plan.csv", "review/changes.csv", "paper/main_revised.tex"],
+           ["review/response_letter.md", "review/closure.csv"],
+           ("Write `review/response_letter.md`: for every comment id, quote the comment, then the response, then exactly "
+            "what changed and where (section/line in `paper/main_revised.tex`), polite and factual. Write "
+            "`review/closure.csv` (id,status,evidence) with status `resolved` or `open` for EVERY id in "
+            "`review/comments.csv`; mark `resolved` only if you re-read the revised text and the change is there.")),
+]
+
 PAPER_TYPES = {
     "research_article": {"label": "Research article", "stages": RESEARCH_ARTICLE},
     "review_paper": {"label": "Review (survey) paper", "stages": REVIEW_PAPER},
+    "thesis_to_paper": {"label": "Thesis to paper", "stages": THESIS_TO_PAPER,
+                        "inputs": "Upload your thesis (PDF, Word or LaTeX)."},
+    "revision_rebuttal": {"label": "Revision & rebuttal", "stages": REVISION_REBUTTAL,
+                          "inputs": "Upload your paper and the reviewer comments (PDF, Word, LaTeX or text)."},
 }
 
 
@@ -202,6 +301,27 @@ def create(store: Store, project_id: str, paper_type: str, venue: str, topic: st
     _save(project_id, state)
     store.log_activity(project_id, "paper_created", paper_type)
     return view(store, project_id)
+
+
+def _has(state: dict, stage_id: str) -> bool:
+    return any(s["id"] == stage_id for s in PAPER_TYPES[state["type"]]["stages"])
+
+
+def _coverage(root: Path) -> dict:
+    """Reviewer points vs the closure file (deterministic)."""
+    import csv
+
+    def ids(rel: str) -> list[tuple[str, str]]:
+        p = root / rel
+        if not p.is_file():
+            return []
+        with p.open(encoding="utf-8", newline="") as f:
+            return [((r.get("id") or "").strip(), (r.get("status") or "").strip().lower()) for r in csv.DictReader(f)]
+    comments = [i for i, _ in ids("review/comments.csv") if i]
+    closure = dict(ids("review/closure.csv"))
+    return {"comments": len(comments), "answered": sum(1 for c in comments if c in closure),
+            "resolved": sum(1 for c in comments if closure.get(c) == "resolved"),
+            "missing": [c for c in comments if c not in closure][:50]}
 
 
 def _stages(state: dict) -> list[dict]:
@@ -241,9 +361,13 @@ def view(store: Store, project_id: str) -> dict | None:
     return {"type": state["type"], "type_label": PAPER_TYPES[state["type"]]["label"], "venue": state["venue"],
             "venue_label": VENUES[state["venue"]]["label"], "topic": state["topic"],
             "conversation_id": state["conversation_id"], "stages": out,
-            "results": experiments.summary(root) if state["type"] == "research_article" else None,
-            "collected": state["stages"].get("experiments", {}).get("collected"),
-            "loop": _loop_view(store, state, root) if state["type"] == "research_article" else None}
+            "results": experiments.summary(root) if _has(state, "experiments") or state["type"] == "thesis_to_paper" else None,
+            "collected": (state["stages"].get("experiments") or state["stages"].get("extract") or {}).get("collected"),
+            "loop": _loop_view(store, state, root) if _has(state, "revise") and state["type"] != "revision_rebuttal" else None,
+            "inputs": PAPER_TYPES[state["type"]].get("inputs"),
+            "uploads": [p.relative_to(root).as_posix() for p in sorted((root / "uploads").glob("*"))
+                        if p.is_file()] if (root / "uploads").is_dir() else [],
+            "coverage": _coverage(root) if state["type"] == "revision_rebuttal" else None}
 
 
 def _loop_view(store: Store, state: dict, root: Path) -> dict:
@@ -262,8 +386,13 @@ def _prompt(state: dict, stage: dict, project_root: Path, notes: str, feedback: 
     engines = "\n".join(f"- {REPO_ROOT / e}" for e in stage["engines"])
     reads = "\n".join(f"- `{r}`" + ("" if (project_root / r).exists() else " (not present yet)") for r in stage["reads"]) or "- (none)"
     outs = "\n".join(f"- `{o}`" for o in stage["outputs"])
-    template = (f"Venue template folder: {REPO_ROOT / venue['template']} (template.tex, guidelines.md, style files)."
-                if venue["template"] else "Venue: generic journal article (use the standard `article` class, 11pt).")
+    if venue["template"]:
+        template = f"Venue template folder: {REPO_ROOT / venue['template']} (template.tex, guidelines.md, style files)."
+    elif venue.get("latex"):
+        template = (f"Venue: {venue['label']}. LaTeX: {venue['latex']} If the user placed an official class or template "
+                    "in `paper/` or `uploads/`, use that instead.")
+    else:
+        template = "Venue: generic journal article (use the standard `article` class, 11pt)."
     parts = [f"Paper Studio — stage: {stage['title']} ({PAPER_TYPES[state['type']]['label']}).",
              f"Paper topic: {state['topic'] or '(see paper/idea.md)'}", template,
              f"\nEngine instructions — read these files first and follow their method (they are the user's own engines):\n{engines}",
@@ -286,6 +415,9 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
         raise ValueError("unknown stage")
     if v[stage_id]["status"] == "locked":
         raise ValueError("approve the previous stage first")
+    if "uploads/" in next(s for s in _stages(state) if s["id"] == stage_id)["reads"] and not [
+            p for p in (workspace.project_root(project_id) / "uploads").glob("*") if p.is_file()]:
+        raise ValueError("upload your files first (" + PAPER_TYPES[state["type"]].get("inputs", "files in uploads/") + ")")
     if v[stage_id]["status"] == "running":
         raise ValueError("this stage is already running")
     stage = next(s for s in _stages(state) if s["id"] == stage_id)
@@ -315,7 +447,7 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
         raise ValueError(f"stage is {v[stage_id]['status']}; it can be approved after a successful run with all outputs")
     state = load(project_id)
     st = state["stages"].setdefault(stage_id, {})
-    if stage_id == "experiments":  # measured values enter the log only now, from results/*.json
+    if stage_id in {"experiments", "extract"}:  # measured values enter the log only now, from results/*.json
         st["collected"] = experiments.collect(workspace.project_root(project_id), st.get("run_id"))
     st["approved_at"] = now()
     _save(project_id, state)
@@ -326,8 +458,8 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
 def start_review_round(store: Store, project_id: str) -> dict:
     """Queue review/revise round 2 or 3 (only after Revise is approved)."""
     state = load(project_id)
-    if not state or state["type"] != "research_article":
-        raise ValueError("review rounds are available for research-article papers")
+    if not state or not _has(state, "revise") or state["type"] == "revision_rebuttal":
+        raise ValueError("this paper type has no review rounds")
     v = {s["id"]: s for s in view(store, project_id)["stages"]}
     if v["revise"]["status"] != "approved":
         raise ValueError("approve the Revise stage first")

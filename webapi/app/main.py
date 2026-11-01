@@ -278,7 +278,7 @@ def run_recipe(project_id: str, recipe_id: str, body: RecipeRunIn):
 
 # ---------------------------------------------------------------- Paper Studio
 class PaperIn(BaseModel):
-    type: str = Field(pattern="^(research_article|review_paper)$")
+    type: str = Field(pattern="^(research_article|review_paper|thesis_to_paper|revision_rebuttal)$")
     venue: str = Field(default="journal", max_length=40)
     topic: str = Field(default="", max_length=4000)
 

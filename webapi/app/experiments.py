@@ -92,7 +92,7 @@ def collect(root: Path, run_id: str | None = None) -> dict:
         cells[5] = str(value)
         lines[s["line"]] = "| " + " | ".join(cells) + " |"
         prov[s["slot_id"]] = {"file": f"results/{p.name}", "value": value, "unit": data.get("unit"),
-                              "seed": data.get("seed"), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+                              "seed": data.get("seed"), "source": data.get("source"), "location": data.get("location"), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
                               "run_id": run_id, "collected_at": now()}
     if found:
         log.write_text("\n".join(lines) + ("\n" if text.endswith("\n") else ""), encoding="utf-8")

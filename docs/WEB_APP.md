@@ -53,6 +53,12 @@ Sidebar → **Paper Studio**, or *Use this idea for a paper* on a Brainstorm ide
 | --- | --- |
 | Research article | Idea → Literature → Method & experiment plan → Code → Run experiments → Write paper → Review → Revise |
 | Review (survey) paper | Scope & protocol → Search & screening → Taxonomy & synthesis → Write survey → Review → Revise |
+| Thesis to paper | Read the thesis → Paper plan → References → Write paper → Review → Revise |
+| Revision & rebuttal | Comments & triage → Response plan → Revise manuscript → Response letter |
+
+Venues: generic journal, ICLR 2025, CVPR 2025, plus IEEE (`IEEEtran`), Elsevier (`elsarticle`), Springer (`llncs`) and MDPI. IEEEtran, elsarticle and llncs are installed with MiKTeX; the Springer Nature journal class and `mdpi.cls` are not, so MDPI uses a generic layout, and the agent is told to prefer an official class the user places in `paper/`.
+
+*Thesis to paper* and *Revision & rebuttal* start from files you upload on the paper page (saved in `uploads/`; the first stage will not run without them). Thesis results enter as `results/<slot>.json` with `source: thesis` and the table/page, copied exactly from the thesis; the server collects them into the experimental log on approval, like measured results. The revision path shows how many reviewer points `review/closure.csv` marks resolved (computed from `review/comments.csv`).
 
 Each stage tells the agent to read the user's own engines first, then the earlier stages' files, and must write
 named outputs:

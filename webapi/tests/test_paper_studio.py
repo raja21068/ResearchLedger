@@ -221,3 +221,58 @@ def test_review_loop_stops_after_three_rounds():
         (root / f["closure"]).write_text("id,status,evidence\nC1,open,x\n")
     s = review_loop.summarize(root)
     assert s["last_round"] == 3 and "3 rounds done" in s["stop_reason"]
+
+
+# ---------------------------------------------------------------- journals and extra paper types
+def test_new_venues_in_prompt_and_all_types_listed(bridge_mode):
+    while client.post("/api/v1/bridge/next", headers=H).status_code == 200:
+        pass
+    types = client.get("/api/v1/paper-types").json()
+    assert {"thesis_to_paper", "revision_rebuttal"} <= set(types["types"])
+    assert {"ieee", "elsevier", "springer", "mdpi"} <= set(types["venues"])
+    for venue, needle in (("ieee", "IEEEtran"), ("elsevier", "elsarticle"), ("springer", "llncs"), ("mdpi", "mdpi.cls")):
+        pid, _ = _paper(venue=venue)
+        client.post(f"/api/v1/projects/{pid}/paper/stages/idea/run", json={}, headers=H)
+        task = client.post("/api/v1/bridge/next", headers=H).json()
+        assert needle in task["task"], venue
+        assert "\x08" not in task["task"]  # no accidental control characters from LaTeX backslashes
+
+
+def test_thesis_to_paper_needs_upload_and_collects_thesis_results(bridge_mode):
+    while client.post("/api/v1/bridge/next", headers=H).status_code == 200:
+        pass
+    pid, view = _paper("thesis_to_paper", "journal")
+    assert [s["id"] for s in view["stages"]] == ["extract", "plan", "references", "write", "review", "revise"]
+    assert view["inputs"] and view["uploads"] == []
+    url = f"/api/v1/projects/{pid}/paper/stages/extract/run"
+    assert client.post(url, json={}, headers=H).status_code == 400  # nothing uploaded yet
+    client.post(f"/api/v1/projects/{pid}/files?folder=uploads", files={"file": ("thesis.pdf", b"%PDF-1.4 x")}, headers=H)
+    assert client.get(f"/api/v1/projects/{pid}/paper").json()["uploads"] == ["uploads/thesis.pdf"]
+    assert client.post(url, json={}, headers=H).status_code == 201
+    task = client.post("/api/v1/bridge/next", headers=H).json()
+    assert "uploads/" in task["task"] and "copied exactly from" in task["task"]
+    root = _ws(pid)
+    (root / "paper").mkdir(exist_ok=True)
+    (root / "paper" / "experimental_log.md").write_text(LOG, encoding="utf-8")
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "acc_main.json").write_text(json.dumps(
+        {"slot_id": "acc_main", "value": 88.1, "source": "thesis", "location": "Table 4.2, p. 57"}))
+    _finish(task, ["paper/thesis_map.md"])
+    v = client.post(f"/api/v1/projects/{pid}/paper/stages/extract/approve", headers=H).json()
+    assert v["collected"]["measured"] == 1
+    prov = json.loads((root / "results" / "provenance.json").read_text())
+    assert prov["acc_main"]["source"] == "thesis" and prov["acc_main"]["location"] == "Table 4.2, p. 57"
+    assert client.post(f"/api/v1/projects/{pid}/paper/review-rounds", headers=H).status_code == 400  # revise not approved
+
+
+def test_revision_rebuttal_path_and_coverage(bridge_mode):
+    pid, view = _paper("revision_rebuttal", "journal")
+    assert [s["id"] for s in view["stages"]] == ["intake", "plan", "revise", "response"]
+    assert view["loop"] is None and view["coverage"]["comments"] == 0
+    root = _ws(pid)
+    (root / "review").mkdir(exist_ok=True)
+    (root / "review" / "comments.csv").write_text("id,reviewer,comment_text,type,severity\nR1.1,1,a,x,y\nR1.2,1,b,x,y\nR2.1,2,c,x,y\n")
+    (root / "review" / "closure.csv").write_text("id,status,evidence\nR1.1,resolved,s2\nR1.2,open,-\n")
+    cov = client.get(f"/api/v1/projects/{pid}/paper").json()["coverage"]
+    assert cov == {"comments": 3, "answered": 2, "resolved": 1, "missing": ["R2.1"]}
+    assert client.post(f"/api/v1/projects/{pid}/paper/review-rounds", headers=H).status_code == 400
