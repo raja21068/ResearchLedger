@@ -90,7 +90,7 @@ export function Sidebar() {
   const [q, setQ] = useState("");
   const [searching, setSearching] = useState(false);
   const [docs, setDocs] = useState<{ path: string }[]>([]);
-  const [worker, setWorker] = useState<{ executor: string; worker_connected: boolean } | null>(null);
+  const [worker, setWorker] = useState<{ executor: string; worker_connected: boolean; worker_state?: string } | null>(null);
   const projectId = path.match(/^\/projects\/(prj_[a-z0-9]+)/)?.[1] ?? null;
 
   useEffect(() => { setWide(readPref("rl-nav-wide", true)); setClosed(readPref("rl-nav-closed", {})); }, []);
@@ -98,7 +98,7 @@ export function Sidebar() {
     api<Recent[]>("/conversations?limit=60").then(setRecents).catch(() => setRecents([]));
   }, [path, search]);
   useEffect(() => {
-    const tick = () => api<{ executor: string; worker_connected: boolean }>("/bridge/status").then(setWorker).catch(() => setWorker(null));
+    const tick = () => api<{ executor: string; worker_connected: boolean; worker_state?: string }>("/bridge/status").then(setWorker).catch(() => setWorker(null));
     tick(); const t = setInterval(tick, 10000); return () => clearInterval(t);
   }, []);
   useEffect(() => {
@@ -219,8 +219,8 @@ export function Sidebar() {
         {worker?.executor === "bridge" && (
           <Link href="/settings" title="Claude app worker status"
             className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs ${wide ? "" : "justify-center"} text-faint hover:bg-[#edeae4]`}>
-            <span className={`h-2 w-2 flex-none rounded-full ${worker.worker_connected ? "bg-[#47765d]" : "bg-[#b64b43]"}`} />
-            <span className={wide ? "" : "lg:hidden"}>{worker.worker_connected ? "Claude app connected" : "Claude app not connected"}</span>
+            <span className={`h-2 w-2 flex-none rounded-full ${worker.worker_state === "busy" ? "rl-pulse bg-[#3b6fd8]" : worker.worker_connected ? "bg-[#47765d]" : "bg-[#b64b43]"}`} />
+            <span className={wide ? "" : "lg:hidden"}>{worker.worker_state === "busy" ? "Claude app working" : worker.worker_connected ? "Claude app ready" : "Claude app not connected"}</span>
           </Link>
         )}
       </div>

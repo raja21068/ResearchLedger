@@ -49,7 +49,7 @@ export default function Settings() {
             <div className="flex items-center gap-2 font-medium">
               <span className={`h-2.5 w-2.5 rounded-full ${bridge.worker_connected ? "bg-accent" : "bg-[#b91c1c]"}`} />
               {bridge.worker_connected
-                ? `Claude app worker connected (checked in ${bridge.last_poll_seconds_ago}s ago)`
+                ? (bridge.worker_state === "busy" ? "Claude app worker is busy with a task (unresponsive tasks return to the queue after 15 minutes)" : `Claude app worker is free (checked in ${bridge.last_poll_seconds_ago}s ago)`)
                 : "Claude app worker not connected"}
               {bridge.queued > 0 && <span className="text-sm text-faint">· {bridge.queued} task(s) waiting</span>}
             </div>

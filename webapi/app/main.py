@@ -441,13 +441,15 @@ class ExecutorIn(BaseModel):
 
 
 class BridgeEventIn(BaseModel):
-    kind: str = Field(pattern="^(say|step|todos)$")
-    text: str = Field(min_length=1, max_length=20_000)
+    kind: str = Field(pattern="^(say|step|todos|ping)$")
+    text: str = Field(default="ping", min_length=1, max_length=20_000)
+    claim: str | None = Field(default=None, max_length=64)
 
 
 class BridgeDoneIn(BaseModel):
     summary: str = Field(default="", max_length=50_000)
     failed: bool = False
+    claim: str | None = Field(default=None, max_length=64)
 
 
 @app.get("/api/v1/bridge/status")
@@ -473,7 +475,7 @@ def bridge_next():
 @app.post("/api/v1/bridge/runs/{run_id}/event")
 def bridge_event(run_id: str, body: BridgeEventIn):
     try:
-        bridge.add_event(store, run_id, body.kind, body.text)
+        bridge.add_event(store, run_id, body.kind, body.text, body.claim)
     except ValueError as exc:
         raise HTTPException(409, str(exc))
     return {"ok": True}
@@ -482,7 +484,9 @@ def bridge_event(run_id: str, body: BridgeEventIn):
 @app.post("/api/v1/bridge/runs/{run_id}/done")
 def bridge_done(run_id: str, body: BridgeDoneIn):
     try:
-        return bridge.complete(store, run_id, body.summary, body.failed)
+        return bridge.complete(store, run_id, body.summary, body.failed, body.claim)
+    except bridge.ClaimError as exc:
+        raise HTTPException(409, str(exc))
     except ValueError as exc:
         raise HTTPException(404, str(exc))
 

@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
-export interface Bridge { executor: "bridge" | "cli"; worker_connected: boolean; last_poll_seconds_ago: number | null; queued: number }
+export interface Bridge { executor: "bridge" | "cli"; worker_connected: boolean; worker_state?: "busy" | "free" | "offline"; last_poll_seconds_ago: number | null; queued: number }
 
 export function useBridge(intervalMs = 5000) {
   const [b, setB] = useState<Bridge | null>(null);

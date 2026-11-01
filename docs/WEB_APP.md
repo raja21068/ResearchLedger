@@ -90,6 +90,13 @@ session in the **Claude app** picks them up:
    tools, writes files into the project folder, and the reply, checklist, steps and files come back
    to the website chat.
 
+Robustness: each claimed task gets a claim token (`bridge_cli.py` stores and sends it automatically). A task whose
+worker has been silent for 15 minutes (no step, todo, say or `ping`) goes back to the queue with a visible note; after two
+re-queues it is marked failed. A late `done` from the old worker is refused (409, "STOP: ... went back to the queue").
+`GET /bridge/status` reports `worker_state`: *busy* (a task is being worked on; the worker is not polling then),
+*free* (polling) or *offline*; the sidebar shows Working / Ready / Not connected. For commands longer than 10 minutes the
+worker runs `python webapi/bridge_cli.py ping RUN_ID`.
+
 Settings → *Where agents run* switches between the Claude app bridge and `claude.exe` in the
 background (which needs `claude auth login`). The Settings page and the chat show whether a worker is
 connected. Paper Factory engine tools that call `claude.exe` themselves (S1–S5, Beihang Referee)
