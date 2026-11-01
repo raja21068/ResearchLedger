@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 import { api, post } from "@/lib/api";
-import { engineName, STAGE_LABEL, type PaperStage, type PaperView } from "@/lib/paper";
+import { engineName, STAGE_LABEL, type PaperStage, type PaperView, type RefReport } from "@/lib/paper";
 import type { Conversation, RunEvent } from "@/lib/types";
 import { BridgeBanner } from "@/components/BridgeStatus";
 import { Markdown } from "@/components/Markdown";
@@ -24,6 +24,14 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [missing, setMissing] = useState(false);
+  const [refs, setRefs] = useState<RefReport | null>(null);
+  const [checking, setChecking] = useState(false);
+  useEffect(() => { api<RefReport | null>(`/projects/${id}/paper/references`).then(setRefs).catch(() => {}); }, [id]);
+  async function checkRefs() {
+    setChecking(true); setError(null);
+    try { setRefs(await post<RefReport>(`/projects/${id}/paper/check-references`)); } catch (e) { setError(e); }
+    finally { setChecking(false); }
+  }
 
   const load = useCallback(async () => {
     try {
@@ -128,6 +136,29 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
                   </ul>
                 </div>
               </div>
+
+              {["literature", "search"].includes(stage.id) && stage.outputs_found.some((o) => o.path === "paper/refs.bib" && o.exists) && (
+                <div className="mt-4 rounded-lg bg-[#f6f5f1] p-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <b>Reference check (Crossref, arXiv)</b>
+                    <button className={btn2} disabled={checking} onClick={checkRefs}>{checking ? "Checking…" : refs ? "Check again" : "Check references"}</button>
+                  </div>
+                  {refs && (
+                    <>
+                      <p className="mt-1 text-muted">
+                        {refs.total} entries: {Object.entries(refs.counts).map(([k, n]) => `${n} ${k.replace(/_/g, " ")}`).join(", ")}.
+                        Missing author, year or venue fields were filled only from a matching record; the original is kept as refs.bib.orig.
+                      </p>
+                      <ul className="mt-1 space-y-0.5">
+                        {refs.entries.filter((e) => e.status !== "verified").map((e) => (
+                          <li key={e.key} className="text-xs text-[#7f1d1d]"><span className="font-mono">{e.key}</span> · {e.status.replace(/_/g, " ")}{e.note ? ` · ${e.note}` : ""}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {!refs && <p className="mt-1 text-faint">Looks up each DOI or arXiv id. If the network is down, entries are marked not checked.</p>}
+                </div>
+              )}
 
               {stage.id === "experiments" && paper.results && (
                 <div className="mt-4 rounded-lg bg-[#f6f5f1] p-3 text-sm">

@@ -38,3 +38,8 @@ export function engineName(path: string) {
   if (path.includes("Referee-Lean")) return `Referee-Lean v2: ${parts.at(-1)}`;
   return parts.at(-1) ?? path;
 }
+
+export interface RefReport {
+  checked_at: string; total: number; counts: Record<string, number>;
+  entries: { key: string; status: string; source: string | null; note: string; filled: Record<string, string> }[];
+}
