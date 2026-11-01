@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (autopilot, inbox, loops, prefs, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (autopilot, inbox, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -286,6 +286,7 @@ class LoopIn(BaseModel):
     external_review: str | None = Field(None, max_length=200_000)
     params: dict = Field(default_factory=dict)
     mode: str = "auto"
+    example_pdf: str | None = None
 
 
 class SteerIn(BaseModel):
@@ -320,7 +321,7 @@ def list_loops(project_id: str):
 def create_loop(project_id: str, body: LoopIn):
     _project(project_id)
     return _loop_call(loops.create, store, project_id, body.type, body.goal, body.idea_text, body.manuscript,
-                      body.external_review, body.params, body.mode)
+                      body.external_review, body.params, body.mode, body.example_pdf)
 
 
 @app.get("/api/v1/projects/{project_id}/loops/{loop_id}")
@@ -339,6 +340,39 @@ def loop_action(project_id: str, loop_id: str, action: str, body: SteerIn | None
     if not fn:
         raise HTTPException(404, "unknown loop action")
     return _loop_call(fn, store, project_id, loop_id)
+
+
+class QualityIn(BaseModel):
+    tex: str
+    target_pages: int | None = Field(None, ge=1, le=200)
+    target_refs: int | None = Field(40, ge=0, le=1000)
+    example_pdf: str | None = None
+    online: bool = False
+
+
+@app.post("/api/v1/projects/{project_id}/quality")
+def run_quality(project_id: str, body: QualityIn):
+    """Submission gate on a .tex (docs/QUALITY_PLAYBOOK.md). online=true also looks every reference up."""
+    _project(project_id)
+    tex = _path(project_id, body.tex)
+    if not tex.is_file() or tex.suffix.lower() != ".tex":
+        raise HTTPException(400, "choose a .tex file in the workspace")
+    if body.example_pdf and not _path(project_id, body.example_pdf).is_file():
+        raise HTTPException(400, f"{body.example_pdf} does not exist")
+    root = workspace.project_root(project_id)
+    report = quality.gate(root, tex.relative_to(root).as_posix(), body.target_pages, body.target_refs or None,
+                          body.example_pdf, body.online)
+    store.log_activity(project_id, "quality_gate", f"{body.tex} ready={report['ready']}")
+    return report
+
+
+@app.get("/api/v1/projects/{project_id}/quality")
+def get_quality(project_id: str, tex: str):
+    _project(project_id)
+    rep = quality.load(workspace.project_root(project_id), tex)
+    if not rep:
+        raise HTTPException(404, "no quality report for this file yet")
+    return rep
 
 
 @app.get("/api/v1/preferences")

@@ -89,6 +89,22 @@ advances loops every 3 s; opening a loop page also advances it.
 API: `GET /api/v1/loop-types`, `GET|POST /api/v1/projects/{id}/loops`, `GET /api/v1/projects/{id}/loops/{loop}`,
 `POST …/loops/{loop}/steer|continue|stop|retry|accept`.
 
+**Quality upgrades (from the user's paper history, see `docs/QUALITY_PLAYBOOK.md`):**
+- Review → fix scores **quality, impact, novelty, methods, readiness** (Referee-Lean 1–10) against the user's own targets
+  8.0 / 9.0 / 8.3 / 8.3 / 7.3 (editable per loop) and stops with "targets met" only when all five are reached and no
+  verified major concern is open. Plateau: mean gain < 0.3 between reviews → stop, naming the concerns that need experiments.
+- The plan move writes `triage.csv`: `text_fix`, `new_analysis`, `new_experiment`, `reject`. Experiments are never done or
+  faked by the loop; they are listed in `needs_experiments.md` and on the loop page for the user to decide.
+- A fix is rejected (and redone once) if it adds a number to a table or the abstract that is in no `results/*.json`, or
+  if a concern marked resolved quotes `new_text` that is not in the revised `.tex`. After each fix the submission gate runs.
+- Optional example paper (PDF): the agent matches its style, length and structure; the gate compares pages, words,
+  figures, tables and references (±20%).
+
+**Quality Check** (`/quality`, `webapi/app/quality.py`, `POST /api/v1/projects/{id}/quality`): the submission gate on
+any `.tex` — compiled and current PDF, page budget, placeholders, cited keys in the `.bib`, reference count, optional
+Crossref/arXiv lookup of every cited reference, numbers in tables/abstract traced to `results/*.json`, vector vs raster
+and low-resolution figures, claim language, and the example-paper match. Report saved to `quality/<stem>.json`.
+
 **Standing instructions** (`webapi/app/prefs.py`, Settings → *Your standing instructions*): the instructions the
 user repeats in every session (verify every reference, never invent citations/DOIs, search 50+ recent papers,
 surgical edits, keep the template, finished deliverables, objective scoring, check everything again, plain

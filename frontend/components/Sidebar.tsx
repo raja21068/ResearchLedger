@@ -56,6 +56,7 @@ const GROUPS: { id: string; label: string; items: Item[] }[] = [
     { href: "/tools/write_manuscript", label: "Manuscripts", icon: "doc" },
     { href: "/tools/thesis_to_manuscript", label: "Thesis to Paper", icon: "thesis" },
     { href: "/tools/quick_review", label: "Peer Review", icon: "review" },
+    { href: "/quality", label: "Quality Check", icon: "evidence" },
     { href: "/tools?section=evidence", label: "Evidence Center", icon: "evidence" },
   ] },
   { id: "resources", label: "Resources", items: [

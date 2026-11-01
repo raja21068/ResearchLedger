@@ -47,6 +47,11 @@ using engines in `vendor/` and `skills/`. Progress on this is recorded below.
   user's was touched). 79 tests pass. Demo loop `lop_27eb2060cce8` (review_fix on `paper/main_revised.tex` of the
   DeFi paper) was created and stopped before any work; "One more round" resumes it.
 
+- 2026-11-02: read the memories of 13 paper projects and 333 of the user's prompts (`~/.claude/projects/*`);
+  wrote `docs/QUALITY_PLAYBOOK.md`. Built the submission gate (`quality.py`, `/quality`) and upgraded Review → fix:
+  the user's 5 score targets, triage (experiments listed, never faked), rejection of fixes that add untraceable
+  numbers or claim fixes not in the text, plateau stop, example-paper match. 86 tests pass.
+
 ## Git
 Work is committed on branch `feature/web-app-paper-studio` (commit 328c4e4, not pushed). Leave the user's own
 uncommitted `Paper/`, zip and `__pycache__` changes alone; never stage them.

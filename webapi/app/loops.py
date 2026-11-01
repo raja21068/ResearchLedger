@@ -35,7 +35,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import claude_runner, recipes, refcheck, workspace
+from . import claude_runner, quality, recipes, refcheck, workspace
 from .db import Store, TERMINAL_STATES, new_id, now
 
 LOOPS = "loops"
@@ -66,9 +66,14 @@ TYPES = {
         "pitch": "A strict reviewer reads the PDF, writes a fix plan for the agent, the agent fixes the LaTeX "
                  "surgically and recompiles, and a fresh review checks again — until no verified major concern is left.",
         "moves": ["review", "plan", "fix"],
-        "params": {"max_rounds": 3, "max_change_ratio": 0.35},
+        # The user's own stop thresholds (Paper Factory S5) on the Referee-Lean 1-10 scale.
+        "params": {"max_rounds": 3, "max_change_ratio": 0.35, "target_quality": 8.0, "target_impact": 9.0,
+                   "target_novelty": 8.3, "target_methods": 8.3, "target_readiness": 7.3, "plateau_gain": 0.3,
+                   "target_pages": 0, "target_refs": 40},
     },
 }
+SCORE_KEYS = ["quality", "impact", "novelty", "methods", "readiness"]
+TRIAGE = {"text_fix", "new_analysis", "new_experiment", "reject"}
 MOVE_LABELS = {"seed": "Generate and rank candidate ideas", "attack": "Novelty attack (literature search)",
                "score": "Score (Phase 10 rubric)", "redesign": "Redesign the idea", "review": "Strict review",
                "plan": "Fix instructions for the agent", "fix": "Surgical fix + recompile"}
@@ -336,9 +341,12 @@ def _prompt(st: dict, n: int, move: str, retry_note: str | None) -> str:
                     "`quote` is the exact passage copied from the .tex (the server checks it occurs there; a concern "
                     "without a real quote is downgraded); verification VERIFIED, UNVERIFIED or REJECTED. Reuse earlier "
                     "concern ids for the same problem. Also check every reference and claim. Write "
-                    f"`{_rel(st, n, 'review.md')}` and `{_rel(st, n, 'scores.json')}` as {{\"overall\": 1-10, "
-                    "\"soundness\": 1-10, \"novelty\": 1-10, \"clarity\": 1-10, \"recommendation\": \"...\"}. Do not "
-                    "edit the manuscript in this move.\n\n" + _library("8. REVIEWER SIMULATION (VERY IMPORTANT).txt"))
+                    f"`{_rel(st, n, 'review.md')}` and `{_rel(st, n, 'scores.json')}` as {{\"quality\": 1-10, "
+                    "\"impact\": 1-10, \"novelty\": 1-10, \"methods\": 1-10, \"readiness\": 1-10, \"overall\": 1-10, "
+                    "\"recommendation\": \"...\"} on the Referee-Lean anchors (8 = strong with limited correctable "
+                    "weaknesses, 9 = excellent). Score what is on the page now, not what it could become; do not "
+                    "inflate. Do not edit the manuscript in this move.\n\n"
+                    + _library("8. REVIEWER SIMULATION (VERY IMPORTANT).txt"))
         elif move == "plan":
             body = (f"Read `{_rel(st, n, 'concerns.csv')}` and `{_rel(st, n, 'review.md')}` for manuscript `{tex}`. Write "
                     f"`{_rel(st, n, 'fix_instructions.md')}`: a detailed instruction file for a coding agent. One section "
@@ -346,15 +354,33 @@ def _prompt(st: dict, n: int, move: str, retry_note: str | None) -> str:
                     "minimal surgical edit (old text -> new text where possible), and how to check it is fixed. Only "
                     "wording, claims, structure, presentation and references — no new experiments or numbers that are "
                     "not already in the workspace. List UNVERIFIED/REJECTED concerns at the end as 'not acted on' with "
-                    "the reason. Do not edit the manuscript in this move.")
+                    "the reason.\nThink before acting — do not follow every suggestion, only the important ones. Write "
+                    f"`{_rel(st, n, 'triage.csv')}` (id,action,reason) with one row per concern, action one of: "
+                    "text_fix (wording, claims, structure, framing, references), new_analysis (a new table, figure or "
+                    "statistic computed from results/*.json that already exist), new_experiment (needs a run that has "
+                    "not been done — this loop will NOT do it; it is listed for the user), reject (not valid or not "
+                    "worth it, with the reason). Do not edit the manuscript in this move.")
         else:  # fix
             out_tex = _fixed_tex(st, n)
             body = (f"Apply `{_rel(st, n, 'fix_instructions.md')}` to `{tex}`. Copy it to `{out_tex}` first and edit only "
                     f"the copy (keep `{tex}` unchanged). Make only surgical changes: do not rephrase text that is not part "
                     "of a fix, keep the template, preamble and \\documentclass, and do not add citation keys that are not "
-                    f"in the bibliography. Compile `{out_tex[:-4]}.pdf` (pdflatex + bibtex/biber as the template needs) and "
-                    f"fix every compile error. Write `{_rel(st, n, 'closure.csv')}` (id,status,evidence) with status "
-                    "resolved or open for every concern you acted on, evidence = the changed location.")
+                    f"in the bibliography. Act only on `text_fix` and `new_analysis` rows of `{_rel(st, n, 'triage.csv')}`. "
+                    "Never type a number into a table or the abstract that is not in results/*.json (the server rejects "
+                    "the fix if a new number cannot be traced); when a reviewer wants a result that does not exist, "
+                    "narrow the claim instead. Lead with the strongest real results; move secondary material to the "
+                    "supplement with a pointer rather than deleting it. Compile "
+                    f"`{out_tex[:-4]}.pdf` (pdflatex + bibtex/biber as the template needs) and fix every compile error. "
+                    f"Write `{_rel(st, n, 'closure.csv')}` (id,status,location,new_text) for every concern you acted on: "
+                    "status resolved or open; new_text = a short passage copied exactly from the revised .tex that shows "
+                    "the fix (the server checks it is really there).")
+        ex = st["inputs"].get("example_pdf")
+        if ex and move in {"review", "fix"}:
+            body += (f"\nThe user's example paper is `{ex}`: the manuscript must match its writing style, tone, structure "
+                     "and length (the server compares pages, words, figures, tables and references within 20%). Extra "
+                     "material goes to the supplement.")
+        if move == "review" and st["params"].get("target_refs"):
+            body += f"\nTarget: at least {st['params']['target_refs']} verified references."
     return head + "\n" + body + tail
 
 
@@ -394,7 +420,8 @@ def _start_move(store: Store, project_id: str, st: dict, n: int, move: str, retr
     rnd = st.setdefault("rounds", {}).setdefault(str(n), {"moves": {}, "metrics": {}})
     prev = rnd["moves"].get(move, {})
     rnd["moves"][move] = {"run_id": rid, "status": "running", "started_at": ts,
-                          "attempt": (prev.get("attempt", 0) + 1) if retry_note else 1}
+                          "attempt": (prev.get("attempt", 0) + 1) if retry_note else 1,
+                          "last_error": prev.get("error") if retry_note else None}
     st.update(status="running", round=n, move=move, run_id=rid, paused_reason=None)
     store.exec("UPDATE conversations SET updated_at=? WHERE id=?", (ts, st["conversation_id"]))
     _save(project_id, st)
@@ -440,16 +467,34 @@ def _check_move(root: Path, st: dict, n: int, move: str, fetch=None) -> tuple[st
         if not cp.is_file():
             return "concerns.csv is missing", {}
         m = check_concerns(cp, tex.read_text(encoding="utf-8", errors="replace") if tex.is_file() else "")
+        m["overall"], m["scores"] = None, {}
         try:
             sc = json.loads((root / _rel(st, n, "scores.json")).read_text(encoding="utf-8"))
             m["overall"] = float(sc.get("overall")) if sc.get("overall") is not None else None
             m["recommendation"] = str(sc.get("recommendation", ""))[:200]
+            for k in SCORE_KEYS:
+                if sc.get(k) is not None:
+                    m["scores"][k] = max(1.0, min(10.0, float(sc[k])))
         except (OSError, ValueError, TypeError):
-            m["overall"] = None
+            pass
+        if len(m["scores"]) == len(SCORE_KEYS):
+            m["mean_score"] = round(sum(m["scores"].values()) / len(SCORE_KEYS), 2)
         return None, m
     if move == "plan":
         f = root / _rel(st, n, "fix_instructions.md")
-        return (None, {}) if f.is_file() and f.stat().st_size > 100 else ("fix_instructions.md is missing", {})
+        if not (f.is_file() and f.stat().st_size > 100):
+            return "fix_instructions.md is missing", {}
+        rows = _rows(root / _rel(st, n, "triage.csv"))
+        if not rows:
+            return "triage.csv is missing or empty", {}
+        bad = [r.get("id", "?") for r in rows if r.get("action", "").lower() not in TRIAGE]
+        if bad:
+            return f"triage.csv has invalid actions for {', '.join(bad[:6])} (use {', '.join(sorted(TRIAGE))})", {}
+        concerns = {c["id"]: c for c in st["rounds"][str(n)]["metrics"].get("concerns", [])}
+        tri = [{"id": r.get("id", ""), "action": r["action"].lower(), "reason": r.get("reason", "")[:300],
+                "concern": concerns.get(r.get("id", ""), {}).get("concern", "")} for r in rows]
+        counts = {a: sum(t["action"] == a for t in tri) for a in sorted(TRIAGE)}
+        return None, {"triage": tri, "triage_counts": counts}
     # fix
     out = root / _fixed_tex(st, n)
     before = root / _manuscript_for(st, n)
@@ -460,11 +505,37 @@ def _check_move(root: Path, st: dict, n: int, move: str, fetch=None) -> tuple[st
     m = check_fix(before, out)
     if not m["template_kept"]:
         return "the \\documentclass line changed; the template must be kept", m
+    new_tex = out.read_text(encoding="utf-8", errors="replace")
+    # Anti-fabrication: a fix may not introduce a table/abstract number that no result file contains.
+    old_untraced = set(quality.trace_numbers(before.read_text(encoding="utf-8", errors="replace"), root / "results")["untraced_set"])
+    introduced = sorted(set(quality.trace_numbers(new_tex, root / "results")["untraced_set"]) - old_untraced)
+    m["introduced_untraced_numbers"] = introduced
+    if introduced:
+        return ("the fix introduced numbers that are not in results/*.json: " + ", ".join(introduced[:10])
+                + " — remove them or narrow the claim"), m
+    # No empty promises: every concern marked resolved must show text that is really in the revised .tex.
+    closure = _rows(root / _rel(st, n, "closure.csv"))
+    if not closure:
+        return "closure.csv is missing or empty", m
+    text = _norm(new_tex)
+    not_found = [r.get("id", "?") for r in closure if r.get("status", "").lower() == "resolved"
+                 and not (_norm(r.get("new_text", "")) and _norm(r.get("new_text", ""))[:80] in text)]
+    m["resolved"] = sum(r.get("status", "").lower() == "resolved" for r in closure)
+    if not_found:
+        return (f"{len(not_found)} concern(s) marked resolved but their new_text is not in the revised .tex: "
+                + ", ".join(not_found[:8])), m
     m["warnings"] = []
     if m["change_ratio"] > p["max_change_ratio"]:
         m["warnings"].append(f"{int(m['change_ratio'] * 100)}% of lines changed — not a surgical edit")
     if m["unknown_citation_keys"]:
         m["warnings"].append("citation keys not in the bibliography: " + ", ".join(m["unknown_citation_keys"][:8]))
+    try:
+        g = quality.gate(root, _fixed_tex(st, n), target_pages=p.get("target_pages") or None,
+                         target_refs=p.get("target_refs") or None, example_pdf=st["inputs"].get("example_pdf"))
+        m["gate"] = {"ready": g["ready"], "counts": g["counts"],
+                     "failing": [c["label"] + ": " + c["detail"] for c in g["checks"] if c["status"] == "fail"]}
+    except Exception as exc:  # the gate is advisory here; it must never block a good fix
+        m["gate"] = {"ready": None, "error": f"{type(exc).__name__}: {exc}"}
     return None, m
 
 
@@ -489,11 +560,24 @@ def _decide(st: dict, n: int, move: str) -> tuple[int, str] | str:
         if n >= p["max_rounds"]:
             return f"{p['max_rounds']} rounds done; best idea kept"
     if st["type"] == "review_fix" and move == "review":
-        if rnd["verified_major"] == 0:
+        scores = rnd.get("scores") or {}
+        short = [f"{k} {scores[k]:g}<{p['target_' + k]:g}" for k in SCORE_KEYS
+                 if k in scores and scores[k] < p["target_" + k]]
+        if rnd["verified_major"] == 0 and len(scores) == len(SCORE_KEYS) and not short:
+            return (f"targets met in round {n}: " + ", ".join(f"{k} {scores[k]:g}" for k in SCORE_KEYS)
+                    + "; no verified major concern")
+        if rnd["verified_major"] == 0 and not scores:
             return (f"clean: no verified major concern in round {n}"
                     + (f" (reviewer score {rnd['overall']}/10)" if rnd.get("overall") is not None else ""))
+        exp = st.get("needs_experiments") or []
+        exp_txt = ("; needs new experiments: " + "; ".join(e["id"] for e in exp[:6])) if exp else ""
         if n > p["max_rounds"]:
-            return f"final check after {p['max_rounds']} fix rounds: {rnd['verified_major']} verified major concern(s) still open"
+            return (f"final check after {p['max_rounds']} fix rounds: {rnd['verified_major']} verified major concern(s) "
+                    f"open" + (", below target: " + ", ".join(short) if short else "") + exp_txt)
+        prev = st["rounds"].get(str(n - 1), {}).get("metrics", {}).get("mean_score")
+        if prev is not None and rnd.get("mean_score") is not None and rnd["mean_score"] - prev < p["plateau_gain"]:
+            return (f"plateau: mean score {prev:g} -> {rnd['mean_score']:g}; editing alone is no longer raising the "
+                    "score" + (", below target: " + ", ".join(short) if short else "") + exp_txt)
         vm = [st["rounds"][str(k)]["metrics"].get("verified_major") for k in range(1, n)]
         if n >= 3 and vm[-2] is not None and rnd["verified_major"] >= vm[-2]:
             return f"plateau: verified major concerns did not go down over two rounds ({vm[-2]} -> {rnd['verified_major']})"
@@ -535,7 +619,7 @@ def final_files(st: dict) -> list[str]:
 # ---------------------------------------------------------------- public API
 def create(store: Store, project_id: str, loop_type: str, goal: str, idea_text: str | None = None,
            manuscript: str | None = None, external_review: str | None = None, params: dict | None = None,
-           mode: str = "auto") -> dict:
+           mode: str = "auto", example_pdf: str | None = None) -> dict:
     if loop_type not in TYPES:
         raise LoopError("unknown loop type")
     if mode not in {"auto", "step"}:
@@ -554,6 +638,10 @@ def create(store: Store, project_id: str, loop_type: str, goal: str, idea_text: 
         if not workspace.resolve(project_id, manuscript).is_file():
             raise LoopError(f"{manuscript} does not exist in the workspace")
         inputs["manuscript"] = manuscript
+        if example_pdf:
+            if not workspace.resolve(project_id, example_pdf).is_file():
+                raise LoopError(f"{example_pdf} does not exist in the workspace")
+            inputs["example_pdf"] = example_pdf
         goal = goal or f"Make {Path(manuscript).name} submission-ready"
     elif not goal and not (idea_text or "").strip():
         raise LoopError("describe the topic or paste the idea")
@@ -600,6 +688,14 @@ def reconcile(store: Store, project_id: str, loop_id: str, fetch=None) -> dict |
         error, metrics = (f"agent task {run['status']}: {run['error'] or ''}".strip(), {}) \
             if run["status"] != "succeeded" else _check_move(workspace.project_root(project_id), st, n, move, fetch)
         rnd = st["rounds"][str(n)]
+        if move == "plan" and not error:
+            rnd["metrics_plan"] = metrics
+            known = {e["id"] for e in st.setdefault("needs_experiments", [])}
+            for t in metrics["triage"]:
+                if t["action"] == "new_experiment" and t["id"] not in known:
+                    st["needs_experiments"].append({"id": t["id"], "concern": t["concern"], "reason": t["reason"],
+                                                    "round": n})
+            _write_needs(project_id, st)
         if move == "attack":
             rnd["metrics_attack"] = metrics
         elif metrics:
@@ -725,7 +821,7 @@ def view(store: Store, project_id: str, loop_id: str) -> dict:
         moves = [{"move": m, "label": MOVE_LABELS[m], **r["moves"][m]} for m in
                  (["seed"] if k == "0" else TYPES[st["type"]]["moves"]) if m in r["moves"]]
         rounds.append({"round": int(k), "moves": moves, "metrics": r.get("metrics", {}),
-                       "evidence": (r.get("metrics_attack") or {}).get("evidence"), "fix": r.get("metrics_fix"),
+                       "evidence": (r.get("metrics_attack") or {}).get("evidence"), "fix": r.get("metrics_fix"), "plan": r.get("metrics_plan"),
                        "files": _round_files(project_id, st, int(k))})
     return {**{k: v for k, v in st.items() if k != "rounds"}, "label": TYPES[st["type"]]["label"], "rounds": rounds,
             "best_round": st.get("best_round") or best_round(st), "final_files": final_files(st),
@@ -758,6 +854,18 @@ def list_view(store: Store, project_id: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------- report
+def _write_needs(project_id: str, st: dict) -> None:
+    """Reviewer requests that need a real experiment: the loop never fakes them; the user decides."""
+    items = st.get("needs_experiments") or []
+    lines = ["# Experiments the reviewers asked for", "",
+             "The review -> fix loop does not run or invent these. Decide which to run; results go to results/*.json.", ""]
+    lines += [f"- **{e['id']}** (round {e['round']}): {e['concern']}" + (f" — {e['reason']}" if e["reason"] else "")
+              for e in items] or ["(none so far)"]
+    d = workspace.project_root(project_id) / LOOPS / st["id"]
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "needs_experiments.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _write_report(project_id: str, st: dict) -> None:
     lines = [f"# {TYPES[st['type']]['label']} — {st['goal']}", "",
              f"Status: **{st['status']}**" + (f" — {st['stop_reason']}" if st.get("stop_reason") else ""), ""]
@@ -773,14 +881,18 @@ def _write_report(project_id: str, st: dict) -> None:
                          f"{ev.get('fabricated_or_wrong', '')} | {m.get('total', '')} | "
                          f"{m.get('criteria', {}).get('novelty', '')} | {len(m.get('fatal_flaws', [])) if m else ''} |")
     else:
-        lines += ["| Round | Concerns | Verified major | Quotes not found | Reviewer /10 | Lines changed |",
-                  "|---|---|---|---|---|---|"]
+        lines += ["| Round | Concerns | Verified major | Quotes not found | " + " | ".join(k.capitalize() for k in SCORE_KEYS)
+                  + " | Mean | Lines changed | Gate fails |", "|---" * (8 + len(SCORE_KEYS)) + "|"]
         for k in sorted(st.get("rounds", {}), key=int):
             r = st["rounds"][k]
             m, fx = r.get("metrics", {}), r.get("metrics_fix") or {}
+            sc = m.get("scores") or {}
             lines.append(f"| {k} | {m.get('total', '')} | {m.get('verified_major', '')} | {m.get('downgraded', '')} | "
-                         f"{m.get('overall', '') if m.get('overall') is not None else ''} | "
-                         f"{str(int(fx['change_ratio'] * 100)) + '%' if fx.get('change_ratio') is not None else ''} |")
+                         + " | ".join(f"{sc[s]:g}" if s in sc else "" for s in SCORE_KEYS)
+                         + f" | {m.get('mean_score', '')} | "
+                         f"{str(int(fx['change_ratio'] * 100)) + '%' if fx.get('change_ratio') is not None else ''} | "
+                         f"{(fx.get('gate') or {}).get('counts', {}).get('fail', '')} |")
+        lines += ["", "Targets: " + ", ".join(f"{s} {st['params'].get('target_' + s, '')}" for s in SCORE_KEYS)]
     lines += ["", "Numbers in this table are computed by the server from the round files, not copied from the agent."]
     d = workspace.project_root(project_id) / LOOPS / st["id"]
     d.mkdir(parents=True, exist_ok=True)

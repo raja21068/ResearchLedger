@@ -24,6 +24,8 @@ export default function LoopsPage() {
   const [types, setTypes] = useState<LoopType[] | null>(null);
   const [loops, setLoops] = useState<LoopSummary[] | null>(null);
   const [texFiles, setTexFiles] = useState<string[]>([]);
+  const [pdfFiles, setPdfFiles] = useState<string[]>([]);
+  const [example, setExample] = useState("");
   const [type, setType] = useState<LoopType["id"]>("idea_forge");
   const [goal, setGoal] = useState("");
   const [idea, setIdea] = useState("");
@@ -42,6 +44,7 @@ export default function LoopsPage() {
     api<WorkspaceFile[]>(`/projects/${projectId}/files`).then((fs) => {
       const tex = fs.map((f) => f.path).filter((p) => p.endsWith(".tex") && !p.includes("_loop"));
       setTexFiles(tex); setManuscript((m) => (tex.includes(m) ? m : tex[0] ?? ""));
+      setPdfFiles(fs.map((f) => f.path).filter((p) => p.endsWith(".pdf") && !p.includes("_loop")));
     }).catch(() => setTexFiles([]));
     const t = setInterval(load, 5000);
     return () => clearInterval(t);
@@ -67,7 +70,8 @@ export default function LoopsPage() {
       const body = { type, goal, mode, params,
         idea_text: type === "idea_forge" && idea.trim() ? idea : null,
         manuscript: type === "review_fix" ? manuscript : null,
-        external_review: type === "review_fix" && external.trim() ? external : null };
+        external_review: type === "review_fix" && external.trim() ? external : null,
+        example_pdf: type === "review_fix" && example ? example : null };
       const v = await post<{ id: string }>(`/projects/${pid}/loops`, body);
       router.push(`/projects/${pid}/loops/${v.id}`);
     } catch (err) { setError(err); setBusy(false); }
@@ -127,6 +131,12 @@ export default function LoopsPage() {
                 </div>
                 <span className="text-xs font-normal text-faint">Figures and .bib must sit next to the .tex in the workspace so it compiles.</span>
               </div>
+              <label className="grid gap-1 text-sm font-medium">Example paper to match — style, length, structure (optional)
+                <select value={example} onChange={(e) => setExample(e.target.value)} className="rounded-lg border border-line px-3 py-2 font-normal">
+                  <option value="">None</option>
+                  {pdfFiles.map((f) => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </label>
               <label className="grid gap-1 text-sm font-medium">Goal (optional)
                 <input value={goal} onChange={(e) => setGoal(e.target.value)} className="rounded-lg border border-line px-3 py-2 font-normal"
                   placeholder="e.g. Submission-ready for IEEE TDSC" />

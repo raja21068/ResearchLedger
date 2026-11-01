@@ -8,7 +8,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { api, post } from "@/lib/api";
 import type { Loop, LoopRound } from "@/lib/loops";
-import { STATUS_STYLE } from "@/lib/loops";
+import { SCORE_KEYS, STATUS_STYLE } from "@/lib/loops";
 import { BridgeBanner } from "@/components/BridgeStatus";
 import { btn, btn2, Card, ErrorBox, PageHeader } from "@/components/ui";
 
@@ -85,6 +85,16 @@ export default function LoopPage() {
       </Card>
 
       {scored.length > 0 && <Trajectory v={v} rounds={scored} />}
+
+      {v.needs_experiments && v.needs_experiments.length > 0 && (
+        <Card className="mb-6 border-[#f0d9a8] p-5">
+          <h2 className="text-sm font-semibold">Experiments the reviewers asked for — your decision</h2>
+          <p className="mt-1 text-xs text-muted">The loop never runs or invents these. Editing alone cannot close them; run the ones worth it and put the results in results/*.json.</p>
+          <ul className="mt-2 space-y-1 text-sm">
+            {v.needs_experiments.map((e) => <li key={e.id}><b>{e.id}</b> (round {e.round}): {e.concern || e.reason}{e.concern && e.reason ? <span className="text-faint"> — {e.reason}</span> : null}</li>)}
+          </ul>
+        </Card>
+      )}
 
       <div className="space-y-4">
         {[...v.rounds].reverse().map((r) => <RoundCard key={r.round} v={v} r={r} view={view} />)}
@@ -167,6 +177,35 @@ function RoundCard({ v, r, view }: { v: Loop; r: LoopRound; view: (p: string) =>
         </div>
       )}
 
+      {m.scores && Object.keys(m.scores).length > 0 && (
+        <div className="mb-3 grid gap-1.5 sm:grid-cols-2">
+          {SCORE_KEYS.map((k) => {
+            const s = m.scores![k]; const t = v.params[`target_${k}`];
+            if (s == null) return null;
+            return (
+              <div key={k} className="flex items-center gap-2 text-xs">
+                <span className="w-20 flex-none capitalize text-muted">{k}</span>
+                <div className="relative h-2 flex-1 rounded bg-[#eceae6]">
+                  <div className={`h-2 rounded ${s >= t ? "bg-[#2f8a55]" : "bg-accent"}`} style={{ width: `${s * 10}%` }} />
+                  {t ? <div className="absolute top-[-3px] h-[14px] w-[2px] bg-ink" style={{ left: `${t * 10}%` }} title={`target ${t}`} /> : null}
+                </div>
+                <span className="w-16 text-right">{s} / {t}</span>
+              </div>
+            );
+          })}
+          {m.mean_score != null && <div className="text-xs text-muted">Mean {m.mean_score}</div>}
+        </div>
+      )}
+
+      {r.plan && (
+        <div className="mb-3 text-sm"><b>Triage:</b>{" "}
+          {Object.entries(r.plan.triage_counts).filter(([, n]) => n > 0).map(([a, n]) => `${n} ${a.replace("_", " ")}`).join(" · ")}
+          <ul className="mt-1 space-y-0.5 text-xs text-muted">
+            {r.plan.triage.map((t) => <li key={t.id}><b className="text-ink">{t.id}</b> {t.action.replace("_", " ")}{t.reason ? ` — ${t.reason}` : ""}</li>)}
+          </ul>
+        </div>
+      )}
+
       {m.concerns && (
         <div className="mb-3">
           <div className="mb-2 text-sm"><b>{m.verified_major}</b> verified major of {m.concerns.length} concerns
@@ -187,11 +226,17 @@ function RoundCard({ v, r, view }: { v: Loop; r: LoopRound; view: (p: string) =>
         <div className="mb-3 text-sm"><b>Fix:</b> {r.fix.changed_lines} of {r.fix.total_lines} lines changed ({Math.round(r.fix.change_ratio * 100)}%),
           {" "}template {r.fix.template_kept ? "kept" : "changed"}{r.fix.new_citation_keys.length > 0 && <>, new citations: {r.fix.new_citation_keys.join(", ")}</>}.
           {r.fix.warnings?.map((w, i) => <div key={i} className="text-[#7a5300]">• {w}</div>)}
+          {r.fix.gate && r.fix.gate.ready != null && (
+            <div className="mt-1"><b>Submission gate:</b> {r.fix.gate.ready ? "no failing check" : `${r.fix.gate.counts?.fail ?? 0} failing (open the report on the Quality Check page)`}
+              {r.fix.gate.failing?.map((f, i) => <div key={i} className="text-[#8a1f17]">• {f}</div>)}</div>
+          )}
         </div>
       )}
 
-      {r.moves.some((mv) => mv.error) && (
-        <div className="mb-3 text-xs text-[#8a1f17]">{r.moves.filter((mv) => mv.error).map((mv) => <div key={mv.move}>{mv.label}: {mv.error}</div>)}</div>
+      {r.moves.some((mv) => mv.error || mv.last_error) && (
+        <div className="mb-3 text-xs text-[#8a1f17]">{r.moves.filter((mv) => mv.error || mv.last_error).map((mv) => (
+          <div key={mv.move}>{mv.label}: {mv.error ?? `redone — the server rejected try ${(mv.attempt ?? 2) - 1}: ${mv.last_error}`}</div>
+        ))}</div>
       )}
 
       {r.files.length > 0 && (

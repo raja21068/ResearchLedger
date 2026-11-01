@@ -26,22 +26,26 @@ export interface Concern {
 
 export interface LoopRound {
   round: number;
-  moves: { move: string; label: string; status: string; run_id: string; attempt?: number; error?: string | null }[];
+  moves: { move: string; label: string; status: string; run_id: string; attempt?: number; error?: string | null; last_error?: string | null }[];
   metrics: {
     total?: number; criteria?: Record<string, number>; fatal_flaws?: string[]; verdict?: string; total_corrected?: boolean;
     claimed_total?: number | null; closest?: string[];
     concerns?: Concern[]; verified_major?: number; downgraded?: number; overall?: number | null; recommendation?: string;
+    scores?: Record<string, number>; mean_score?: number;
   };
   evidence?: Evidence | null;
   fix?: { change_ratio: number; changed_lines: number; total_lines: number; template_kept: boolean;
-          new_citation_keys: string[]; unknown_citation_keys: string[]; warnings?: string[] } | null;
+          new_citation_keys: string[]; unknown_citation_keys: string[]; warnings?: string[];
+          gate?: { ready: boolean | null; counts?: Record<string, number>; failing?: string[]; error?: string } } | null;
+  plan?: { triage: { id: string; action: string; reason: string; concern: string }[]; triage_counts: Record<string, number> } | null;
   files: string[];
 }
 
 export interface Loop {
   id: string; type: LoopType["id"]; label: string; goal: string; mode: "auto" | "step"; status: LoopStatus;
   round: number; move: string | null; run_id: string | null; conversation_id: string;
-  params: Record<string, number>; inputs: { manuscript?: string; external_review?: string };
+  params: Record<string, number>; inputs: { manuscript?: string; external_review?: string; example_pdf?: string };
+  needs_experiments?: { id: string; concern: string; reason: string; round: number }[];
   stop_reason: string | null; paused_reason?: string | null; notes: { at: string; text: string; used_in: string | null }[];
   rounds: LoopRound[]; best_round: number | null; final_files: string[]; accepted?: boolean; accepted_files?: string[];
   rubric: { id: string; label: string; max: number }[]; report: string;
@@ -54,3 +58,5 @@ export const STATUS_STYLE: Record<LoopStatus, [string, string]> = {
   failed: ["Needs a retry", "bg-[#fbe7e5] text-[#8a1f17]"],
   stopped: ["Stopped", "bg-[#eeeeee] text-[#555]"],
 };
+
+export const SCORE_KEYS = ["quality", "impact", "novelty", "methods", "readiness"] as const;
