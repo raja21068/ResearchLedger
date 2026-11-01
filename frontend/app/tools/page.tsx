@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { SECTION_LABEL, type SkillCatalog, type Workflow } from "@/lib/types";
 import { CapabilityBadge, ErrorBox, PageHeader } from "@/components/ui";
 
-export default function AllTools() {
+export default function AllToolsPage() {
+  return <Suspense><AllTools /></Suspense>;
+}
+
+function AllTools() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [catalog, setCatalog] = useState<SkillCatalog | null>(null);
   const [q, setQ] = useState("");
@@ -16,18 +21,24 @@ export default function AllTools() {
     api<SkillCatalog>("/skills").then(setCatalog).catch(setError);
   }, []);
 
+  // ?section=evidence (from the sidebar's Evidence Center) shows one section and hides skills.
+  const only = useSearchParams().get("section") as Workflow["section"] | null;
   const m = (...s: string[]) => s.some((x) => x.toLowerCase().includes(q.toLowerCase()));
   const sections = (Object.keys(SECTION_LABEL) as Workflow["section"][])
+    .filter((s) => !only || s === only)
     .map((s) => [SECTION_LABEL[s], workflows.filter((w) => w.section === s && m(w.name, w.description))] as const)
     .filter(([, items]) => items.length);
-  const skills = catalog?.skills.filter((s) => m(s.name, s.description, s.category)) ?? [];
+  const skills = only ? [] : catalog?.skills.filter((s) => m(s.name, s.description, s.category)) ?? [];
   const cats = [...new Set(skills.map((s) => s.category))];
 
   return (
     <main className="mx-auto max-w-[1180px] px-4 py-7 sm:px-8">
-      <PageHeader title="All tools"
-        sub={<>Research tools open a form; skills run your task through a skill from your skill folders. {catalog &&
-          <>{catalog.skills.length} skills found; {catalog.zipped_packages} zipped packages are not used until unpacked.</>}</>} />
+      <PageHeader title={only === "evidence" ? "Evidence Center" : only ? SECTION_LABEL[only] : "All tools & skills"}
+        sub={only === "evidence"
+          ? "Check references, the evidence ledger, readiness and integrity gates for a project."
+          : <>Research tools open a form; skills run your task through a skill from your skill folders. {catalog &&
+            <>{catalog.skills.length} skills found; {catalog.zipped_packages} zipped packages are not used until unpacked.</>}</>}
+        actions={only ? <Link href="/tools" className="text-sm text-accent underline">Show all tools</Link> : undefined} />
       <ErrorBox error={error} />
       <input aria-label="Search tools" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search tools and skills…"
         className="mb-6 min-h-11 w-full rounded-xl border border-line bg-white px-4" />
