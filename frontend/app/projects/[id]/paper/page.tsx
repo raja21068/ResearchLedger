@@ -129,6 +129,15 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
                 </div>
               </div>
 
+              {stage.id === "experiments" && paper.results && (
+                <div className="mt-4 rounded-lg bg-[#f6f5f1] p-3 text-sm">
+                  <b>{paper.results.measured} of {paper.results.slots}</b> result slots have a measured file in <span className="font-mono text-xs">results/</span>.
+                  {" "}Unmeasured slots stay <span className="font-mono text-xs">TBD</span> and show as placeholders in the paper.
+                  {paper.collected?.issues?.map((m) => <div key={m} className="mt-1 text-[#7f1d1d]">⚠ {m}</div>)}
+                  <p className="mt-1 text-faint">The experimental log is filled from these files when you approve this stage.</p>
+                </div>
+              )}
+
               {stage.status === "locked" && <p className="mt-4 text-sm text-faint">Approve the previous stage to unlock this one.</p>}
 
               {["ready", "failed", "incomplete"].includes(stage.status) && (

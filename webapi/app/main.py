@@ -12,7 +12,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (bridge, claude_runner, director, memory, paper_studio, recipes, registry, skills_catalog,
+from . import (bridge, claude_runner, director, experiments, memory, paper_studio, recipes, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -340,6 +340,17 @@ def approve_paper_stage(project_id: str, stage_id: str):
         return paper_studio.approve(store, project_id, stage_id)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+
+
+@app.post("/api/v1/projects/{project_id}/paper/collect-results")
+def collect_paper_results(project_id: str):
+    """Fill paper/experimental_log.md from results/*.json (also done when 'Run experiments' is approved)."""
+    _project(project_id)
+    state = paper_studio.load(project_id)
+    if not state:
+        raise HTTPException(400, "this project has no paper yet")
+    run_id = state["stages"].get("experiments", {}).get("run_id")
+    return experiments.collect(workspace.project_root(project_id), run_id)
 
 
 @app.post("/api/v1/projects/{project_id}/paper/choose-idea/{idea_id}")

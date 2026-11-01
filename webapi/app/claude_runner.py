@@ -79,13 +79,18 @@ def explain(error: str | None) -> str | None:
 DIRECTOR_SYSTEM = ""  # filled in by director.py at import, to avoid a circular import
 
 
-def build_command(resume_session: str | None, model: str | None, extra_system: str | None = None) -> list[str]:
+# Stages that run the project's own code get a little more than the LaTeX toolchain.
+EXTRA_TOOLS_BY_KIND = {"paper:experiments": ["Bash(python:*)", "Bash(pip install:*)"]}
+
+
+def build_command(resume_session: str | None, model: str | None, extra_system: str | None = None,
+                  kind: str | None = None) -> list[str]:
     if not settings.claude_cmd:
         raise RuntimeError("Claude Code CLI not found on PATH (set RL_CLAUDE_CMD to override)")
     cmd = [*settings.claude_cmd, "-p", "--output-format", "stream-json", "--verbose",
            "--permission-mode", "acceptEdits",
            "--append-system-prompt", SYSTEM_PROMPT + ("\n\n" + extra_system if extra_system else ""),
-           "--allowedTools", *settings.allowed_tools]
+           "--allowedTools", *settings.allowed_tools, *EXTRA_TOOLS_BY_KIND.get(kind or "", [])]
     if resume_session:
         cmd += ["--resume", resume_session]
     if model or settings.default_model:
@@ -180,7 +185,8 @@ def _execute(store: Store, run_id: str) -> None:
         # a skill, a form workflow) start fresh so their task prompt stands on its own.
         is_chat = run.get("kind") in {"claude_code", "director"}
         cmd = build_command(conv.get("claude_session_id") if is_chat else None, run.get("model"),
-                            extra_system=run.get("kind") == "director" and DIRECTOR_SYSTEM or None)
+                            extra_system=run.get("kind") == "director" and DIRECTOR_SYSTEM or None,
+                            kind=run.get("kind"))
         flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
         proc = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, text=True, encoding="utf-8",

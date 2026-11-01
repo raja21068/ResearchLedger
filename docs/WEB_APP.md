@@ -51,7 +51,7 @@ Sidebar → **Paper Studio**, or *Use this idea for a paper* on a Brainstorm ide
 
 | Paper type | Stages |
 | --- | --- |
-| Research article | Idea → Literature → Method & experiment plan → Code → Write paper → Review → Revise |
+| Research article | Idea → Literature → Method & experiment plan → Code → Run experiments → Write paper → Review → Revise |
 | Review (survey) paper | Scope & protocol → Search & screening → Taxonomy & synthesis → Write survey → Review → Revise |
 
 Each stage tells the agent to read the user's own engines first, then the earlier stages' files, and must write
@@ -60,6 +60,7 @@ named outputs:
 - Literature: `skills/paper-orchestra-literature`, PaperOrchestra `literature_review_agent.py` → `paper/refs.bib`, `paper/literature.md`
 - Method: research-method/experiment/evaluation/baseline/ablation skills → `paper/protocol.md`, `paper/experimental_log.md` (declared slots, values `TBD`)
 - Code: PaperCompiler `3_architecting.py`, `4_contracting.py`, `5_engineering.py` as the recipe → `code/` (scripts write `results/<slot>.json`)
+- Run experiments: the agent runs `code/` (CLI executor gets `python`/`pip install` for this stage only), writes `results/<slot>.json` and `results/run_log.md`. On approval the server (`webapi/app/experiments.py`) copies each valid result into the `value` column of `paper/experimental_log.md` and records file, SHA-256 and run id in `results/provenance.json`; invalid, mismatched or undeclared files are reported and ignored; unmeasured slots stay `TBD`. `POST /projects/{id}/paper/collect-results` does the same on demand.
 - Write: `skills/paper-orchestra*` + PaperOrchestra prompts + venue template (`vendor/paperorchestra/templates/iclr2025|cvpr2025`) → `paper/main.tex`, `paper/main.pdf`
 - Review: Referee-Lean v2 core reviewer + independent verifier prompts → `review/review_report.md`, `review/concern_matrix.csv`
 - Revise: manuscript-revision + refine → `paper/main_revised.tex/.pdf`, `review/response_letter.md`

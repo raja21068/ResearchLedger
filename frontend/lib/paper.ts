@@ -9,6 +9,8 @@ export interface PaperStage {
 export interface PaperView {
   type: string; type_label: string; venue: string; venue_label: string; topic: string;
   conversation_id: string; stages: PaperStage[];
+  results?: { slots: number; measured: number; pending: number } | null;
+  collected?: { slots: number; measured: number; pending: number; issues: string[] } | null;
 }
 
 export interface PaperSummary {

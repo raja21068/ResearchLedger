@@ -94,3 +94,68 @@ def test_review_paper_has_its_own_path():
     pid, view = _paper("review_paper", "journal")
     assert [s["id"] for s in view["stages"]] == ["scope", "search", "synthesis", "write", "review", "revise"]
     assert client.post(f"/api/v1/projects/{pid}/paper", json={"type": "review_paper"}, headers=H).status_code == 400
+
+
+# ---------------------------------------------------------------- Run experiments (measured results)
+LOG = """# Experimental log
+| slot_id | metric | unit | dataset | method | value |
+| --- | --- | --- | --- | --- | --- |
+| acc_main | accuracy | % | D1 | ours | TBD |
+| acc_base | accuracy | % | D1 | baseline | TBD |
+| f1_main | F1 | - | D1 | ours | TBD |
+"""
+
+
+def test_experiments_stage_follows_code_and_collects_only_valid_results():
+    from webapi.app import experiments
+    pid, view = _paper()
+    ids = [s["id"] for s in view["stages"]]
+    assert ids.index("experiments") == ids.index("code") + 1 and ids.index("write") == ids.index("experiments") + 1
+    root = _ws(pid)
+    (root / "paper").mkdir(exist_ok=True)
+    (root / "paper" / "experimental_log.md").write_text(LOG, encoding="utf-8")
+    (root / "results").mkdir()
+    (root / "results" / "acc_main.json").write_text(json.dumps({"slot_id": "acc_main", "value": 91.2, "seed": 1}))
+    (root / "results" / "acc_base.json").write_text(json.dumps({"slot_id": "wrong", "value": 80}))  # name mismatch
+    (root / "results" / "extra.json").write_text(json.dumps({"slot_id": "extra", "value": 1}))  # undeclared
+    (root / "results" / "f1_main.json").write_text("not json")
+    out = experiments.collect(root, "run_x")
+    assert out["measured"] == 1 and out["pending"] == 2 and len(out["issues"]) == 3
+    text = (root / "paper" / "experimental_log.md").read_text(encoding="utf-8")
+    assert "| acc_main | accuracy | % | D1 | ours | 91.2 |" in text
+    assert text.count("TBD") == 2  # unmeasured slots stay TBD
+    prov = json.loads((root / "results" / "provenance.json").read_text())
+    assert prov["acc_main"]["run_id"] == "run_x" and len(prov["acc_main"]["sha256"]) == 64
+    # idempotent
+    assert experiments.collect(root, "run_x")["measured"] == 1
+
+
+def test_approving_experiments_collects_results(bridge_mode):
+    while client.post("/api/v1/bridge/next", headers=H).status_code == 200:
+        pass
+    pid, _ = _paper()
+    root = _ws(pid)
+    st = json.loads((root / "paper" / "studio.json").read_text())
+    for sid in ("idea", "literature", "method", "code"):
+        st["stages"][sid] = {"approved_at": "2026-01-01T00:00:00+00:00"}
+    (root / "paper" / "studio.json").write_text(json.dumps(st))
+    (root / "paper" / "experimental_log.md").write_text(LOG, encoding="utf-8")
+    client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/run", json={}, headers=H)
+    task = client.post("/api/v1/bridge/next", headers=H).json()
+    assert "results/run_log.md" in task["task"] and "Do NOT edit" in task["task"]
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "acc_main.json").write_text(json.dumps({"slot_id": "acc_main", "value": 7}))
+    _finish(task, ["results/run_log.md"])
+    v = client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/approve", headers=H).json()
+    assert v["collected"]["measured"] == 1 and v["results"]["measured"] == 1
+    assert "| 7 |" in (root / "paper" / "experimental_log.md").read_text(encoding="utf-8")
+    assert client.post(f"/api/v1/projects/{pid}/paper/collect-results", headers=H).json()["measured"] == 1
+
+
+def test_experiments_run_gets_python_tool_only_for_that_kind():
+    from webapi.app import claude_runner
+    from webapi.app.config import settings
+    if not settings.claude_cmd:
+        pytest.skip("claude not installed")
+    assert "Bash(python:*)" in claude_runner.build_command(None, None, kind="paper:experiments")
+    assert "Bash(python:*)" not in claude_runner.build_command(None, None, kind="paper:code")

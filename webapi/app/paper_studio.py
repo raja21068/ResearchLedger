@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import claude_runner, workspace
+from . import claude_runner, experiments, workspace
 from .config import REPO_ROOT
 from .db import Store, new_id, now
 
@@ -73,6 +73,18 @@ RESEARCH_ARTICLE = [
               "how to run it. Scripts must write each declared slot's measured value to `results/<slot_id>.json` as "
               "{\"slot_id\":…, \"value\":…, \"unit\":…, \"seed\":…}. You cannot execute code here: never write results "
               "files yourself and never claim the code ran.")},
+    {"id": "experiments", "title": "Run experiments", "purpose": "Execute the code and record measured results.",
+     "engines": ["skills/reproducible-implementation-spec/SKILL.md", f"{PC}/5_engineering.py"],
+     "reads": ["paper/protocol.md", "paper/experimental_log.md", "code/README.md", "code/blueprint.md"],
+     "outputs": ["results/run_log.md"],
+     "task": ("The user approved running `code/`. Install only what `code/requirements.txt` lists, run the scripts as "
+              "`code/README.md` says (smoke-test on a small input first, then the full protocol), and fix real bugs in "
+              "`code/`. Each script writes `results/<slot_id>.json` as {\"slot_id\":…, \"value\":…, \"unit\":…, "
+              "\"seed\":…}; a file's name must equal its slot id. Write `results/run_log.md`: commands run, exit "
+              "codes, seeds, runtime, which slots were measured, which failed or were skipped and why. Never write a "
+              "results file by hand, never copy numbers from papers, never round up a failed run into a result. If a "
+              "slot cannot be measured here (no GPU, no dataset), leave it without a file and say so. Do NOT edit "
+              "`paper/experimental_log.md`: the server fills it from `results/*.json` when the user approves.")},
     {"id": "write", "title": "Write paper", "purpose": "LaTeX manuscript and PDF via PaperOrchestra.",
      "engines": ["skills/paper-orchestra/SKILL.md", "skills/paper-orchestra-outline/SKILL.md",
                  "skills/paper-orchestra-sections/SKILL.md", "skills/paper-orchestra-figures/SKILL.md",
@@ -84,7 +96,7 @@ RESEARCH_ARTICLE = [
      "task": ("Run the PaperOrchestra sequence (outline → sections → figures plan → refine). Write `paper/outline.md`, "
               "then `paper/main.tex` using the venue template (copy needed .sty/.bst files from the template folder "
               "into `paper/`). Use `paper/refs.bib`. For results: use measured values from `results/*.json` when they "
-              "exist (cite the slot id in a comment); otherwise keep \\PFVAL{slot_id} and \\PFFIG{slot_id}, and define "
+              "exist (`results/provenance.json` says which run produced each; cite the slot id in a comment); otherwise keep \\PFVAL{slot_id} and \\PFFIG{slot_id}, and define "
               "them in the preamble as visible placeholders, e.g. "
               "\\newcommand{\\PFVAL}[1]{\\textbf{[#1]}} \\newcommand{\\PFFIG}[1]{\\fbox{Figure slot: #1}}. "
               "Compile with pdflatex (and bibtex) to `paper/main.pdf`; fix LaTeX errors until it compiles.")},
@@ -143,8 +155,8 @@ REVIEW_PAPER = [
      "task": ("Write the survey in `paper/main.tex` (abstract, introduction, methodology of the review with the "
               "search numbers from the log, taxonomy sections, comparison tables, open problems, conclusion) using "
               "`paper/refs.bib`; compile to `paper/main.pdf` with pdflatex and bibtex.")},
-    RESEARCH_ARTICLE[5],
-    RESEARCH_ARTICLE[6],
+    next(s for s in RESEARCH_ARTICLE if s["id"] == "review"),
+    next(s for s in RESEARCH_ARTICLE if s["id"] == "revise"),
 ]
 
 PAPER_TYPES = {
@@ -224,7 +236,9 @@ def view(store: Store, project_id: str) -> dict | None:
         previous_ok = status == "approved"
     return {"type": state["type"], "type_label": PAPER_TYPES[state["type"]]["label"], "venue": state["venue"],
             "venue_label": VENUES[state["venue"]]["label"], "topic": state["topic"],
-            "conversation_id": state["conversation_id"], "stages": out}
+            "conversation_id": state["conversation_id"], "stages": out,
+            "results": experiments.summary(root) if state["type"] == "research_article" else None,
+            "collected": state["stages"].get("experiments", {}).get("collected")}
 
 
 def _prompt(state: dict, stage: dict, project_root: Path, notes: str, feedback: str | None) -> str:
@@ -270,7 +284,7 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
     # Re-running a stage re-opens everything after it.
     ids = [s["id"] for s in _stages(state)]
     for later in ids[ids.index(stage_id) + 1:]:
-        state["stages"][later].pop("approved_at", None)
+        state["stages"].setdefault(later, {}).pop("approved_at", None)
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_started", f"{stage_id} {rid}")
     claude_runner.start_run(store, rid)
@@ -284,7 +298,10 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     if v[stage_id]["status"] != "needs_review":
         raise ValueError(f"stage is {v[stage_id]['status']}; it can be approved after a successful run with all outputs")
     state = load(project_id)
-    state["stages"][stage_id]["approved_at"] = now()
+    st = state["stages"].setdefault(stage_id, {})
+    if stage_id == "experiments":  # measured values enter the log only now, from results/*.json
+        st["collected"] = experiments.collect(workspace.project_root(project_id), st.get("run_id"))
+    st["approved_at"] = now()
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)
     return view(store, project_id)
