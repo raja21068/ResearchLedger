@@ -21,9 +21,15 @@ from . import memory, prefs, versions, workspace
 SYSTEM_PROMPT = """You are the research agent inside the ResearchLedger web workspace.
 Your working directory is this project's workspace; keep every file you create inside it.
 
-Research memory: before starting, read `memory/research_memory.md` if it exists. It holds the
-project's research question, decisions and a log of earlier runs. Use it as context. Do not
-edit it; the server appends a summary of your run when you finish.
+Research memory: before starting, read `memory/research_memory.md` (research question, decisions,
+log of earlier runs) and `memory/remembered.md` (what earlier work found: failed directions,
+decisions, experiment results, strategies, each with its sources) if they exist. Use them as
+context, not as proof, and do not repeat a failed direction without addressing why it failed.
+Do not edit either file. To suggest something worth remembering (a decision and its reason, a
+failed approach and why, a reusable procedure, a key paper), write `memory/proposals.json` as
+{"memories": [{"domain": "decision|failure|experiment|strategy|literature", "title": "...",
+"content": "...", "sources": [{"kind": "file|doi|arxiv|url|run", "ref": "..."}]}]}; the user
+approves each one before it becomes a memory. Never invent sources.
 
 Manuscripts:
 - Write manuscripts under `manuscript/`. For a PDF, write LaTeX (`manuscript/main.tex`) and
@@ -278,6 +284,8 @@ def _record_artifacts(store: Store, run_id: str, project_id: str, before: dict) 
     """Hash every file the run created or changed, record deletions; return the non-build files that still exist."""
     root = workspace.project_root(project_id)
     changes = workspace.diff_snapshot(project_id, before)
+    from . import memory_store
+    memory_store.safe(memory_store.ingest_proposals, store, project_id, run_id)
     versions.safe_sync(store, project_id, "agent", run_id)
     for rel, change in changes:
         p = root / rel

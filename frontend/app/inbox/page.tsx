@@ -11,10 +11,10 @@ import { Markdown } from "@/components/Markdown";
 import { btn, btn2, Empty, ErrorBox, PageHeader } from "@/components/ui";
 
 interface Item {
-  kind: "paper_stage" | "plan" | "manual_start" | "run" | "loop"; project_id: string; project: string; paper: string;
+  kind: "paper_stage" | "plan" | "manual_start" | "run" | "loop" | "memory"; project_id: string; project: string; paper: string;
   stage: string; stage_id?: string; step?: string; summary?: string | null; outputs?: string[]; next?: string | null;
   autopilot?: boolean; conversation_id?: string; steps?: string[]; blocked?: boolean; status?: string; error?: string | null;
-  run_id?: string; loop_id?: string; loop_state?: "finished" | "paused"; loop_type?: string; key?: string;
+  run_id?: string; loop_id?: string; loop_state?: "finished" | "paused"; loop_type?: string; key?: string; memory_id?: string;
 }
 
 function DismissButton({ item, onDone }: { item: Item; onDone: () => void }) {
@@ -82,7 +82,7 @@ function Header({ item }: { item: Item }) {
         <div className="text-lg font-semibold">{item.stage}</div>
         {item.paper && item.paper !== item.project && <div className="truncate text-sm text-muted">{item.paper}</div>}
       </div>
-      <Link className="text-sm text-accent underline" href={item.kind === "plan" ? `/projects/${item.project_id}?conv=${item.conversation_id}` : item.kind === "loop" ? `/projects/${item.project_id}/loops/${item.loop_id}` : `/projects/${item.project_id}/paper`}>Open</Link>
+      <Link className="text-sm text-accent underline" href={item.kind === "memory" ? `/memory?item=${item.memory_id}` : item.kind === "plan" ? `/projects/${item.project_id}?conv=${item.conversation_id}` : item.kind === "loop" ? `/projects/${item.project_id}/loops/${item.loop_id}` : `/projects/${item.project_id}/paper`}>Open</Link>
     </div>
   );
 }
@@ -143,6 +143,12 @@ function ApproveCard({ item, onDone }: { item: Item; onDone: () => void }) {
         )}
         {item.kind === "loop" && item.loop_state === "paused" && (
           <button className={btn} disabled={busy} onClick={() => act(() => post(`/projects/${item.project_id}/loops/${item.loop_id}/continue`))}>Continue</button>
+        )}
+        {item.kind === "memory" && (
+          <>
+            <button className={btn} disabled={busy} onClick={() => act(() => post(`/memory/${item.memory_id}/decision`, { approve: true }))}>Remember this</button>
+            <button className={btn2} disabled={busy} onClick={() => act(() => post(`/memory/${item.memory_id}/decision`, { approve: false }))}>Reject</button>
+          </>
         )}
         {item.kind === "plan" && (
           <button className={btn} disabled={busy || item.blocked} onClick={() => act(() => post(`/conversations/${item.conversation_id}/plan/approve`))}>

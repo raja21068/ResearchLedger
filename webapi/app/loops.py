@@ -899,6 +899,8 @@ def _finish(store: Store, project_id: str, st: dict, reason: str) -> None:
     st["best_round"] = best_round(st)
     _save(project_id, st)
     store.log_activity(project_id, "loop_finished", f"{st['id']} {reason}")
+    from . import memory_store  # scores and verdicts become memories (failed directions are never forgotten)
+    memory_store.safe(memory_store.ingest_loops, store, project_id)
 
 
 def best_round(st: dict) -> int | None:
@@ -1167,7 +1169,9 @@ def stop(store: Store, project_id: str, loop_id: str) -> dict:
             st.pop("next", None)
             st.pop("awaiting", None)
             _save(project_id, st)
-        return view(store, project_id, loop_id)
+    from . import memory_store
+    memory_store.safe(memory_store.ingest_loops, store, project_id)
+    return view(store, project_id, loop_id)
 
 
 def steer(store: Store, project_id: str, loop_id: str, text: str) -> dict:

@@ -13,7 +13,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1104,6 +1104,82 @@ def integrity(project_id: str | None = None, full: bool = False):
 @app.on_event("startup")
 def _start_daily_backups():
     backup.start_daily(store)
+
+
+@app.on_event("startup")
+def _backfill_memory():
+    """Recorded loop outcomes become memories once (idempotent), so older projects get them too."""
+    for p in store.all("SELECT id FROM projects"):
+        memory_store.safe(memory_store.ingest_loops, store, p["id"])
+
+
+# ---------------------------------------------------------------- research memory v2
+class MemoryIn(BaseModel):
+    domain: str
+    title: str = Field(..., max_length=300)
+    content: str = Field(..., max_length=20000)
+    sources: list[dict] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    all_projects: bool = False
+
+
+class MemoryCorrectIn(BaseModel):
+    title: str = Field("", max_length=300)
+    content: str = Field(..., max_length=20000)
+    sources: list[dict] | None = None
+
+
+class MemoryDecisionIn(BaseModel):
+    approve: bool
+    note: str = ""
+
+
+def _mem(fn, *args, **kw):
+    try:
+        return fn(*args, **kw)
+    except memory_store.MemoryError_ as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/memory")
+def memory_search(q: str = "", project_id: str | None = None, domain: str | None = None, status: str | None = None,
+                  include_global: bool = True, limit: int = 100):
+    """Search memories: one project (plus global ones) or, without project_id, all of them."""
+    if project_id:
+        _project(project_id)
+    return memory_store.search(store, project_id, q, [domain] if domain else None, [status] if status else None,
+                               include_global, min(max(limit, 1), 500))
+
+
+@app.get("/api/v1/memory/{item_id}")
+def memory_get(item_id: str):
+    return _mem(memory_store.get, store, item_id)
+
+
+@app.post("/api/v1/projects/{project_id}/memory", status_code=201)
+def memory_add(project_id: str, body: MemoryIn):
+    """Add a memory yourself (active at once). all_projects=true makes it visible to every project."""
+    _project(project_id)
+    return _mem(memory_store.add, store, None if body.all_projects else project_id, body.domain, body.title,
+                body.content, "user", evidence=body.sources, tags=body.tags)
+
+
+@app.post("/api/v1/memory/{item_id}/decision")
+def memory_decide(item_id: str, body: MemoryDecisionIn):
+    return _mem(memory_store.decide, store, item_id, body.approve, "user", body.note)
+
+
+@app.post("/api/v1/memory/{item_id}/correct")
+def memory_correct(item_id: str, body: MemoryCorrectIn):
+    """Replace a memory with a corrected version; the old one is kept and marked superseded."""
+    return _mem(memory_store.correct, store, item_id, body.title, body.content, "user", body.sources)
+
+
+@app.post("/api/v1/projects/{project_id}/memory/refresh")
+def memory_refresh(project_id: str):
+    """Re-read recorded loop outcomes into memory (normally automatic) and rewrite memory/remembered.md."""
+    _project(project_id)
+    return {"added": memory_store.ingest_loops(store, project_id)}
 
 
 @app.post("/api/v1/projects/{project_id}/files", status_code=201)

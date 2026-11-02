@@ -55,7 +55,6 @@ const TOOLS: Item[] = [
   { href: "/tools?section=evidence", label: "Evidence Center", icon: "evidence" },
   { href: "/tools", label: "All Tools & Skills", icon: "tools" },
   { href: "/agents", label: "Agent Directory", icon: "bot" },
-  { href: "/memory", label: "Research Memory", icon: "brain" },
   { href: "/results", label: "Results", icon: "results" },
   { href: "/runs", label: "Run History", icon: "clock" },
 ];
@@ -174,6 +173,9 @@ export function Sidebar() {
         </Link>
         <Link href="/library" title="Library" className={row(active("/library"))}>
           <Icon d={I.book} /><span className={wide ? "" : "lg:hidden"}>Library</span>
+        </Link>
+        <Link href="/memory" title="Memory" className={row(active("/memory"))}>
+          <Icon d={I.brain} /><span className={wide ? "" : "lg:hidden"}>Memory</span>
         </Link>
         <Link href="/projects" title="Papers" className={`${row(path === "/projects")} ${wide ? "lg:hidden" : ""}`}>
           <Icon d={I.doc} /><span className="lg:hidden">Papers</span>

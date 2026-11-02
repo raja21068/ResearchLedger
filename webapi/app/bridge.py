@@ -208,6 +208,8 @@ def complete(store: Store, run_id: str, summary: str, failed: bool = False, clai
         if not workspace.is_build_output(rel) and rel != memory.MEMORY_PATH:
             produced.append(rel)
     versions.safe_sync(store, run["project_id"], "agent", run_id)
+    from . import memory_store
+    memory_store.safe(memory_store.ingest_proposals, store, run["project_id"], run_id)
     if summary.strip():
         store.add_event(run_id, "assistant_text", {"text": summary[:20000]})
     if produced:

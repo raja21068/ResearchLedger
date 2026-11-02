@@ -138,9 +138,20 @@ or **Restore** it. Restoring adds a new version, so you can always undo it. The 
 - **Trash:** deleted files are listed on the project's **Trash** page, ready to bring back.
 - **Backups:** the database is copied and checked every day, and the last 14 copies are kept in
   `webapi_dataackups\`. **Settings → Backups and safety check** has *Back up now* and *Check everything*.
-  To restore a backup, stop the server and copy the backup over `webapi_dataesearchledger_web.sqlite3`.
+  To restore a backup, stop the server and copy the backup over `webapi_data
+esearchledger_web.sqlite3`.
 
 ---
+
+**Memory.** The **Memory** page (left sidebar) lists what earlier work found, by kind:
+- **Failures:** ideas that did not pass scoring, and pre-registered experiments that were not supported.
+- **Decisions, experiment results, strategies and literature notes.**
+
+Finished idea rounds and experiments are recorded automatically, with links to their files. Agents read the
+active memories before every task (`memory/remembered.md`), so they do not repeat a failed direction. When an agent
+suggests something worth remembering, it appears in **Decisions** as *Remember this / Reject*. To fix a memory,
+click **Correct**: the old version is kept and marked as replaced. Your own free-form notes are under
+**Memory → Project notes**.
 
 ## 8. Your own prompts and the offline skills pack (optional)
 

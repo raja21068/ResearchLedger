@@ -105,11 +105,36 @@ CREATE INDEX IF NOT EXISTS artifacts_project_path ON artifacts(project_id, path)
 """)
 
 
+def _add_memory_store(c: sqlite3.Connection) -> None:
+    # Research memory v2 (memory_store.py): typed, sourced, append-only history; FTS5 index for search.
+    c.executescript("""
+CREATE TABLE IF NOT EXISTS memory_items (
+  id TEXT PRIMARY KEY, project_id TEXT REFERENCES projects(id),
+  domain TEXT NOT NULL CHECK (domain IN ('literature','decision','experiment','failure','strategy')),
+  title TEXT NOT NULL, content TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('proposed','active','needs_review','superseded','rejected')),
+  origin TEXT NOT NULL CHECK (origin IN ('system','user','agent')), source_key TEXT UNIQUE,
+  confidence TEXT NOT NULL DEFAULT 'unassessed', tags TEXT NOT NULL DEFAULT '[]',
+  supersedes TEXT REFERENCES memory_items(id), conflict_with TEXT REFERENCES memory_items(id),
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS memory_items_project ON memory_items(project_id, status, domain);
+CREATE TABLE IF NOT EXISTS memory_evidence (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, item_id TEXT NOT NULL REFERENCES memory_items(id),
+  kind TEXT NOT NULL, ref TEXT NOT NULL, quote TEXT, created_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS memory_evidence_item ON memory_evidence(item_id);
+CREATE TABLE IF NOT EXISTS memory_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, item_id TEXT NOT NULL REFERENCES memory_items(id),
+  ts TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL, detail TEXT NOT NULL);
+CREATE VIRTUAL TABLE IF NOT EXISTS memory_fts USING fts5(item_id UNINDEXED, title, content, tags);
+""")
+
+
 # Ordered, append-only. Each step must be safe on a database that already has its effect (older databases
 # were migrated ad hoc before this table existed). Never edit or reorder a released step; add a new one.
 MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes),
               (3, "file versions", _add_file_versions),
-              (4, "backups table, artifacts.project_id foreign key", _backups_and_artifact_fk)]
+              (4, "backups table, artifacts.project_id foreign key", _backups_and_artifact_fk),
+              (5, "research memory v2", _add_memory_store)]
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
 

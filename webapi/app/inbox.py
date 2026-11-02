@@ -35,7 +35,7 @@ def dismiss(key: str) -> None:
 
 def _key(item: dict) -> str:
     return ":".join(str(item.get(k) or "") for k in ("kind", "project_id", "stage_id", "loop_id", "loop_state",
-                                                     "conversation_id", "run_id", "status", "stage"))
+                                                     "conversation_id", "run_id", "status", "stage", "memory_id"))
 
 
 def _summary(store: Store, run_id: str | None) -> str | None:
@@ -112,6 +112,15 @@ def build(store: Store) -> dict:
             retry.append({**item, "status": "failed", "error": r["error"]})
         else:
             running.append({**item, "status": r["status"]})
+    # Memories waiting for the user: proposed by an agent, or flagged as a possible conflict.
+    for m in store.all("SELECT m.id, m.project_id, m.domain, m.title, m.content, m.status, m.conflict_with, "
+                       "p.title project FROM memory_items m LEFT JOIN projects p ON p.id=m.project_id "
+                       "WHERE m.status IN ('proposed','needs_review') ORDER BY m.created_at DESC LIMIT 50"):
+        other = store.one("SELECT title FROM memory_items WHERE id=?", (m["conflict_with"],)) if m["conflict_with"] else None
+        approve.append({"kind": "memory", "memory_id": m["id"], "project_id": m["project_id"],
+                        "project": m["project"] or "All projects", "paper": m["title"],
+                        "stage": f"Memory · {m['domain']}" + (" · possible conflict" if m["status"] == "needs_review" else ""),
+                        "summary": (f"Looks like it conflicts with: {other['title']}. " if other else "") + m["content"][:400]})
     hidden = dismissed()
     for x in approve + retry:
         x["key"] = _key(x)
