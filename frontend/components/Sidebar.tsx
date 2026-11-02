@@ -202,6 +202,7 @@ export function Sidebar() {
                         <Link href={`/loops?project=${p.id}`} className="text-accent hover:underline">Loops</Link>
                         <Link href={`/quality?project=${p.id}`} className="text-accent hover:underline">Check</Link>
                         <Link href={`/projects/${p.id}/lab`} className="text-accent hover:underline">Experiments</Link>
+                        <Link href={`/projects/${p.id}/evidence`} className="text-accent hover:underline">Evidence</Link>
                         <Link href={`/results?project=${p.id}`} className="text-accent hover:underline">Results</Link>
                       </div>
                       {docs.map((d) => (

@@ -126,6 +126,7 @@ export default function PaperHome() {
         <Link className={btn2} href={`/loops?project=${id}`}>Review and fix / improve idea</Link>
         <Link className={btn2} href={`/loops?project=${id}&type=experiment`}>Run experiments</Link>
         <Link className={btn2} href={`/projects/${id}/lab`}>Experiment records</Link>
+        <Link className={btn2} href={`/projects/${id}/evidence`}>Evidence</Link>
         <Link className={btn2} href={`/quality?project=${id}`}>Submission check</Link>
         <Link className={btn2} href={`/trash/${id}`}>Trash</Link>
       </div>

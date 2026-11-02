@@ -154,6 +154,19 @@ progress and a live log. Tick two runs and click **Compare** to see which values
 **Repeat** runs the same commands again as a new, separate record and leaves your project's results as they were,
 so you can check that a result reproduces. Each run's receipt is kept in `results/receipts/`.
 
+**Evidence.** A project's **Evidence** page is its ResearchLedger:
+- **Sealed runs (R####):** every experiment run with measured values, recorded tamper-evidently and marked "not
+  independently reproduced".
+- **Evidence (E###):** each one starts as *observed* (recorded by a run, not reviewed). Only you change that: mark
+  it *checked* (you reviewed it), *verified* (confirmed, e.g. a repeat gave the same values) or *invalid*, and give
+  a short reason that is kept with it.
+- **Claims (C###):** pre-registered experiments become claims automatically; you can add your own. A claim's status
+  (hypothesis, provisional, supported, contradicted, withdrawn) is worked out by the ledger from its evidence and is
+  never set by hand.
+
+**Trace** shows the full chain from claim to evidence to run. These checks support your judgment; they are not
+proof of correctness or publication readiness.
+
 **Memory.** The **Memory** page (left sidebar) lists what earlier work found, by kind:
 - **Failures:** ideas that did not pass scoring, and pre-registered experiments that were not supported.
 - **Decisions, experiment results, strategies and literature notes.**
