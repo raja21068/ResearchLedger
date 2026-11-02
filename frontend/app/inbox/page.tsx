@@ -14,7 +14,15 @@ interface Item {
   kind: "paper_stage" | "plan" | "manual_start" | "run" | "loop"; project_id: string; project: string; paper: string;
   stage: string; stage_id?: string; step?: string; summary?: string | null; outputs?: string[]; next?: string | null;
   autopilot?: boolean; conversation_id?: string; steps?: string[]; blocked?: boolean; status?: string; error?: string | null;
-  run_id?: string; loop_id?: string; loop_state?: "finished" | "paused"; loop_type?: string;
+  run_id?: string; loop_id?: string; loop_state?: "finished" | "paused"; loop_type?: string; key?: string;
+}
+
+function DismissButton({ item, onDone }: { item: Item; onDone: () => void }) {
+  if (!item.key) return null;
+  return (
+    <button className="ml-auto text-xs text-faint hover:text-ink" title="Hide this. It comes back if anything about it changes."
+      onClick={() => post("/inbox/dismiss", { key: item.key }).then(onDone).catch(() => {})}>Dismiss</button>
+  );
 }
 interface Inbox { approve: Item[]; retry: Item[]; running: Item[]; counts: { approve: number; retry: number; running: number } }
 
@@ -26,8 +34,7 @@ export default function InboxPage() {
 
   return (
     <main className="mx-auto max-w-[900px] px-4 py-8 sm:px-8">
-      <PageHeader title="Approvals"
-        sub="Everything waiting for you, in one place. Approve and the work continues by itself; ask for changes and the agent redoes that step." />
+      <PageHeader title="Decisions" sub="What is waiting for you. Approve and the work continues; dismiss what you don't need." />
       <ErrorBox error={error} />
       {inbox && inbox.counts.approve + inbox.counts.retry + inbox.counts.running === 0 && (
         <Empty title="Nothing needs you right now">Start something from <Link className="text-accent underline" href="/">New task</Link> or <Link className="text-accent underline" href="/paper">Paper Studio</Link>.</Empty>
@@ -35,7 +42,7 @@ export default function InboxPage() {
 
       {inbox && inbox.approve.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-[.1em] text-faint">Needs your approval · {inbox.approve.length}</h2>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-[.1em] text-faint">Needs you · {inbox.approve.length}</h2>
           <div className="space-y-3">{inbox.approve.map((it, i) => <ApproveCard key={i} item={it} onDone={load} />)}</div>
         </section>
       )}
@@ -142,6 +149,7 @@ function ApproveCard({ item, onDone }: { item: Item; onDone: () => void }) {
             Approve plan and run
           </button>
         )}
+        <DismissButton item={item} onDone={onDone} />
       </div>
       {asking && (
         <div className="mt-3 space-y-2">
@@ -162,7 +170,7 @@ function RetryCard({ item, onDone }: { item: Item; onDone: () => void }) {
     <article className="rounded-2xl border border-[#ecd0cc] bg-white p-5">
       <Header item={item} />
       <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#7f1d1d]">{item.error}</p>
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex items-center gap-2">
         {item.kind === "loop" ? (
           <button className={btn} disabled={busy} onClick={async () => {
             setBusy(true); setError(null);
@@ -178,6 +186,7 @@ function RetryCard({ item, onDone }: { item: Item; onDone: () => void }) {
         ) : (
           <Link className={btn2} href={`/projects/${item.project_id}?conv=${item.conversation_id}`}>Open the chat</Link>
         )}
+        <DismissButton item={item} onDone={onDone} />
       </div>
       {error ? <div className="mt-3"><ErrorBox error={error} /></div> : null}
     </article>

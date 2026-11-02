@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { ConnectBar } from "@/components/BridgeStatus";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased">
         <div className="flex min-h-screen flex-col lg:flex-row">
           <Suspense><Sidebar /></Suspense>
-          <div className="min-w-0 flex-1">{children}</div>
+          <div className="min-w-0 flex-1"><ConnectBar />{children}</div>
         </div>
       </body>
     </html>

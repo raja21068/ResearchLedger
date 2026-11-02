@@ -238,7 +238,8 @@ export default function ProjectStudio({ params }: { params: Promise<{ id: string
         )}
         {project?.kind === "paper" && (
           <nav aria-label="This paper" className="flex gap-3 text-sm">
-            <Link className="text-accent hover:underline" href={`/projects/${id}/paper`}>Paper</Link>
+            <Link className="text-accent hover:underline" href={`/projects/${id}/home`}>Overview</Link>
+            <Link className="text-accent hover:underline" href={`/projects/${id}/paper`}>Writing</Link>
             <Link className="text-accent hover:underline" href={`/loops?project=${id}`}>Loops</Link>
             <Link className="text-accent hover:underline" href={`/quality?project=${id}`}>Check</Link>
             <Link className="text-accent hover:underline" href={`/results?project=${id}`}>Results</Link>

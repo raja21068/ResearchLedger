@@ -41,7 +41,7 @@ interface Item { href: string; label: string; icon: IconName }
 const TOOLS: Item[] = [
   { href: "/dashboard", label: "Overview", icon: "home" },
   { href: "/paper", label: "Paper Studio", icon: "pen" },
-  { href: "/loops", label: "Research Loops", icon: "loop" },
+  { href: "/loops", label: "Loops", icon: "loop" },
   { href: "/brainstorm", label: "Idea Discovery", icon: "spark" },
   { href: "/tools/literature_review", label: "Literature Review", icon: "lit" },
   { href: "/tools/research_design", label: "Research Design", icon: "design" },
@@ -188,14 +188,15 @@ export function Sidebar() {
               {papers.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">Long projects appear here — start one by asking to write a paper.</p>}
               {shownPapers.map((p) => (
                 <div key={p.id}>
-                  <Link href={`/projects/${p.id}`} title={p.title}
+                  <Link href={`/projects/${p.id}/home`} title={p.title}
                     className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] ${projectId === p.id ? "bg-[#e9e5dd] font-semibold text-ink" : "text-[#4d4a44] hover:bg-[#edeae4]"}`}>
                     {dot(paperStatus(p.id)) ?? <Icon d={I.doc} />}<span className="min-w-0 truncate">{p.title}</span>
                   </Link>
                   {projectId === p.id && (
                     <div className="mb-1 ml-9 mt-0.5 text-xs">
                       <div className="flex flex-wrap gap-x-2.5">
-                        <Link href={`/projects/${p.id}/paper`} className="text-accent hover:underline">Paper</Link>
+                        <Link href={`/projects/${p.id}`} className="text-accent hover:underline">Chat</Link>
+                        <Link href={`/projects/${p.id}/paper`} className="text-accent hover:underline">Writing</Link>
                         <Link href={`/loops?project=${p.id}`} className="text-accent hover:underline">Loops</Link>
                         <Link href={`/quality?project=${p.id}`} className="text-accent hover:underline">Check</Link>
                         <Link href={`/results?project=${p.id}`} className="text-accent hover:underline">Results</Link>

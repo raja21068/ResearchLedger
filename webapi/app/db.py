@@ -52,7 +52,7 @@ def new_id(prefix: str) -> str:
 
 
 class Store:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, keep_agent_runs: bool = False):
         path.parent.mkdir(parents=True, exist_ok=True)
         self.path = path
         self._lock = threading.Lock()
@@ -61,9 +61,20 @@ class Store:
             # 'paper' = a long project with stages; 'quick' = a one-off job (review a PDF, check references, ...).
             if "kind" not in {r[1] for r in c.execute("PRAGMA table_info(projects)")}:
                 c.execute("ALTER TABLE projects ADD COLUMN kind TEXT NOT NULL DEFAULT 'paper'")
-            # A server restart orphans any in-flight run: record that honestly.
-            c.execute("UPDATE runs SET status='failed', error='server restarted while run was active', "
-                      "finished_at=? WHERE status IN ('queued','running')", (now(),))
+            ts = now()
+            if keep_agent_runs:
+                # Claude app bridge: agent tasks live in the queue, not in this process, so a restart loses nothing.
+                # A task a worker had claimed goes back to the queue (its claim token was in memory).
+                for r in c.execute("SELECT id FROM runs WHERE status='running' AND provider='claude_code_cli'").fetchall():
+                    c.execute("UPDATE runs SET status='queued', started_at=NULL WHERE id=?", (r[0],))
+                    c.execute("INSERT INTO run_events(run_id,ts,kind,payload) VALUES (?,?,?,?)",
+                              (r[0], ts, "status", json.dumps({"text": "Re-queued: the server restarted"})))
+                c.execute("UPDATE runs SET status='failed', error='server restarted while run was active', "
+                          "finished_at=? WHERE status IN ('queued','running') AND provider!='claude_code_cli'", (ts,))
+            else:
+                # A process-run task (CLI agent, server experiment run) died with the server: record that honestly.
+                c.execute("UPDATE runs SET status='failed', error='server restarted while run was active', "
+                          "finished_at=? WHERE status IN ('queued','running')", (ts,))
 
     @contextmanager
     def conn(self):

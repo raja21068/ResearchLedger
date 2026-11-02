@@ -20,7 +20,7 @@ from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
 
 app = FastAPI(title="ResearchLedger Web API", version="0.1.0")
-store = Store(settings.db_path)
+store = Store(settings.db_path, keep_agent_runs=bridge.executor() == "bridge")
 
 # Local single-user deployment: only loopback hosts (blocks DNS rebinding) and the
 # configured frontend origins.
@@ -296,6 +296,17 @@ def paper_autopilot(project_id: str, body: AutopilotToggleIn):
 
 @app.get("/api/v1/inbox")
 def get_inbox():
+    return inbox.build(store)
+
+
+class DismissIn(BaseModel):
+    key: str = Field(min_length=1, max_length=600)
+
+
+@app.post("/api/v1/inbox/dismiss")
+def dismiss_inbox_item(body: DismissIn):
+    """Hide one decision (it returns if its state changes). Changes nothing else."""
+    inbox.dismiss(body.key)
     return inbox.build(store)
 
 

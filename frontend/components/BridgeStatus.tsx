@@ -29,6 +29,35 @@ export function WorkerHowTo() {
   );
 }
 
+/** One slim bar on every page while the Claude app is not connected: says what that means and how to fix it. */
+export function ConnectBar() {
+  const b = useBridge(8000);
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  if (!b || b.executor !== "bridge" || b.worker_connected) return null;
+  return (
+    <div className="border-b border-[#f0d2ac] bg-[#fff8ef] px-4 py-2 text-sm">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="h-2 w-2 flex-none rounded-full bg-[#b64b43]" aria-hidden="true" />
+        <span className="font-medium text-[#7a3a06]">Claude isn&apos;t connected</span>
+        <span className="text-muted">{b.queued > 0 ? `${b.queued} task${b.queued > 1 ? "s are" : " is"} waiting for it.` : "New tasks will wait until it is."}</span>
+        <button className="font-medium text-accent underline" onClick={() => setOpen(!open)} aria-expanded={open}>{open ? "Hide steps" : "Connect Claude"}</button>
+      </div>
+      {open && (
+        <div className="mt-2 grid gap-2 pb-1">
+          <WorkerHowTo />
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <button className="rounded-md border border-line bg-white px-2 py-1 font-mono"
+              onClick={() => { navigator.clipboard?.writeText("/rl-worker").then(() => setCopied(true)).catch(() => {}); }}>
+              {copied ? "Copied" : "Copy /rl-worker"}</button>
+            <span className="text-faint">This bar disappears as soon as the worker connects. Or switch to the Claude Code CLI under Settings.</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function BridgeBanner({ waiting }: { waiting: boolean }) {
   const b = useBridge();
   if (!b || b.executor !== "bridge" || (b.worker_connected && !waiting)) return null;

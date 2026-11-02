@@ -35,7 +35,7 @@ export default function LoopPage() {
 
   return (
     <main className="mx-auto max-w-[1000px] px-4 py-8 sm:px-8">
-      <div className="mb-2 text-sm"><Link className="text-accent underline" href={`/loops?project=${id}`}>← Research Loops</Link></div>
+      <div className="mb-2 text-sm"><Link className="text-accent underline" href={`/loops?project=${id}`}>← Loops</Link></div>
       <PageHeader title={v.label} sub={v.goal}
         actions={<span className={`rounded-full px-3 py-1 text-xs font-semibold ${cls}`}>{label}</span>} />
       <ErrorBox error={error} />
@@ -100,11 +100,11 @@ export default function LoopPage() {
       {v.needs_experiments && v.needs_experiments.length > 0 && (
         <Card className="mb-6 border-[#f0d9a8] p-5">
           <h2 className="text-sm font-semibold">Experiments the reviewers asked for — your decision</h2>
-          <p className="mt-1 text-xs text-muted">This loop never runs or invents these, and editing alone cannot close them. An Experiment loop can run them — only after you approve the code.</p>
+          <p className="mt-1 text-xs text-muted">This loop never runs or invents these, and editing alone cannot close them. "Run experiments" can run them — only after you approve the code.</p>
           <ul className="mt-2 space-y-1 text-sm">
             {v.needs_experiments.map((e) => <li key={e.id}><b>{e.id}</b> (round {e.round}): {e.concern || e.reason}{e.concern && e.reason ? <span className="text-faint"> — {e.reason}</span> : null}</li>)}
           </ul>
-          <Link className={`${btn2} mt-3`} href={`/loops?project=${id}&type=experiment&from=${loop}`}>Run these in an Experiment loop</Link>
+          <Link className={`${btn2} mt-3`} href={`/loops?project=${id}&type=experiment&from=${loop}`}>Run these experiments</Link>
         </Card>
       )}
 
@@ -133,7 +133,7 @@ function ExperimentPanel({ v, view }: { v: Loop; view: (p: string) => string }) 
   const measured = Object.entries(v.measured ?? {});
   return (
     <Card className="mb-6 p-5">
-      <h2 className="text-sm font-semibold">Pre-registered plan</h2>
+      <h2 className="text-sm font-semibold">Plan, locked before running</h2>
       <p className="mt-1 text-xs text-muted">Frozen {new Date(pre.frozen_at).toLocaleString()} before any code ran (sha256 {pre.sha256.slice(0, 12)}…). Hypotheses and success criteria cannot change afterwards.</p>
       <ul className="mt-3 space-y-2 text-sm">
         {pre.experiments.map((e) => (
@@ -165,7 +165,7 @@ function ExperimentPanel({ v, view }: { v: Loop; view: (p: string) => string }) 
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-xs text-faint">Every value was written by the server&apos;s own run of the approved script. Full record: provenance/experiments.json. Next: a Review → fix loop can now put these numbers in the paper — its number check accepts them.</p>
+          <p className="mt-2 text-xs text-faint">Every value was written by the server&apos;s own run of the approved script. Full record: provenance/experiments.json. Next: "Review and fix" can now put these numbers in the paper.</p>
         </>
       )}
     </Card>

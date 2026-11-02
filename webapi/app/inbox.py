@@ -6,10 +6,36 @@ existing endpoints (approve stage, run stage with feedback, approve plan).
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 
 from . import director, loops, paper_studio
-from .db import Store
+from .config import settings
+from .db import Store, now
+
+
+def _dismissed_file():
+    return settings.data_dir / "inbox_dismissed.json"
+
+
+def dismissed() -> dict:
+    try:
+        return json.loads(_dismissed_file().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def dismiss(key: str) -> None:
+    """Hide one decision. Its key includes its state, so it comes back if anything about it changes."""
+    d = dismissed()
+    d[key] = now()
+    _dismissed_file().parent.mkdir(parents=True, exist_ok=True)
+    _dismissed_file().write_text(json.dumps(d, indent=2), encoding="utf-8")
+
+
+def _key(item: dict) -> str:
+    return ":".join(str(item.get(k) or "") for k in ("kind", "project_id", "stage_id", "loop_id", "loop_state",
+                                                     "conversation_id", "run_id", "status", "stage"))
 
 
 def _summary(store: Store, run_id: str | None) -> str | None:
@@ -86,6 +112,11 @@ def build(store: Store) -> dict:
             retry.append({**item, "status": "failed", "error": r["error"]})
         else:
             running.append({**item, "status": r["status"]})
+    hidden = dismissed()
+    for x in approve + retry:
+        x["key"] = _key(x)
+    approve = [x for x in approve if x["key"] not in hidden]
+    retry = [x for x in retry if x["key"] not in hidden]
     return {"approve": approve, "retry": retry, "running": running,
             "counts": {"approve": len(approve), "retry": len(retry), "running": len(running)}}
 

@@ -82,7 +82,7 @@ function ProjectsInner() {
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {projects?.map((p) => (
-          <Link key={p.id} href={`/projects/${p.id}`} className="rounded-xl border border-line bg-white p-4 hover:border-accent">
+          <Link key={p.id} href={kind === "paper" ? `/projects/${p.id}/home` : `/projects/${p.id}`} className="rounded-xl border border-line bg-white p-4 hover:border-accent">
             <div className="font-semibold">{p.title}</div>
             {p.domain && <div className="mt-0.5 text-sm text-accent">{p.domain}</div>}
             <p className="mt-2 line-clamp-3 text-sm text-muted">{p.description || "No description."}</p>

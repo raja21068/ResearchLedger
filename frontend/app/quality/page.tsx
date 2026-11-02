@@ -61,7 +61,7 @@ export default function QualityPage() {
   return (
     <main className="mx-auto max-w-[1000px] px-4 py-8 sm:px-8">
       <PageHeader title="Quality Check"
-        sub="The checks that sank or saved your earlier papers, run by the server: no placeholders, every citation real and in the .bib, every number in tables and abstract traced to results/*.json, vector figures, page budget, calibrated claims, and the same length and shape as your example paper." />
+        sub="Is it ready to submit? Checks placeholders, references, numbers, figures, page count and wording." />
       <ErrorBox error={error || pErr} />
 
       <Card className="mb-6 p-6">
@@ -110,7 +110,7 @@ export default function QualityPage() {
             <span className={`rounded-full px-3 py-1 text-sm font-semibold ${report.ready ? TONE.pass : TONE.fail}`}>
               {report.ready ? "No failing check" : `${report.counts.fail} failing check(s)`}</span>
             <span className="text-sm text-muted">{report.counts.warn} warning(s) · {report.tex} · {new Date(report.checked_at).toLocaleString()}</span>
-            <Link className="ml-auto text-sm text-accent underline" href={`/loops?project=${projectId}`}>Fix in a Review → fix loop</Link>
+            <Link className="ml-auto text-sm text-accent underline" href={`/loops?project=${projectId}`}>Fix with "Review and fix"</Link>
           </div>
           <div className="space-y-3">
             {report.checks.map((c) => (

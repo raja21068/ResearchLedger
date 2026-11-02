@@ -14,9 +14,9 @@ import type { WorkspaceFile } from "@/lib/types";
 import { btn, Card, Empty, ErrorBox, PageHeader, timeAgo } from "@/components/ui";
 
 const FLOW: Record<string, string[]> = {
-  idea_forge: ["Attack: search 50+ recent papers", "Score: your Phase 10 rubric /100", "Redesign the idea", "Repeat until it passes"],
-  review_fix: ["Strict review of the PDF", "Fix instructions (MD) for the agent", "Surgical fix + recompile", "Re-review until clean"],
-  experiment: ["Pre-registered plan (frozen)", "Agent writes the code", "You approve → server runs it", "Analysis checked vs criteria"],
+  idea_forge: ["Search 50+ recent papers", "Score it /100", "Redesign it", "Repeat until it passes"],
+  review_fix: ["Strict review", "Fix plan", "Small exact edits + new PDF", "Review again until clean"],
+  experiment: ["Plan, locked first", "Code is written", "You approve, it runs", "Results checked vs plan"],
 };
 
 export default function LoopsPage() {
@@ -89,8 +89,8 @@ export default function LoopsPage() {
 
   return (
     <main className="mx-auto max-w-[1000px] px-4 py-8 sm:px-8">
-      <PageHeader title="Research Loops"
-        sub="The rounds you used to drive prompt by prompt, run for you. The server checks every round itself — references looked up, review quotes found in the paper, edits kept surgical — and stops when the result passes or stops improving." />
+      <PageHeader title="Loops"
+        sub="Repeat a job round after round until it passes. Every round is checked by the server, and it stops when the result is good enough or stops improving." />
       <ErrorBox error={error || pErr} />
 
       <Card className="mb-8 p-6">

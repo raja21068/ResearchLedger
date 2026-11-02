@@ -60,17 +60,17 @@ CONCERN_COLS = ["id", "severity", "location", "concern", "quote", "verification"
 
 TYPES = {
     "idea_forge": {
-        "label": "Idea forge", "icon": "idea",
-        "pitch": "Attack the idea with a 50+ paper novelty search, score it on your Phase 10 rubric, redesign it, "
+        "label": "Improve an idea", "icon": "idea",
+        "pitch": "Search 50+ papers for anything that already does it, score it out of 100, redesign it — "
                  "and repeat until it passes or stops improving.",
         "moves": ["attack", "score", "redesign"],
         "params": {"min_papers": 50, "target_total": 75, "target_novelty": 14, "max_rounds": 4,
                    "plateau_points": 3, "candidates": 5, "verify_sample": 12},
     },
     "review_fix": {
-        "label": "Review → fix → re-review", "icon": "review",
-        "pitch": "A strict reviewer reads the PDF, writes a fix plan for the agent, the agent fixes the LaTeX "
-                 "surgically and recompiles, and a fresh review checks again — until no verified major concern is left.",
+        "label": "Review and fix", "icon": "review",
+        "pitch": "A strict review, a fix plan, small exact edits to your LaTeX and a new PDF — then a fresh "
+                 "review, until no real major problem is left or your score targets are met.",
         "moves": ["review", "plan", "fix"],
         # The user's own stop thresholds (Paper Factory S5) on the Referee-Lean 1-10 scale.
         "params": {"max_rounds": 3, "max_change_ratio": 0.35, "target_quality": 8.0, "target_impact": 9.0,
@@ -78,20 +78,20 @@ TYPES = {
                    "target_pages": 0, "target_refs": 40},
     },
     "experiment": {
-        "label": "Experiment loop", "icon": "flask",
-        "pitch": "The experiments a reviewer asked for, really run: a pre-registered plan, code, a run on this computer "
-                 "after your click, and an analysis the server checks against the frozen success criteria.",
+        "label": "Run experiments", "icon": "flask",
+        "pitch": "The experiments a reviewer asked for, really run: a plan locked before anything runs, code, a run on "
+                 "this computer after your click, and results checked against the plan.",
         "moves": ["design", "code", "run", "analyze"],
         "params": {"max_rounds": 3, "max_minutes": 30},
     },
 }
 SCORE_KEYS = ["quality", "impact", "novelty", "methods", "readiness"]
 TRIAGE = {"text_fix", "new_analysis", "new_experiment", "reject"}
-MOVE_LABELS = {"seed": "Generate and rank candidate ideas", "attack": "Novelty attack (literature search)",
-               "score": "Score (Phase 10 rubric)", "redesign": "Redesign the idea", "review": "Strict review",
-               "plan": "Fix instructions for the agent", "fix": "Surgical fix + recompile",
-               "design": "Pre-registered experiment plan", "code": "Write the experiment code",
-               "run": "Run on this computer (server)", "analyze": "Analyse against the criteria"}
+MOVE_LABELS = {"seed": "Generate and rank candidate ideas", "attack": "Search for competing papers",
+               "score": "Score the idea (/100)", "redesign": "Redesign the idea", "review": "Strict review",
+               "plan": "Fix plan", "fix": "Fix and recompile",
+               "design": "Plan (locked before running)", "code": "Write the experiment code",
+               "run": "Run on this computer", "analyze": "Check results against the plan"}
 MAX_ATTEMPTS = 2
 EXP_ID = r"[A-Za-z][A-Za-z0-9_\-]{0,40}"
 SLOT_ID = r"[A-Za-z0-9_.\-]{1,80}"
