@@ -1,0 +1,1028 @@
+Rc files read (in order):
+  NONE
+Latexmk: This is Latexmk, John Collins, 9 March 2026. Version 4.88.
+Latexmk: Getting log file 'main.log'
+Latexmk: Examining 'main.log'
+Latexmk: Found input bbl file 'main.bbl'
+Latexmk: Log file says output to 'main.pdf'
+Latexmk: Using biber to make bibliography file(s).
+Latexmk: Bibliography file(s) from .bcf file:
+  ref.bib
+Sources for biber
+  ref.bib
+  main.bcf
+Latexmk: applying rule 'biber main'...
+Rule 'biber main':  Reasons for rerun
+Category 'other':
+  Rerun of 'biber main' forced or previously required:
+    Reason or flag: 'Initial set up of rule'
+
+------------
+Run number 1 of rule 'biber main'
+------------
+------------
+Running 'biber  "main.bcf"'
+------------
+INFO - This is Biber 2.21
+INFO - Logfile is 'main.blg'
+INFO - Reading 'main.bcf'
+INFO - Found 30 citekeys in bib section 0
+INFO - Processing section 0
+INFO - Looking for bibtex file 'ref.bib' for section 0
+INFO - LaTeX decoding ...
+INFO - Found BibTeX data source 'ref.bib'
+INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+INFO - No sort tailoring available for locale 'en-US'
+INFO - Writing 'main.bbl' with encoding 'UTF-8'
+INFO - Output to main.bbl
+biber: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Found biber source file(s) [main.bcf, ref.bib]
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  figs/fig_design.pdf
+  figs/fig_framework.pdf
+  figs/fig_reg.pdf
+  figs/fig_scale.pdf
+  figs/fig_sup.pdf
+  figs/fig_support.pdf
+  main.aux
+  main.bbl
+  main.out
+  main.tex
+Category 'changed_user':
+  figs/fig_design.pdf
+  figs/fig_framework.pdf
+  figs/fig_reg.pdf
+  figs/fig_scale.pdf
+  figs/fig_sup.pdf
+  figs/fig_support.pdf
+  main.tex
+Category 'never_run':
+  pdflatex
+
+------------
+Run number 1 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "main.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ieeetran\IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefineke
+ys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.sty
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettitle
+string.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty))
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc.s
+ty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfilec
+heck.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquecou
+nter.sty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amscls\amsthm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-pdfte
+x.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.cfg))
+ (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-dm.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-compat.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric-comp
+.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\standard.bbx
+))))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.cbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/cbx\numeric-verb
+.cbx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdfte
+x.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-expl3.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.
+sty))) (main.aux)
+-- Lines per column: 58 (exact).
+(main.out) (main.out)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-bas
+e.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+)) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-ptm.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/lbx\english.lbx)
+(main.bbl)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg)
+
+LaTeX Warning: Citation 'boiko2023coscientist' on page 1 undefined on input lin
+e 61.
+
+
+LaTeX Warning: Citation 'bran2024chemcrow' on page 1 undefined on input line 61
+.
+
+
+LaTeX Warning: Citation 'swanson2025virtuallab' on page 1 undefined on input li
+ne 61.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 61--62
+[]\T1/ptm/m/n/10 (+20) ESEARCH agents now search lit-er-a-ture,
+
+Underfull \hbox (badness 10000) in paragraph at lines 61--62
+\T1/ptm/m/n/10 (+20) for-mu-late hy-pothe-ses, run code and draft
+
+Underfull \hbox (badness 10000) in paragraph at lines 61--62
+\T1/ptm/m/n/10 (+20) manuscripts [], [],
+
+Underfull \hbox (badness 6188) in paragraph at lines 61--62
+[]\T1/ptm/m/n/10 (+20) , [[][]3[][]]. Pa-per2Agent ex-tends this
+[1{C:/Users/SAM/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
+Overfull \hbox (1.34991pt too wide) in paragraph at lines 75--76
+[]\T1/ptm/b/n/10 (-20) Transactional integrity\T1/ptm/m/n/10 (-20) : typed life
+cycles and invariants $\OML/cmm/m/it/10 I[]$\T1/ptm/m/n/10 (-20) --
+
+Underfull \hbox (badness 1360) in paragraph at lines 78--79
+\T1/ptm/m/n/10 (+20) ex-per-i-ments, 13 gen-uine his-tor-i-cal re-vi-sions pass
+ed
+
+Underfull \hbox (badness 3229) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) re-main-ing con-fir-ma-tory study uses na-tive old/new
+
+Underfull \hbox (badness 2717) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) executable-paper-agent tra-jec-to-ries, blind an-no-ta-tio
+n,
+
+LaTeX Warning: Citation 'boiko2023coscientist' on page 2 undefined on input lin
+e 86.
+
+
+LaTeX Warning: Citation 'bran2024chemcrow' on page 2 undefined on input line 86
+.
+
+
+LaTeX Warning: Citation 'swanson2025virtuallab' on page 2 undefined on input li
+ne 86.
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd) [2 <./fi
+gs/fig_framework.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 105--106
+[]\T1/ptm/m/it/10 (+20) Registered re-search state \T1/ptm/m/n/10 (+20) is the 
+set of recorded
+
+Underfull \hbox (badness 2111) in paragraph at lines 105--106
+\T1/ptm/m/n/10 (+20) commitments---runs $\OML/cmm/m/it/10 U$\T1/ptm/m/n/10 (+20
+) , ev-i-dence records $\OML/cmm/m/it/10 E$\T1/ptm/m/n/10 (+20) , claims $\OML/
+cmm/m/it/10 C$\T1/ptm/m/n/10 (+20) ,
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Non-epistemic
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Ledger-live / ledger-
+[3]
+Underfull \vbox (badness 10000) has occurred while \output is active [4]
+[5 <./figs/fig_support.pdf>]
+Underfull \hbox (badness 2310) in paragraph at lines 231--232
+[]\T1/ptm/m/n/10 (+20) TRL is a model-agnostic Python layer (typed dat-a-
+
+Underfull \hbox (badness 2080) in paragraph at lines 231--232
+\T1/ptm/m/n/10 (+20) search's 23-stage work-flow; pipeline hooks record ev-i-
+
+Overfull \hbox (3.51341pt too wide) in paragraph at lines 253--253
+[]|\T1/ptm/m/n/7 (-20) Formal/implementation 
+
+
+pdfTeX warning: pdflatex.exe (file ./figs/fig_design.pdf): PDF inclusion: found
+ PDF version <1.7>, but at most version <1.5> allowed
+[6]
+Underfull \vbox (badness 10000) has occurred while \output is active [7 <./figs
+/fig_design.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active [8 <./figs
+/fig_sup.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
+\T1/pcr/m/n/10 scanpy\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 squidpy\T1/ptm/m/n/1
+0 (+20) , \T1/pcr/m/n/10 TabPFN\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 SAELens\T1
+/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 Compass\T1/ptm/m/n/10 (+20) ,
+[9 <./figs/fig_reg.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active [10 <./fig
+s/fig_scale.pdf>] [11] [12] [13] (main.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package biblatex Warning: Please (re)run Biber on the file:
+(biblatex)                main
+(biblatex)                and rerun LaTeX afterwards.
+
+ )
+(see the transcript file for additional information)<C:/Users/SAM/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/SAM/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/SAM
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Use
+rs/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><
+C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7
+.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmmi8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr5.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr6.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmr7.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/SAM/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/SAM/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/SAM/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/SAM/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/
+SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users
+/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/SA
+M/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (13 pages, 484524 bytes).
+Transcript written on main.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Getting log file 'main.log'
+Latexmk: Examining 'main.fls'
+Latexmk: Examining 'main.log'
+Latexmk: Found input bbl file 'main.bbl'
+Latexmk: References changed.
+Latexmk: Log file says output to 'main.pdf'
+Latexmk: Using biber to make bibliography file(s).
+Latexmk: Bibliography file(s) from .bcf file:
+  ref.bib
+Sources for biber
+  ref.bib
+  main.bcf
+Latexmk: applying rule 'biber main'...
+Rule 'biber main':  Reasons for rerun
+Changed files or newly in use/created:
+  main.bcf
+
+------------
+Run number 2 of rule 'biber main'
+------------
+------------
+Running 'biber  "main.bcf"'
+------------
+INFO - This is Biber 2.21
+INFO - Logfile is 'main.blg'
+INFO - Reading 'main.bcf'
+INFO - Found 30 citekeys in bib section 0
+INFO - Processing section 0
+INFO - Looking for bibtex file 'ref.bib' for section 0
+INFO - LaTeX decoding ...
+INFO - Found BibTeX data source 'ref.bib'
+INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+INFO - No sort tailoring available for locale 'en-US'
+INFO - Writing 'main.bbl' with encoding 'UTF-8'
+INFO - Output to main.bbl
+biber: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Found biber source file(s) [main.bcf, ref.bib]
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  main.aux
+  main.bbl
+  main.run.xml
+
+------------
+Run number 2 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "main.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ieeetran\IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefineke
+ys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.sty
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettitle
+string.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty))
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc.s
+ty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfilec
+heck.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquecou
+nter.sty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amscls\amsthm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-pdfte
+x.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.cfg))
+ (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-dm.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-compat.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric-comp
+.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\standard.bbx
+))))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.cbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/cbx\numeric-verb
+.cbx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdfte
+x.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-expl3.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.
+sty))) (main.aux)
+-- Lines per column: 58 (exact).
+(main.out) (main.out)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-bas
+e.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+)) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-ptm.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/lbx\english.lbx)
+(main.bbl)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg)
+Overfull \hbox (1.34991pt too wide) in paragraph at lines 75--76
+[]\T1/ptm/b/n/10 (-20) Transactional integrity\T1/ptm/m/n/10 (-20) : typed life
+cycles and invariants $\OML/cmm/m/it/10 I[]$\T1/ptm/m/n/10 (-20) --
+[1{C:/Users/SAM/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
+Underfull \hbox (badness 1360) in paragraph at lines 78--79
+\T1/ptm/m/n/10 (+20) ex-per-i-ments, 13 gen-uine his-tor-i-cal re-vi-sions pass
+ed
+
+Underfull \hbox (badness 3229) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) re-main-ing con-fir-ma-tory study uses na-tive old/new
+
+Underfull \hbox (badness 2717) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) executable-paper-agent tra-jec-to-ries, blind an-no-ta-tio
+n,
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd) [2 <./fi
+gs/fig_framework.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 105--106
+[]\T1/ptm/m/it/10 (+20) Registered re-search state \T1/ptm/m/n/10 (+20) is the 
+set of recorded
+
+Underfull \hbox (badness 2111) in paragraph at lines 105--106
+\T1/ptm/m/n/10 (+20) commitments---runs $\OML/cmm/m/it/10 U$\T1/ptm/m/n/10 (+20
+) , ev-i-dence records $\OML/cmm/m/it/10 E$\T1/ptm/m/n/10 (+20) , claims $\OML/
+cmm/m/it/10 C$\T1/ptm/m/n/10 (+20) ,
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Non-epistemic
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Ledger-live / ledger-
+[3] [4] [5 <./figs/fig_support.pdf>]
+Underfull \hbox (badness 2310) in paragraph at lines 231--232
+[]\T1/ptm/m/n/10 (+20) TRL is a model-agnostic Python layer (typed dat-a-
+
+Underfull \hbox (badness 2080) in paragraph at lines 231--232
+\T1/ptm/m/n/10 (+20) search's 23-stage work-flow; pipeline hooks record ev-i-
+
+Overfull \hbox (3.51341pt too wide) in paragraph at lines 253--253
+[]|\T1/ptm/m/n/7 (-20) Formal/implementation 
+
+
+pdfTeX warning: pdflatex.exe (file ./figs/fig_design.pdf): PDF inclusion: found
+ PDF version <1.7>, but at most version <1.5> allowed
+[6] [7 <./figs/fig_design.pdf>] [8 <./figs/fig_sup.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
+\T1/pcr/m/n/10 scanpy\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 squidpy\T1/ptm/m/n/1
+0 (+20) , \T1/pcr/m/n/10 TabPFN\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 SAELens\T1
+/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 Compass\T1/ptm/m/n/10 (+20) ,
+[9 <./figs/fig_reg.pdf>] [10 <./figs/fig_scale.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active [11]
+[12] [13] (main.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package biblatex Warning: Please rerun LaTeX.
+
+ )
+(see the transcript file for additional information)<C:/Users/SAM/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/SAM/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/SAM
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Use
+rs/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><
+C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7
+.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmmi8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr5.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr6.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmr7.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/SAM/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/SAM/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/SAM/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/SAM/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/
+SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users
+/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/SA
+M/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (13 pages, 485125 bytes).
+Transcript written on main.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Getting log file 'main.log'
+Latexmk: Examining 'main.fls'
+Latexmk: Examining 'main.log'
+Latexmk: Found input bbl file 'main.bbl'
+Latexmk: References changed.
+Latexmk: Log file says output to 'main.pdf'
+Latexmk: Using biber to make bibliography file(s).
+Latexmk: Bibliography file(s) from .bcf file:
+  ref.bib
+Sources for biber
+  ref.bib
+  main.bcf
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  main.aux
+  main.run.xml
+
+------------
+Run number 3 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "main.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ieeetran\IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefineke
+ys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.sty
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettitle
+string.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty))
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc.s
+ty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfilec
+heck.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquecou
+nter.sty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amscls\amsthm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-pdfte
+x.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.cfg))
+ (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-dm.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-compat.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric-comp
+.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\standard.bbx
+))))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.cbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/cbx\numeric-verb
+.cbx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdfte
+x.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-expl3.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.
+sty))) (main.aux)
+-- Lines per column: 58 (exact).
+(main.out) (main.out)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-bas
+e.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+)) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-ptm.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/lbx\english.lbx)
+(main.bbl)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg)
+Overfull \hbox (1.34991pt too wide) in paragraph at lines 75--76
+[]\T1/ptm/b/n/10 (-20) Transactional integrity\T1/ptm/m/n/10 (-20) : typed life
+cycles and invariants $\OML/cmm/m/it/10 I[]$\T1/ptm/m/n/10 (-20) --
+[1{C:/Users/SAM/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
+Underfull \hbox (badness 1360) in paragraph at lines 78--79
+\T1/ptm/m/n/10 (+20) ex-per-i-ments, 13 gen-uine his-tor-i-cal re-vi-sions pass
+ed
+
+Underfull \hbox (badness 3229) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) re-main-ing con-fir-ma-tory study uses na-tive old/new
+
+Underfull \hbox (badness 2717) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) executable-paper-agent tra-jec-to-ries, blind an-no-ta-tio
+n,
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd) [2 <./fi
+gs/fig_framework.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 105--106
+[]\T1/ptm/m/it/10 (+20) Registered re-search state \T1/ptm/m/n/10 (+20) is the 
+set of recorded
+
+Underfull \hbox (badness 2111) in paragraph at lines 105--106
+\T1/ptm/m/n/10 (+20) commitments---runs $\OML/cmm/m/it/10 U$\T1/ptm/m/n/10 (+20
+) , ev-i-dence records $\OML/cmm/m/it/10 E$\T1/ptm/m/n/10 (+20) , claims $\OML/
+cmm/m/it/10 C$\T1/ptm/m/n/10 (+20) ,
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Non-epistemic
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Ledger-live / ledger-
+[3] [4] [5 <./figs/fig_support.pdf>]
+Underfull \hbox (badness 2310) in paragraph at lines 231--232
+[]\T1/ptm/m/n/10 (+20) TRL is a model-agnostic Python layer (typed dat-a-
+
+Underfull \hbox (badness 2080) in paragraph at lines 231--232
+\T1/ptm/m/n/10 (+20) search's 23-stage work-flow; pipeline hooks record ev-i-
+
+Overfull \hbox (3.51341pt too wide) in paragraph at lines 253--253
+[]|\T1/ptm/m/n/7 (-20) Formal/implementation 
+
+
+pdfTeX warning: pdflatex.exe (file ./figs/fig_design.pdf): PDF inclusion: found
+ PDF version <1.7>, but at most version <1.5> allowed
+[6] [7 <./figs/fig_design.pdf>] [8 <./figs/fig_sup.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
+\T1/pcr/m/n/10 scanpy\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 squidpy\T1/ptm/m/n/1
+0 (+20) , \T1/pcr/m/n/10 TabPFN\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 SAELens\T1
+/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 Compass\T1/ptm/m/n/10 (+20) ,
+[9 <./figs/fig_reg.pdf>] [10 <./figs/fig_scale.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active [11]
+[12] [13] (main.aux) )
+(see the transcript file for additional information)<C:/Users/SAM/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/SAM/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/SAM
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Use
+rs/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><
+C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7
+.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmmi8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr5.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr6.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmr7.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/SAM/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/SAM/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/SAM/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/SAM/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/
+SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users
+/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/SA
+M/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (13 pages, 485125 bytes).
+Transcript written on main.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Getting log file 'main.log'
+Latexmk: Examining 'main.fls'
+Latexmk: Examining 'main.log'
+Latexmk: Found input bbl file 'main.bbl'
+Latexmk: Log file says output to 'main.pdf'
+Latexmk: Using biber to make bibliography file(s).
+Latexmk: Bibliography file(s) from .bcf file:
+  ref.bib
+Sources for biber
+  ref.bib
+  main.bcf
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  main.run.xml
+
+------------
+Run number 4 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "main.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ieeetran\IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefineke
+ys.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.sty
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettitle
+string.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty))
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc.s
+ty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfilec
+heck.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquecou
+nter.sty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amscls\amsthm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-pdfte
+x.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.cfg))
+ (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-dm.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-compat.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric-comp
+.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\numeric.bbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\standard.bbx
+))))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-ieee\ieee.cbx
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/cbx\numeric-verb
+.cbx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdfte
+x.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-expl3.s
+ty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.
+sty))) (main.aux)
+-- Lines per column: 58 (exact).
+(main.out) (main.out)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-bas
+e.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+)) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-ptm.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/lbx\english.lbx)
+(main.bbl)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg)
+Overfull \hbox (1.34991pt too wide) in paragraph at lines 75--76
+[]\T1/ptm/b/n/10 (-20) Transactional integrity\T1/ptm/m/n/10 (-20) : typed life
+cycles and invariants $\OML/cmm/m/it/10 I[]$\T1/ptm/m/n/10 (-20) --
+[1{C:/Users/SAM/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}]
+Underfull \hbox (badness 1360) in paragraph at lines 78--79
+\T1/ptm/m/n/10 (+20) ex-per-i-ments, 13 gen-uine his-tor-i-cal re-vi-sions pass
+ed
+
+Underfull \hbox (badness 3229) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) re-main-ing con-fir-ma-tory study uses na-tive old/new
+
+Underfull \hbox (badness 2717) in paragraph at lines 79--80
+\T1/ptm/m/n/10 (+20) executable-paper-agent tra-jec-to-ries, blind an-no-ta-tio
+n,
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd) [2 <./fi
+gs/fig_framework.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 105--106
+[]\T1/ptm/m/it/10 (+20) Registered re-search state \T1/ptm/m/n/10 (+20) is the 
+set of recorded
+
+Underfull \hbox (badness 2111) in paragraph at lines 105--106
+\T1/ptm/m/n/10 (+20) commitments---runs $\OML/cmm/m/it/10 U$\T1/ptm/m/n/10 (+20
+) , ev-i-dence records $\OML/cmm/m/it/10 E$\T1/ptm/m/n/10 (+20) , claims $\OML/
+cmm/m/it/10 C$\T1/ptm/m/n/10 (+20) ,
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Non-epistemic
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/ptm/m/n/7 (+20) Ledger-live / ledger-
+[3] [4] [5 <./figs/fig_support.pdf>]
+Underfull \hbox (badness 2310) in paragraph at lines 231--232
+[]\T1/ptm/m/n/10 (+20) TRL is a model-agnostic Python layer (typed dat-a-
+
+Underfull \hbox (badness 2080) in paragraph at lines 231--232
+\T1/ptm/m/n/10 (+20) search's 23-stage work-flow; pipeline hooks record ev-i-
+
+Overfull \hbox (3.51341pt too wide) in paragraph at lines 253--253
+[]|\T1/ptm/m/n/7 (-20) Formal/implementation 
+
+
+pdfTeX warning: pdflatex.exe (file ./figs/fig_design.pdf): PDF inclusion: found
+ PDF version <1.7>, but at most version <1.5> allowed
+[6] [7 <./figs/fig_design.pdf>] [8 <./figs/fig_sup.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
+\T1/pcr/m/n/10 scanpy\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 squidpy\T1/ptm/m/n/1
+0 (+20) , \T1/pcr/m/n/10 TabPFN\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 SAELens\T1
+/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 Compass\T1/ptm/m/n/10 (+20) ,
+[9 <./figs/fig_reg.pdf>] [10 <./figs/fig_scale.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active [11]
+[12] [13] (main.aux) )
+(see the transcript file for additional information)<C:/Users/SAM/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/SAM/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/SAM
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Use
+rs/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><
+C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7
+.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmmi8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr5.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr6.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmr7.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/SAM/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/SAM/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/SAM/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/SAM/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/
+SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users
+/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/S
+AM/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/SA
+M/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (13 pages, 485125 bytes).
+Transcript written on main.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Getting log file 'main.log'
+Latexmk: Examining 'main.fls'
+Latexmk: Examining 'main.log'
+Latexmk: Found input bbl file 'main.bbl'
+Latexmk: Log file says output to 'main.pdf'
+Latexmk: Using biber to make bibliography file(s).
+Latexmk: Bibliography file(s) from .bcf file:
+  ref.bib
+Sources for biber
+  ref.bib
+  main.bcf
+Latexmk: All targets (main.pdf) are up-to-date
+
+latexmk: major issue: So far, you have not checked for MiKTeX updates.

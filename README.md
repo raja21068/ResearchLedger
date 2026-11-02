@@ -1,6 +1,6 @@
 <div align="center">
 
-# ResearchLedger × Paper Factory
+# Paper Generation
 
 ### An evidence-first research workflow — from falsifiable ideas to traceable results
 
@@ -25,15 +25,15 @@ A research assistant can produce a convincing paper even when its experiments do
 
 ## ✨ Highlights
 
-| Capability | What it does for researchers |
-| --- | --- |
-| **Falsifiable idea selection** | Generates candidate research ideas, scores them through two critical personas, and enforces measurable falsification criteria. |
-| **Evidence-aware writing** | Drafts with **empty result placeholders** first; inserts numerical findings only from explicitly bound executed outputs. |
-| **Scientific review and revision** | Produces structured manuscript feedback, checks concerns, and supports bounded revision rounds. |
-| **Isolated experiments** | Runs generated experiments inside a network-restricted Docker environment; retains code, result, and input provenance. |
-| **ResearchLedger provenance** | Connects claims **C###**, evidence **E###**, and runs **R####** using digests and validation checks. |
-| **Opt-in validation gates** | Locks research protocol and dataset, audits prior-art metadata, checks metric mappings and registered seeds, and performs isolated repeats. |
-| **Bundled specialist tools** | Includes [Referee Lean v2](#-specialist-agents-and-integration-boundaries) and an Idea Discovery v5 archive, distinct from the default Factory stage implementations. |
+| Capability                         | What it does for researchers                                                                                                                                          |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Falsifiable idea selection**     | Generates candidate research ideas, scores them through two critical personas, and enforces measurable falsification criteria.                                        |
+| **Evidence-aware writing**         | Drafts with **empty result placeholders** first; inserts numerical findings only from explicitly bound executed outputs.                                              |
+| **Scientific review and revision** | Produces structured manuscript feedback, checks concerns, and supports bounded revision rounds.                                                                       |
+| **Isolated experiments**           | Runs generated experiments inside a network-restricted Docker environment; retains code, result, and input provenance.                                                |
+| **ResearchLedger provenance**      | Connects claims **C###**, evidence **E###**, and runs **R####** using digests and validation checks.                                                                  |
+| **Opt-in validation gates**        | Locks research protocol and dataset, audits prior-art metadata, checks metric mappings and registered seeds, and performs isolated repeats.                           |
+| **Bundled specialist tools**       | Includes [Referee Lean v2](#-specialist-agents-and-integration-boundaries) and an Idea Discovery v5 archive, distinct from the default Factory stage implementations. |
 
 ## 🔄 How it works
 
@@ -57,16 +57,16 @@ flowchart LR
 The same **seven research steps** appear in the local website and in the Claude console. They are defined once in
 [`webapi/app/steps.py`](webapi/app/steps.py), so the two never drift apart.
 
-| # | Step | You give | You get | Engines behind it |
-| --- | --- | --- | --- | --- |
-| 1 | Literature | PDFs, a zip, or a topic | summary, methods and research-gap table | literature skills |
-| 2 | Idea | a topic or your idea | an idea scored /100 that survived a 50+ paper novelty search | Idea Discovery v5, Phase 10–13 prompts |
-| 3 | Method and code | your idea or method | experiment plan and runnable code (written, not run) | PaperCompiler, research code agent v4 |
-| 4 | Run experiments | what to test | measured results, each traced to its script and run | experiment loop (plan locked first, runs after your click) |
-| 5 | Write paper | idea and results | LaTeX paper with figures and PDF | PaperOrchestra |
-| 6 | Review and revise | your `.tex` (and any review) | fixed paper, re-reviewed until clean or your score targets are met | Referee Lean, auto-review loop |
-| 7 | Final check | your `.tex` | ready / not ready: references, numbers, figures, placeholders, pages | submission gate |
-| 8 | Guided paper | an idea or topic | steps 1 → 7 in order, you approve each one | Paper Studio |
+| #   | Step              | You give                     | You get                                                              | Engines behind it                                          |
+| --- | ----------------- | ---------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | Literature        | PDFs, a zip, or a topic      | summary, methods and research-gap table                              | literature skills                                          |
+| 2   | Idea              | a topic or your idea         | an idea scored /100 that survived a 50+ paper novelty search         | Idea Discovery v5, Phase 10–13 prompts                     |
+| 3   | Method and code   | your idea or method          | experiment plan and runnable code (written, not run)                 | PaperCompiler, research code agent v4                      |
+| 4   | Run experiments   | what to test                 | measured results, each traced to its script and run                  | experiment loop (plan locked first, runs after your click) |
+| 5   | Write paper       | idea and results             | LaTeX paper with figures and PDF                                     | PaperOrchestra                                             |
+| 6   | Review and revise | your `.tex` (and any review) | fixed paper, re-reviewed until clean or your score targets are met   | Referee Lean, auto-review loop                             |
+| 7   | Final check       | your `.tex`                  | ready / not ready: references, numbers, figures, placeholders, pages | submission gate                                            |
+| 8   | Guided paper      | an idea or topic             | steps 1 → 7 in order, you approve each one                           | Paper Studio                                               |
 
 **Website** — start it with `& .\start_web.ps1` (API on port 8000, GUI on http://localhost:3000). The home page has
 one box (drop files or type; it shows which tool will run) and the seven steps. Every step opens the same screen:
@@ -130,26 +130,26 @@ The DOI above is a **placeholder**, not a real citation. Populate the protocol, 
 
 ## 🧠 Specialist agents and integration boundaries
 
-| Layer | Repository component | Scope | Integration status |
-| --- | --- | --- | --- |
-| **Idea generation** | [`factory/steps/idea.py`](factory/steps/idea.py) | Candidate ideas, critical personas, numerical falsifiability gate | **Default Factory S1** |
-| **Bundled idea research** | [`vendor/idea-generation/idea-discovery-v5.zip`](vendor/idea-generation/idea-discovery-v5.zip) | Additional idea-discovery distribution | **Bundled ZIP; full internals and S1 invocation not validated here** |
-| **Factory peer review** | [`factory/steps/review.py`](factory/steps/review.py) | Structured feedback, PDF anchors, guarded revision | **Default Factory S3/S5** |
-| **Specialist review engine** | [`Referee Lean v2`](vendor/20-%20Paper%20Review%20Agent/Referee-Lean-v2/README.md) | Reviewer roles, evidence-verification procedures, red-team review, concern closure | **Bundled; not all standalone functions invoked by default** |
-| **Evidence and integrity** | [`researchledger/`](researchledger/) and [`factory/science/`](factory/science/) | Claim/evidence/run graph, protocol and metric checks | **Integrated; validation mode opt-in** |
+| Layer                        | Repository component                                                                           | Scope                                                                              | Integration status                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Idea generation**          | [`factory/steps/idea.py`](factory/steps/idea.py)                                               | Candidate ideas, critical personas, numerical falsifiability gate                  | **Default Factory S1**                                               |
+| **Bundled idea research**    | [`vendor/idea-generation/idea-discovery-v5.zip`](vendor/idea-generation/idea-discovery-v5.zip) | Additional idea-discovery distribution                                             | **Bundled ZIP; full internals and S1 invocation not validated here** |
+| **Factory peer review**      | [`factory/steps/review.py`](factory/steps/review.py)                                           | Structured feedback, PDF anchors, guarded revision                                 | **Default Factory S3/S5**                                            |
+| **Specialist review engine** | [`Referee Lean v2`](vendor/20-%20Paper%20Review%20Agent/Referee-Lean-v2/README.md)             | Reviewer roles, evidence-verification procedures, red-team review, concern closure | **Bundled; not all standalone functions invoked by default**         |
+| **Evidence and integrity**   | [`researchledger/`](researchledger/) and [`factory/science/`](factory/science/)                | Claim/evidence/run graph, protocol and metric checks                               | **Integrated; validation mode opt-in**                               |
 
 > **Implementation clarity:** A vendored agent is a real packaged component, but *presence in `vendor/` is not proof that the complete specialist workflow runs on each `researchctl run`*. This README deliberately distinguishes the available distribution from the standard orchestration path.
 
 ## 🔬 Scientific safeguards
 
-| Safeguard | What is checked | What it **does not** establish |
-| --- | --- | --- |
-| Protocol lock | Prospective local protocol, selected idea, data and registered metadata integrity | External preregistration or methodological adequacy |
-| Literature check | DOI bibliographic metadata and operator-completed prior-art register | Claim support, exhaustive literature search, or novelty |
-| Experiment receipt | Docker result, expected metrics, artifact and dataset/code digests | Correct design, sound statistics, absence of leakage |
-| Claim mapping | Required result slots mapped to measured runs | Every free-text scientific assertion |
-| Isolated repeat | Same implementation rerun under a restricted container and declared tolerances | Independent reimplementation or external replication |
-| Scientific audit | Automated integrity constraints | Scientific validity or editorial acceptance |
+| Safeguard          | What is checked                                                                   | What it **does not** establish                          |
+| ------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Protocol lock      | Prospective local protocol, selected idea, data and registered metadata integrity | External preregistration or methodological adequacy     |
+| Literature check   | DOI bibliographic metadata and operator-completed prior-art register              | Claim support, exhaustive literature search, or novelty |
+| Experiment receipt | Docker result, expected metrics, artifact and dataset/code digests                | Correct design, sound statistics, absence of leakage    |
+| Claim mapping      | Required result slots mapped to measured runs                                     | Every free-text scientific assertion                    |
+| Isolated repeat    | Same implementation rerun under a restricted container and declared tolerances    | Independent reimplementation or external replication    |
+| Scientific audit   | Automated integrity constraints                                                   | Scientific validity or editorial acceptance             |
 
 The system deliberately differentiates **hypothesis → checked evidence → provisional claim** from externally verified evidence. See [Scientific Readiness](docs/SCIENTIFIC_READINESS.md).
 
@@ -194,16 +194,16 @@ Passing tests and automated research gates does **not** substitute for domain-sp
 
 ## 📚 Documentation
 
-| Guide | Start here when… |
-| --- | --- |
-| [Getting started](START_HERE.md) | You want the shortest reliable installation path |
-| [Web app](docs/WEB_APP.md) | You want the local browser GUI (chat with Claude Code, PDF/Word panel) |
-| [Evidence-first operator guide](docs/EVIDENCE_FIRST_V2.md) | You need a locked-protocol validation workflow |
-| [Architecture](docs/ARCHITECTURE.md) | You want to understand each Factory stage |
-| [Integration](docs/INTEGRATION.md) | You want to understand the Factory–Ledger boundary |
-| [Scientific readiness](docs/SCIENTIFIC_READINESS.md) | You need definitions of checked, provisional, and verified |
-| [Research-agent comparison](docs/RESEARCH_AGENT_COMPARISON.md) | You want the categorized comparison and signature matrix |
-| [Engineering audit](docs/DEEP_CODE_AUDIT_2026-10-08.md) | You want implementation and release audit notes |
+| Guide                                                          | Start here when…                                                       |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| [Getting started](START_HERE.md)                               | You want the shortest reliable installation path                       |
+| [Web app](docs/WEB_APP.md)                                     | You want the local browser GUI (chat with Claude Code, PDF/Word panel) |
+| [Evidence-first operator guide](docs/EVIDENCE_FIRST_V2.md)     | You need a locked-protocol validation workflow                         |
+| [Architecture](docs/ARCHITECTURE.md)                           | You want to understand each Factory stage                              |
+| [Integration](docs/INTEGRATION.md)                             | You want to understand the Factory–Ledger boundary                     |
+| [Scientific readiness](docs/SCIENTIFIC_READINESS.md)           | You need definitions of checked, provisional, and verified             |
+| [Research-agent comparison](docs/RESEARCH_AGENT_COMPARISON.md) | You want the categorized comparison and signature matrix               |
+| [Engineering audit](docs/DEEP_CODE_AUDIT_2026-10-08.md)        | You want implementation and release audit notes                        |
 
 ## 🤝 Contributing and provenance
 

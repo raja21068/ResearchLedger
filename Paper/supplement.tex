@@ -21,7 +21,7 @@
 \renewcommand{\theequation}{S\arabic{equation}}
 
 \title{Supplementary Material for ``AutoResearch-Ledger: Transactional Revision Integrity for Executable Research Agents''}
-\author{Rajesh~Kumar, Waqar~Ali, Junaid~Ahmed, Abdullah~Aman~Khan, Shaoning~Zeng}
+\author{Rajesh~Kumar, Waqar~Ali\textsuperscript{*}, Nikesh~Lagun, Shaoning~Zeng\thanks{*Corresponding author: Waqar Ali (ORCID: 0000-0003-0846-7281; e-mail: waqar.uestc@yahoo.com). Rajesh Kumar ORCID: 0000-0003-0813-7485; Nikesh Lagun ORCID: 0009-0005-6372-4852.}}
 
 \begin{document}
 \maketitle
@@ -338,7 +338,6 @@ Paper2Agent \cite{miao2026paper2agent} & Tested MCP tools + paper resources & Ex
 ScientistOne \cite{meng2026scientistone} & Chain-of-Evidence & NR & NR & NR & Post-hoc CoE audit \\
 EviGraph \cite{ren2026evigraph} & Typed evidence graph & Downstream subgraph regeneration & Partial: graph checkpoint/repair & NR & Graph checkpointing \\
 ARIS \cite{yang2026aris} & Claim ledger + raw evidence & Partial: verdict propagation & NR & NR & Evidence-to-claim audit cascade \\
-AAR \cite{rasheed2026auditability} & Persistent provenance proposed & Continuous validation proposed & NR & NR & Provenance/audit metrics \\
 Continuity Kernel \cite{he2026continuity} & Generic versioned agent state & Exact-predecessor activation & Atomic commit/reject/quarantine/defer & Generic authority/lineage & Activation receipts + lineage \\
 \textbf{AutoResearch-Ledger} & \textbf{Typed claim/evidence/decision state} & \textbf{Deterministic stale-dependency propagation} & \textbf{Validated commit/rollback} & \textbf{Explicit evidence-linked decisions} & \textbf{Hash-chained history + RSM benchmark} \\
 \bottomrule
@@ -396,43 +395,7 @@ Spurious 30\% & 900 & 900 & 900 & 876 & 0 & 24 \\
 
 The two divergence causes are properties of the implementation, not of the semantics. \emph{Already blocked}: TRL reports state transitions, so an assertion that cites two claims, one of which never had support, is not reported when the other loses support; it was not admissible before the revision either. \emph{Pair collision}: in \texttt{support.py} an evidence record named in a support group or required set is excluded from the singleton alternatives of that claim, so a second, mistyped \texttt{supports} edge on the same pair replaces rather than adds an alternative, and TRL invalidates a claim that the oracle keeps. We have not changed this behaviour, because the frozen results in the paper were produced with it; a registration layer could reject a second relation on an existing pair.
 
-\section{Secondary Historical Evidence and Ethical Considerations}
-\subsection{Historical executor and citation results}
-These results predate the transactional-state contribution and show only that the surrounding AutoResearch executor executes code and reduces bibliographic errors within its own tested setting. They were not collected under a matched-budget protocol against contemporary baselines, and code-repair success and citation validity are not measures of research-state mutation integrity; they are neither evidence for nor against the revision-semantics claims of the main paper.
-
-\begin{table}[!t]
-\centering
-\caption{Controlled code-repair results from the existing executor evaluation.}
-\label{tab:executor_controlled}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{lccc}
-\toprule
-Method & Exec. success & HumanEval final & MBPP final \\
-\midrule
-Vanilla LLM & 41\% & 42.1\% & 47.3\% \\
-Retry-only & 64\% & 68.2\% & 69.5\% \\
-AutoResearch executor & \textbf{79\%} & \textbf{88.1\%} & \textbf{87.4\%} \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-Four annotators labelled 500 AutoResearch and 500 Tool-Agent citations, with an externally adjudicated invalid-citation rate of 3.5\% against 31\% and Fleiss' $\kappa=0.82$.
-
-\begin{table}[!t]
-\centering
-\caption{External citation annotation (500 citations per method).}
-\label{tab:citation_external}
-\begin{tabular}{lc}
-\toprule
-Method & Invalid-citation rate $\downarrow$ \\
-\midrule
-Tool-Agent (no verification) & 31.0\% \\
-AutoResearch & \textbf{3.5\%} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
+\section{Historical Revision Evidence and Ethical Considerations}
 \subsection{Executed historical-semantic replay, tracked proxy trajectories and transaction fault injection}
 \label{sec:hist_replay_supp}
 This subsection reports development evidence collected after the main mechanism experiments, using genuine historical revisions rather than only generator-authored fixtures. It is developer-run and non-blind: semantic fixtures, dependency bindings and the paper-agent proxy were constructed by the developers rather than independent annotators, so it strengthens implementation and integration confidence but does not satisfy the preregistered confirmatory study. It is summarized in the main paper's Results and referenced there as Supplement~S9.
@@ -503,6 +466,8 @@ Each case retains the two immutable run manifests, artifact hashes, three commit
 Automated paper generation risks low-quality, misleading or plagiarized submissions. AutoResearch includes execution, citation and evidence-alignment checks before artifact promotion, and TRL adds deterministic provenance and revision-state constraints; these reduce particular failure modes but do not establish correctness, novelty or ethical acceptability. Users could still misuse the system to mass-produce superficial papers; we recommend human oversight and treating generated manuscripts as drafts. A ledger makes stale dependencies visible and preserves a reviewable history of evidence changes, at the cost of retaining superseded state and some review burden. Provenance integrity is not a certificate of scientific validity.
 
 \section{Reproducibility}
+\noindent\textbf{Code availability.} The ResearchLedger repository is at \url{https://github.com/raja21068/ResearchLedger}. Reproducibility procedures and snapshot identifiers for the reported validation are specified below.
+
 \subsection{Frozen identifiers}
 \begin{table}[!t]
 \centering
@@ -527,7 +492,6 @@ RLV2-400 output & \texttt{eval/researchledger\_v2\_validator\_results.json} \\
 Integrated v2.2 tests & 206/206 passed across 22 modules \\
 Bridge smoke test & \texttt{integration/test\_bridge.py} \\
 Unit tests & \texttt{code\_patch/tests/test\_research\_ledger.py} \\
-Legacy Docker image & TBD (legacy executor rerun only) \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -557,7 +521,7 @@ PYTHONPATH=. python validation_study/analysis/bootstrap_repository_clustered.py
 # Blind human packets / aggregation are generated by validation_study/annotation_tool.py
 PYTHONPATH=. python ../eval/researchledger_v2_validator_benchmark.py --trials-per-scenario 50
 \end{lstlisting}
-The RRT tooling is \texttt{eval/rrt/} (schema, independent oracle, systems, metrics, agreement, blind packets); protocols are \texttt{docs/RRT\_PROTOCOL.md} and \texttt{docs/HUMAN\_AUDIT\_STUDY.md}; the audit-study analysis is \texttt{eval/analyze\_audit\_study.py}. Historical executor results require the original environment and are not reproduced.
+The RRT tooling is \texttt{eval/rrt/} (schema, independent oracle, systems, metrics, agreement, blind packets); protocols are \texttt{docs/RRT\_PROTOCOL.md} and \texttt{docs/HUMAN\_AUDIT\_STUDY.md}; the audit-study analysis is \texttt{eval/analyze\_audit\_study.py}.
 
 \printbibliography
 \end{document}

@@ -1,0 +1,413 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(Definitions/tsp.cls
+Document Class: Definitions/tsp 18/12/2024 TSP paper class
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\size11.clo))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\indentfirst.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/fancyhdr\fancyhdr.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf.sty
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/grfext\grfext.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefineke
+ys.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty))
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.s
+ty (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-bas
+e.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+))) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/lastpage\lastpage.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/lastpage\lastpage2e.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/lastpage\lastpagemodern.s
+ty) 
+)) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/lineno\lineno.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/setspace\setspace.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\mathpazo.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/titlesec\titlesec.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/colortbl\colortbl.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/soul\soul.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/soul\soul-ori.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/etexcmds\etexcmds.sty))
+ (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-pdfte
+x.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.cfg))
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/frontendlayer\tikz.st
+y (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil-c
+ommon.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil-l
+atex.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfrcs.co
+de.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf\pgf.revision.tex)))
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgfcore.st
+y
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/systemlayer\pgfsys.st
+y
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsys.
+code.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys.c
+ode.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeysli
+braryfiltered.code.tex))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgf.cfg
+)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsys-
+pdftex.def
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsys-
+common-pdf.def)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsyss
+oftpath.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsysp
+rotocol.code.tex))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcore.
+code.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code.t
+ex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathutil.co
+de.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathparser.
+code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.basic.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.trigonometric.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.random.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.comparison.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.base.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.round.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.misc.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctio
+ns.integerarithmetics.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathcalc.co
+de.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfloat.c
+ode.tex))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfint.code.te
+x)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorep
+oints.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorep
+athconstruct.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorep
+athusage.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcores
+copes.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreg
+raphicstate.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoret
+ransformations.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreq
+uick.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreo
+bjects.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorep
+athprocessing.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorea
+rrows.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcores
+hade.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorei
+mage.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoree
+xternal.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorel
+ayers.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoret
+ransparency.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorep
+atterns.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorer
+df.code.tex)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulesh
+apes.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulepl
+ot.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfcomp
+-version-0-65.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfcomp
+-version-1-18.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgffor.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfkeys.sty
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys.c
+ode.tex))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pgf/math\pgfmath.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code.t
+ex))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgffor.co
+de.tex))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz\
+tikz.code.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibrar
+yplothandlers.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulema
+trix.code.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/
+libraries\tikzlibrarytopaths.code.tex)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/totcount\totcount.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/frankenstein\attrib.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/frankenstein\moredefs.sty
+)) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/was\upgreek.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/pbox\pbox.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ragged2e\ragged2e.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tocloft\tocloft.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/adjustbox\adjustbox.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/xkeyval\xkeyval.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\xkeyval.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\xkvutils.tex)))
+ (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/adjustbox\adjcalc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/adjustbox\trimclip.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/collectbox\collectbox.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/adjustbox\tc-pdftex.def
+))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ifoddpage\ifoddpage.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/varwidth\varwidth.sty)
+==> First Aid for varwidth.sty applied!
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/enotez\enotez.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdfte
+x.def))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.
+sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/l3keys2e\l3key
+s2e.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xtemplate\xtem
+plate.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/translations\translations
+.sty)) (Definitions/journalnames.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/amscls\amsthm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/footmisc\footmisc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyphenat\hyphenat.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/newfloat\newfloat.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/seqsplit\seqsplit.sty))
+(Definitions/package.tex
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/ulem\ulem.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/algorithms\algorithm.sty)
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/algorithms\algorithmic.st
+y) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/subfig\subfig.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathcomp\mathcomp.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\textcomp.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/cjk\CJKutf8.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifpdf.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/cjk\CJK.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/cjk/mule\MULEenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/cjk\CJK.enc))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ppl.fd)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\pifont.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\upzd.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\upsy.fd))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/tools\bm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/bbm\bbm.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/verse\verse.sty))
+
+LaTeX Warning: \include should only be used after \begin{document} on input lin
+e 8.
+
+(Definitions/unicode.tex)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettitle
+string.sty))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.sty
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc.s
+ty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfilec
+heck.sty
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquecou
+nter.sty)))
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/cleveref\cleveref.sty)
+==> First Aid for cleveref.sty applied!
+(main.aux)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-ppl.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/translations/dicts\transl
+ations-basic-dictionary-english.trsl)
+*geometry* detected driver: pdftex
+(main.out) (main.out)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ppl.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omlzplm.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omszplm.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxzplm.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1zplm.fd)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-eur.cfg)
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg)
+
+pdfTeX warning: pdflatex.exe (file ./Definitions/logo-tsp.pdf): PDF inclusion: 
+found PDF version <1.6>, but at most version <1.5> allowed
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 38.62325pt, for example:
+(fancyhdr)                \setlength{\headheight}{38.62325pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-26.62325pt}.
+
+(C:\Users\SAM\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ppl.fd)
+
+LaTeX Font Warning: Font shape `TS1/cmr/m/n' in size <8.5> not available
+(Font)              size <8> substituted on input line 56.
+
+
+LaTeX Font Warning: Font shape `TS1/cmr/m/n' in size <6.45995> not available
+(Font)              size <6> substituted on input line 56.
+
+[1{C:/Users/SAM/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/SAM/
+AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc} <./Definitions/logo-
+tsp.pdf> <./Definitions/logo-orcid.pdf>] [2 <./figs/fig_framework.pdf>]
+[3] [4]
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+[]|\T1/ppl/m/n/10 (+20) Sufficient set
+
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+[]|\T1/ppl/m/n/10 (+20) Required
+
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+[]|\T1/ppl/m/n/10 (+20) Non-epistemic
+
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+\T1/ppl/m/n/10 (+20) de-pen-dency
+
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+[]|\T1/ppl/m/n/10 (+20) Assertion
+
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+[]|\T1/ppl/m/n/10 (+20) Ledger
+
+Underfull \hbox (badness 10000) in paragraph at lines 136--136
+\T1/ppl/m/n/10 (+20) live-ness and
+[5] [6] [7 <./figs/fig_support.pdf>] [8] [9] [10]
+
+pdfTeX warning: pdflatex.exe (file ./figs/fig_design.pdf): PDF inclusion: found
+ PDF version <1.7>, but at most version <1.5> allowed
+
+Underfull \hbox (badness 1152) in paragraph at lines 261--262
+[]\T1/ppl/b/n/10.95 (+20) Conformance. \T1/ppl/m/n/10.95 (+20) RSM-1000 (sin-gl
+e mu-ta-tions of a 20-claim state), RSM-SEQ-2500 (25
+[11] [12 <./figs/fig_design.pdf>] [13 <./figs/fig_sup.pdf>] [14 <./figs/fig_reg
+.pdf>]
+Underfull \hbox (badness 1454) in paragraph at lines 352--353
+\T1/ppl/m/n/10.95 (+20) repos-i-to-ries (\T1/cmtt/m/n/10.95 POP-TOOLS\T1/ppl/m/
+n/10.95 (+20) , \T1/cmtt/m/n/10.95 scanpy\T1/ppl/m/n/10.95 (+20) , \T1/cmtt/m/n
+/10.95 squidpy\T1/ppl/m/n/10.95 (+20) , \T1/cmtt/m/n/10.95 TabPFN\T1/ppl/m/n/10
+.95 (+20) , \T1/cmtt/m/n/10.95 SAELens\T1/ppl/m/n/10.95 (+20) , \T1/cmtt/m/n/10
+.95 Compass\T1/ppl/m/n/10.95 (+20) , \T1/cmtt/m/n/10.95 scvi-tools\T1/ppl/m/n/1
+0.95 (+20) , \T1/cmtt/m/n/10.95 seurat\T1/ppl/m/n/10.95 (+20) ,
+[15] [16 <./figs/fig_scale.pdf>]
+Underfull \hbox (badness 1337) in paragraph at lines 389--390
+\T1/ppl/m/n/10.95 (+20) ex-per-i-ments use generator-authored ref-er-ence struc
+-tures. The 13 his-tor-i-cal re-vi-sion
+[17]
+Underfull \hbox (badness 1168) in paragraph at lines 391--392
+[]\T1/ppl/b/n/10.95 (+20) Semantic war-rant and scope. \T1/ppl/m/n/10.95 (+20) 
+A sup-port set is a Boolean dec-la-ra-tion checked for
+
+Underfull \hbox (badness 2689) in paragraph at lines 395--396
+[]\T1/ppl/b/n/10.95 (+20) Internal and sta-tis-ti-cal va-lid-ity. \T1/ppl/m/n/1
+0.95 (+20) Di-ag-nos-tics use fixed seeds and one gen-er-a-tor
+[18] (main.bbl [19] [20]) [21]
+
+enddocument/afterlastpage (AED): lastpage setting LastPage.
+(main.aux)
+
+LaTeX Font Warning: Size substitutions with differences
+(Font)              up to 0.5pt have occurred.
+
+ )
+(see the transcript file for additional information) <C:\Users\SAM\AppData\Loca
+l\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1000.pk> <C:\Users\SAM\AppData\
+Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C:\Users\SAM\AppD
+ata\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi450\ecss0800.pk><C:/Users/SAM/A
+ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/User
+s/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
+C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5
+.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmmi6.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmmi7.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr10.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/cm/cmr5.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmsy10.pfb><C:/Users/SAM/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/SAM/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/SAM/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/mathpazo/fplmr.pfb><C:/Users/SAM/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/mathpazo/fplmri.pfb><C:/Users/SAM/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/SAM/AppData/Lo
+cal/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users/SAM/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/urw/palatino/uplb8a.pfb><C:/Users/SAM/AppData/
+Local/Programs/MiKTeX/fonts/type1/urw/palatino/uplbi8a.pfb><C:/Users/SAM/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/urw/palatino/uplr8a.pfb><C:/Users/SAM/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/urw/palatino/uplri8a.pfb>
+Output written on main.pdf (21 pages, 512171 bytes).
+Transcript written on main.log.

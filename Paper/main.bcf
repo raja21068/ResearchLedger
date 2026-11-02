@@ -2374,23 +2374,24 @@
     <bcf:datasource type="file" datatype="bibtex" glob="false">ref.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1" intorder="1">lu2026aiscientist</bcf:citekey>
-    <bcf:citekey order="1" intorder="2">yamada2025aiscientistv2</bcf:citekey>
-    <bcf:citekey order="1" intorder="3">schmidgall2025agentlab</bcf:citekey>
+    <bcf:citekey order="1" intorder="1">boiko2023coscientist</bcf:citekey>
+    <bcf:citekey order="1" intorder="2">bran2024chemcrow</bcf:citekey>
+    <bcf:citekey order="1" intorder="3">swanson2025virtuallab</bcf:citekey>
+    <bcf:citekey order="1" intorder="4">schmidgall2025agentlab</bcf:citekey>
     <bcf:citekey order="2" intorder="1">miao2026paper2agent</bcf:citekey>
     <bcf:citekey order="3" intorder="1">meng2026scientistone</bcf:citekey>
     <bcf:citekey order="3" intorder="2">ren2026evigraph</bcf:citekey>
     <bcf:citekey order="3" intorder="3">yang2026aris</bcf:citekey>
-    <bcf:citekey order="3" intorder="4">rasheed2026auditability</bcf:citekey>
-    <bcf:citekey order="4" intorder="1">lu2026aiscientist</bcf:citekey>
-    <bcf:citekey order="4" intorder="2">yamada2025aiscientistv2</bcf:citekey>
-    <bcf:citekey order="4" intorder="3">schmidgall2025agentlab</bcf:citekey>
+    <bcf:citekey order="3" intorder="4">martinboyle2026papertrail</bcf:citekey>
+    <bcf:citekey order="4" intorder="1">boiko2023coscientist</bcf:citekey>
+    <bcf:citekey order="4" intorder="2">bran2024chemcrow</bcf:citekey>
+    <bcf:citekey order="4" intorder="3">swanson2025virtuallab</bcf:citekey>
+    <bcf:citekey order="4" intorder="4">schmidgall2025agentlab</bcf:citekey>
     <bcf:citekey order="5" intorder="1">miao2026paper2agent</bcf:citekey>
     <bcf:citekey order="6" intorder="1">meng2026scientistone</bcf:citekey>
     <bcf:citekey order="6" intorder="2">ren2026evigraph</bcf:citekey>
     <bcf:citekey order="6" intorder="3">yang2026aris</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">rasheed2026auditability</bcf:citekey>
-    <bcf:citekey order="7" intorder="2">martinboyle2026papertrail</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">martinboyle2026papertrail</bcf:citekey>
     <bcf:citekey order="8" intorder="1">doyle1979tms</bcf:citekey>
     <bcf:citekey order="9" intorder="1">dekleer1986atms</bcf:citekey>
     <bcf:citekey order="10" intorder="1">buneman2001provenance</bcf:citekey>
