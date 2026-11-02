@@ -36,6 +36,18 @@ They are the items that either close a defect found in use (lessons never crossi
 search round; agent work without a receipt) or make an existing claim honest (reproducibility labels, tested
 security guards). The rest either already exists or needs a prerequisite (Codex) that does not.
 
+## Status (3 November 2026, end of night)
+
+| Step | State |
+|---|---|
+| 1. Adversarial security tests | Done: `webapi/tests/test_security.py` (path traversal, other project, symlink, zip members, command parsing, forged receipts, failed jobs, concurrent claim ids, no agent write path to the ledger). **It found one real hole:** a receipt file an agent wrote into its workspace was imported as evidence. The ledger import now trusts only runs the server executed (a run row must exist) |
+| 2. Agent receipts | Done: `agent_receipts.py`. Written by the server when a task ends, stored outside the workspace, never rewritten, a hash detects hand edits. API `/agent-receipts` |
+| 3. Cross-project lessons | Done: a labelled section in `memory/remembered.md`. Only active failure, strategy, experiment and decision memories from other live projects that share words with this project's title or topic; papers and proposed memories never travel |
+| 4. Literature library | Done: `literature.py`, the "Paper library" page, the file `literature/library.md`. Duplicates merge on identity only; the `supports` level is human-only |
+| 5. Reproducibility levels | Done in `lab.py`: run once, repeated here, repeated elsewhere, not reproduced. Independent replication is never computed |
+
+Not done on purpose: per-task isolation and Codex, hypothesis tree, review roles, statistical profiles, Semantic Scholar.
+
 ## Order and gates
 
 1. Adversarial security tests (no behaviour change).

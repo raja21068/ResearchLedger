@@ -91,6 +91,10 @@ def tree(store: Store, project_id: str) -> dict:
                       "parent": None, "created_at": None})
     active = store.all("SELECT id, kind, status, created_at FROM runs WHERE project_id=? AND provider=? AND "
                        "status IN ('queued','running') ORDER BY created_at DESC", (project_id, exprun.PROVIDER))
+    repro = reproducibility(project_id, runs)
+    for r in runs:
+        r["reproducibility"] = repro.get(r["run_id"]) or ({"level": None, "label": "a repeat", "meaning":
+                                                          f"Repeat of {r['repeat_of']}; see that run's level."} if r.get("repeat_of") else None)
     return {"experiments": nodes, "runs": runs, "active": active}
 
 
@@ -146,6 +150,60 @@ def compare(project_id: str, a: str, b: str) -> dict:
                             "packages": [{"name": n, "a": (ea.get("packages") or {}).get(n), "b": (eb.get("packages") or {}).get(n)}
                                          for n in pk if (ea.get("packages") or {}).get(n) != (eb.get("packages") or {}).get(n)]},
             "fingerprints_missing": not (fa and fb)}
+
+
+LEVELS = {
+    0: ("not usable", "The run did not finish cleanly, or has no recorded results."),
+    1: ("run once", "One sealed run. Nothing has checked that it can be repeated."),
+    2: ("repeated here", "Run again with the same code, data and environment and the same values came out."),
+    3: ("repeated elsewhere", "Run again in a different environment (other Python or package versions) with the same values."),
+}
+NOT_REPRODUCED = ("not reproduced", "A repeat with the same code and data gave different values. Treat the result as unstable.")
+INDEPENDENT = "Independent replication (a different team or code) is never decided by the software; record it yourself."
+
+
+def _env_key(rc: dict) -> str:
+    e = (rc.get("receipt") or {}).get("environment") or {}
+    return json.dumps({"python": e.get("python"), "packages": e.get("packages") or {}}, sort_keys=True)
+
+
+def reproducibility(project_id: str, runs: list[dict] | None = None) -> dict:
+    """Reproducibility level of every original run, from the repeats recorded in the project (nothing is assumed).
+
+    1 run once; 2 repeated with the same code, data and environment and the same values; 3 the same values in a
+    different environment. A repeat that gave different values with the same code and data is reported as
+    'not reproduced'. The fourth level, independent replication, is not computed."""
+    runs = runs if runs is not None else _receipts(workspace.project_root(project_id))
+    by_id = {r["run_id"]: r for r in runs}
+    out = {}
+    for r in runs:
+        if r.get("repeat_of"):
+            continue
+        level, label = (1, LEVELS[1]) if r["ok"] and r["values"] else (0, LEVELS[0])
+        detail = {"repeats": [], "independent_replication": INDEPENDENT}
+        if level:
+            for rep in (x for x in runs if x.get("repeat_of") == r["run_id"] and x["ok"]):
+                try:
+                    cmp = compare(project_id, r["run_id"], rep["run_id"])
+                except LabError:
+                    continue
+                if cmp["fingerprints_missing"] or not cmp["code_same"] or not cmp["data_same"]:
+                    detail["repeats"].append({"run_id": rep["run_id"], "result": "not comparable (code, data or fingerprints differ)"})
+                    continue
+                same_env = _env_key(receipt(project_id, r["run_id"])) == _env_key(receipt(project_id, rep["run_id"]))
+                if cmp["same_values"]:
+                    got = 2 if same_env else 3
+                    detail["repeats"].append({"run_id": rep["run_id"], "result": "same values", "same_environment": same_env})
+                    level = max(level, got)
+                else:
+                    detail["repeats"].append({"run_id": rep["run_id"], "result": "different values"})
+                    detail["not_reproduced"] = True
+        if detail.get("not_reproduced") and not any(x["result"] == "same values" for x in detail["repeats"]):
+            out[r["run_id"]] = {"level": 1, "label": NOT_REPRODUCED[0], "meaning": NOT_REPRODUCED[1], **detail}
+        else:
+            lab_, why = LEVELS[level]
+            out[r["run_id"]] = {"level": level, "label": lab_, "meaning": why, **detail}
+    return out
 
 
 def repeat(store: Store, project_id: str, run_id: str) -> str:

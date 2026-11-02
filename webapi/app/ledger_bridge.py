@@ -299,12 +299,22 @@ def overview(store: Store, project_id: str) -> dict:
                 continue
         return {}
     res = validate(ws)
+    from . import lab
+    try:
+        repro = lab.reproducibility(project_id)
+    except Exception:  # noqa: BLE001 — a label must never stop the evidence page from loading
+        repro = {}
+
+    def repeatability(ref: str | None) -> dict | None:
+        r = repro.get((ref or "").split(":")[0])
+        return {"level": r["level"], "label": r["label"], "meaning": r["meaning"]} if r else None
     return {
         "claims": [{"id": c.id, "name": c.name, "status": c.status, "statement": c.statement(),
                     "evidence": c.evidence, "contradicts": c.contradicts} for c in sorted(claims.values(), key=lambda c: c.id)],
         "evidence": [{"id": e.id, "name": e.name, "status": e.status, "meaning": STATUS_WORDS.get(e.status, e.status),
                       "supports": e.supports, "contradicts": e.contradicts, "runs": e.runs, "values": values(e),
-                      "app_ref": app.get(e.id)} for e in sorted(evidence.values(), key=lambda e: e.id)],
+                      "app_ref": app.get(e.id), "repeatability": repeatability(app.get(e.id))}
+                     for e in sorted(evidence.values(), key=lambda e: e.id)],
         "runs": [{"id": rid, "command": m.get("command"), "finished_at": m.get("finished_at"),
                   "reproducibility": m.get("reproducibility_status") or ("replayable" if m.get("replay_supported") else None),
                   "app_ref": app.get(rid)} for rid, m in sorted(runs.items())],

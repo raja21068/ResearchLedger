@@ -11,7 +11,8 @@ import { btn, btn2, Card, ErrorBox, PageHeader } from "@/components/ui";
 
 interface Claim { id: string; name: string; status: string; statement: string; evidence: string[]; contradicts: string[] }
 interface Ev { id: string; name: string; status: string; meaning: string; supports: string[]; contradicts: string[];
-  runs: string[]; values: Record<string, unknown>; app_ref: string | null }
+  runs: string[]; values: Record<string, unknown>; app_ref: string | null;
+  repeatability: { level: number; label: string; meaning: string } | null }
 interface Run { id: string; command: string | null; finished_at: string | null; reproducibility: string | null; app_ref: string | null }
 interface Overview { claims: Claim[]; evidence: Ev[]; runs: Run[]; issues: { level: string; code: string; message: string }[];
   valid: boolean; sync: { evidence_added?: number; claims_added?: number; error?: string } | null }
@@ -146,6 +147,12 @@ export default function EvidencePage({ params }: { params: Promise<{ id: string 
                 <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${EV_TONE[e.status] ?? ""}`}>{e.status}</span>
                 <span className="text-xs text-faint">{e.meaning}</span>
                 {e.runs.map((r) => <span key={r} className="font-mono text-xs text-faint">run {r}</span>)}
+                {e.repeatability && (
+                  <span className={`rounded px-1.5 text-xs ${e.repeatability.label === "not reproduced" ? "bg-[#fbe4e4] text-[#7f1d1d]" : "bg-[#f4f5f7] text-[#3a4552]"}`}
+                    title={`${e.repeatability.meaning} Independent replication is never decided by the software.`}>
+                    repeatability: {e.repeatability.label}
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-sm">{e.name}</p>
               <div className="mt-1 flex flex-wrap gap-1.5 text-xs">

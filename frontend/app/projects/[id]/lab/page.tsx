@@ -14,7 +14,8 @@ interface Node { id: string; kind: "loop" | "paper" | "source"; title: string; s
 interface RunSummary { run_id: string; experiment: string | null; repeat_of: string | null; finished_at: string | null;
   file: string; legacy: boolean; runner: string | null; ok: boolean; values: Record<string, unknown>;
   jobs: { id: string; command: string; exit_code: number | null; seconds: number; ok: boolean }[];
-  code_sha256: string | null; data_sha256: string | null; python: string | null }
+  code_sha256: string | null; data_sha256: string | null; python: string | null;
+  reproducibility?: { level: number | null; label: string; meaning: string } | null }
 interface Lab { experiments: Node[]; runs: RunSummary[]; active: { id: string; kind: string; status: string; created_at: string }[] }
 interface Compare { a: string; b: string; same_values: boolean; code_same: boolean | null; data_same: boolean | null;
   slots: { slot: string; a: unknown; b: unknown; same: boolean; diff?: number; rel_diff?: number | null }[];
@@ -201,6 +202,10 @@ export default function LabPage({ params }: { params: Promise<{ id: string }> })
                 <span className={r.ok ? "text-[#14532d]" : "text-[#7f1d1d]"}>{r.ok ? "✓" : "✕"}</span>
                 <b className="font-mono text-xs">{r.run_id}</b>
                 {r.repeat_of && <span className="rounded-full bg-[#e6eefb] px-2 text-xs">repeat of {r.repeat_of}</span>}
+                {r.reproducibility && !r.repeat_of && (
+                  <span className={`rounded-full px-2 text-xs ${r.reproducibility.label === "not reproduced" ? "bg-[#fbe4e4] text-[#7f1d1d]" : "bg-[#f4f5f7] text-[#3a4552]"}`}
+                    title={`${r.reproducibility.meaning} Independent replication is never decided by the software.`}>{r.reproducibility.label}</span>
+                )}
                 {r.legacy && <span className="rounded-full bg-[#f4f5f7] px-2 text-xs text-faint">before fingerprints</span>}
                 <span className="ml-auto text-xs text-faint">{when(r.finished_at)}</span>
               </div>
