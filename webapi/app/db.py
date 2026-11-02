@@ -129,12 +129,20 @@ CREATE VIRTUAL TABLE IF NOT EXISTS memory_fts USING fts5(item_id UNINDEXED, titl
 """)
 
 
+def _add_ledger_links(c: sqlite3.Connection) -> None:
+    # Which app record (server run job, pre-registered experiment) became which ledger id (R####, E###, C###).
+    c.execute("CREATE TABLE IF NOT EXISTS ledger_links (project_id TEXT NOT NULL REFERENCES projects(id), "
+              "kind TEXT NOT NULL, app_ref TEXT NOT NULL, ledger_id TEXT NOT NULL, created_at TEXT NOT NULL, "
+              "PRIMARY KEY(project_id, kind, app_ref))")
+
+
 # Ordered, append-only. Each step must be safe on a database that already has its effect (older databases
 # were migrated ad hoc before this table existed). Never edit or reorder a released step; add a new one.
 MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes),
               (3, "file versions", _add_file_versions),
               (4, "backups table, artifacts.project_id foreign key", _backups_and_artifact_fk),
-              (5, "research memory v2", _add_memory_store)]
+              (5, "research memory v2", _add_memory_store),
+              (6, "evidence ledger links", _add_ledger_links)]
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
 

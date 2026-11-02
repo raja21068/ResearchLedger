@@ -900,8 +900,9 @@ def _finish(store: Store, project_id: str, st: dict, reason: str) -> None:
     st["best_round"] = best_round(st)
     _save(project_id, st)
     store.log_activity(project_id, "loop_finished", f"{st['id']} {reason}")
-    from . import memory_store  # scores and verdicts become memories (failed directions are never forgotten)
+    from . import ledger_bridge, memory_store  # scores and verdicts become memories; verdicts become claims
     memory_store.safe(memory_store.ingest_loops, store, project_id)
+    ledger_bridge.safe_sync(store, project_id)
 
 
 def best_round(st: dict) -> int | None:

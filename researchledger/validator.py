@@ -439,7 +439,12 @@ def validate(ws: Workspace) -> ValidationResult:
 
     # --- Graph-shape constraints: C->E, E_experimental->R, claim basis -----
     for cid, cl in claims.items():
-        if cl.status != "hypothesis" and not _claim_support_ids(cl):
+        # A contradicting edge is an evidence edge too: recompute_claim_status derives 'contradicted' from
+        # contradicting evidence alone, so such a claim must not be reported as having no evidence. A withdrawn
+        # claim asserts nothing any more, so it needs no evidence edge.
+        has_edge = (bool(_claim_support_ids(cl)) or (cl.status == "contradicted" and bool(cl.contradicts))
+                    or cl.status == "withdrawn")
+        if cl.status != "hypothesis" and not has_edge:
             error(codes.RL110_EMPIRICAL_CLAIM_WITHOUT_EVIDENCE, f"{cid} is '{cl.status}' but cites no evidence")
 
     for eid, ev in evidence.items():
@@ -456,7 +461,7 @@ def validate(ws: Workspace) -> ValidationResult:
 
     for cid, cl in claims.items():
         support_ids = _claim_support_ids(cl)
-        if not support_ids:
+        if not support_ids or cl.status == "withdrawn":  # a withdrawn claim no longer rests on its evidence
             continue
         live_supporting = [evidence[e] for e in support_ids if e in evidence and evidence[e].status != "superseded"]
         if live_supporting and all(e.status in ("contradicted", "invalidated") for e in live_supporting):

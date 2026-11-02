@@ -736,3 +736,38 @@ def test_validator_flags_missing_support_set_member(tmp_path):
     _write_evidence(ws, "E001", name="E001", status="proposed", source_kind="observation", supports=["C021"])
     result = validate(ws)
     assert any(i.code == codes.RL101_BROKEN_EDGE and "E404" in i.message for i in result.errors)
+
+
+def test_contradicted_claim_with_contradicting_evidence_is_not_rl110(tmp_path):
+    # recompute_claim_status derives 'contradicted' from contradicting evidence alone; the validator must accept it.
+    ws = init_workspace(tmp_path)
+    _write_claim(ws, "C010", name="C010", status="contradicted", evidence=[], contradicts=["E010"])
+    _write_evidence(ws, "E010", name="E010", status="checked", source_kind="observation", contradicts=["C010"])
+
+    result = validate(ws)
+    assert not any(i.code == codes.RL110_EMPIRICAL_CLAIM_WITHOUT_EVIDENCE for i in result.issues)
+
+
+def test_contradicted_claim_without_any_edge_is_still_rl110(tmp_path):
+    ws = init_workspace(tmp_path)
+    _write_claim(ws, "C011", name="C011", status="contradicted", evidence=[])
+
+    result = validate(ws)
+    assert any(i.code == codes.RL110_EMPIRICAL_CLAIM_WITHOUT_EVIDENCE for i in result.errors)
+
+
+def test_withdrawn_claim_needs_no_evidence_edge(tmp_path):
+    ws = init_workspace(tmp_path)
+    _write_claim(ws, "C012", name="C012", status="withdrawn", evidence=[])
+
+    result = validate(ws)
+    assert not any(i.code == codes.RL110_EMPIRICAL_CLAIM_WITHOUT_EVIDENCE for i in result.issues)
+
+
+def test_withdrawn_claim_on_invalidated_evidence_is_not_rl120(tmp_path):
+    ws = init_workspace(tmp_path)
+    _write_claim(ws, "C013", name="C013", status="withdrawn", evidence=["E013"])
+    _write_evidence(ws, "E013", name="E013", status="invalidated", source_kind="observation", supports=["C013"])
+
+    result = validate(ws)
+    assert not any(i.code == codes.RL120_CLAIM_BASED_ON_REJECTED_EVIDENCE for i in result.issues)

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import os
 import mimetypes
 from pathlib import Path
@@ -13,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1177,6 +1178,82 @@ def loop_parent(project_id: str, body: ParentIn):
         st["parent"] = body.parent
         loops._save(project_id, st)
     return {"loop_id": loop_id, "parent": body.parent}
+
+
+# ---------------------------------------------------------------- evidence ledger (C/E/R)
+def _ledger(fn, *args):
+    try:
+        return fn(*args)
+    except ledger_bridge.LedgerError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/projects/{project_id}/evidence")
+def evidence_overview(project_id: str, sync: bool = True):
+    """Claims (C###), evidence (E###) and runs (R####) from the project's ResearchLedger, plus integrity issues.
+    sync=true first imports any newly recorded runs and pre-registered verdicts (idempotent)."""
+    _project(project_id)
+    report = ledger_bridge.safe_sync(store, project_id) if sync else None
+    return {**_ledger(ledger_bridge.overview, store, project_id), "sync": report}
+
+
+class ClaimIn(BaseModel):
+    statement: str = Field(..., max_length=4000)
+    name: str = Field("", max_length=200)
+    supports: list[str] = Field(default_factory=list)
+    contradicts: list[str] = Field(default_factory=list)
+
+
+@app.post("/api/v1/projects/{project_id}/claims", status_code=201)
+def claim_add(project_id: str, body: ClaimIn):
+    _project(project_id)
+    return {"id": _ledger(ledger_bridge.add_claim, store, project_id, body.statement, body.name, body.supports,
+                          body.contradicts)}
+
+
+class EvidenceStatusIn(BaseModel):
+    status: str
+    reason: str = Field(..., max_length=1000)
+
+
+@app.post("/api/v1/projects/{project_id}/evidence/{evidence_id}/status")
+def evidence_status(project_id: str, evidence_id: str, body: EvidenceStatusIn):
+    """Your judgment on one piece of evidence (checked = reviewed, verified = confirmed, invalidated). The ledger
+    re-derives every claim's status from it; claim status is never set directly."""
+    _project(project_id)
+    return _ledger(ledger_bridge.set_status, store, project_id, evidence_id, body.status, body.reason)
+
+
+class WithdrawIn(BaseModel):
+    reason: str = Field(..., max_length=1000)
+
+
+@app.post("/api/v1/projects/{project_id}/claims/{claim_id}/withdraw")
+def claim_withdraw(project_id: str, claim_id: str, body: WithdrawIn):
+    _project(project_id)
+    _ledger(ledger_bridge.withdraw_claim, store, project_id, claim_id, body.reason)
+    return {"ok": True}
+
+
+class BindIn(BaseModel):
+    claim: str
+    relation: str = "supports"
+
+
+@app.post("/api/v1/projects/{project_id}/evidence/{evidence_id}/bind")
+def evidence_bind(project_id: str, evidence_id: str, body: BindIn):
+    _project(project_id)
+    _ledger(ledger_bridge.bind, store, project_id, evidence_id, body.claim, body.relation)
+    return {"ok": True}
+
+
+@app.get("/api/v1/projects/{project_id}/ledger/trace/{entity_id}")
+def ledger_trace_view(project_id: str, entity_id: str):
+    """The provenance chain of a claim, evidence or run, as the ledger's own trace prints it."""
+    _project(project_id)
+    if not re.fullmatch(r"[CER]\d{3,4}", entity_id):
+        raise HTTPException(400, "give a claim (C###), evidence (E###) or run (R####) id")
+    return {"id": entity_id, "text": _ledger(ledger_bridge.trace, project_id, entity_id)}
 
 
 # ---------------------------------------------------------------- research memory v2

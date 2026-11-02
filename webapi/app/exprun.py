@@ -148,6 +148,8 @@ def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: P
     rdir.mkdir(parents=True, exist_ok=True)
     (rdir / f"{run_id}.json").write_text(json.dumps(log, indent=2), encoding="utf-8")
     versions.safe_sync(store, project_id, "server_exec", run_id)
+    from . import ledger_bridge  # measured results enter the evidence ledger as observed evidence
+    ledger_bridge.safe_sync(store, project_id)
     if run_id in _cancelled:
         _cancelled.discard(run_id)
         return  # cancel() already marked the run
