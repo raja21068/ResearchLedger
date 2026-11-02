@@ -16,6 +16,7 @@ import { btn, Card, Empty, ErrorBox, PageHeader, timeAgo } from "@/components/ui
 const FLOW: Record<string, string[]> = {
   idea_forge: ["Attack: search 50+ recent papers", "Score: your Phase 10 rubric /100", "Redesign the idea", "Repeat until it passes"],
   review_fix: ["Strict review of the PDF", "Fix instructions (MD) for the agent", "Surgical fix + recompile", "Re-review until clean"],
+  experiment: ["Pre-registered plan (frozen)", "Agent writes the code", "You approve → server runs it", "Analysis checked vs criteria"],
 };
 
 export default function LoopsPage() {
@@ -31,12 +32,19 @@ export default function LoopsPage() {
   const [idea, setIdea] = useState("");
   const [manuscript, setManuscript] = useState("");
   const [external, setExternal] = useState("");
+  const [experiments, setExperiments] = useState("");
+  const [fromLoop, setFromLoop] = useState("");
   const [mode, setMode] = useState<"auto" | "step">("auto");
   const [params, setParams] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => { api<LoopType[]>("/loop-types").then(setTypes).catch(setError); }, []);
+  useEffect(() => {  // "Run these experiments" on a review loop links here with ?type=experiment&from=<loop>
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("type") === "experiment") setType("experiment");
+    if (q.get("from")) setFromLoop(q.get("from")!);
+  }, []);
   useEffect(() => {
     if (!projectId) { setLoops([]); return; }
     const load = () => api<LoopSummary[]>(`/projects/${projectId}/loops`).then(setLoops).catch(setError);
@@ -69,7 +77,9 @@ export default function LoopsPage() {
       if (!pid) pid = (await post<{ id: string }>("/projects", { title: (goal || idea).slice(0, 60) || "Research loop" })).id;
       const body = { type, goal, mode, params,
         idea_text: type === "idea_forge" && idea.trim() ? idea : null,
-        manuscript: type === "review_fix" ? manuscript : null,
+        manuscript: type === "review_fix" || (type === "experiment" && manuscript) ? manuscript || null : null,
+        experiments_text: type === "experiment" && experiments.trim() ? experiments : null,
+        from_loop: type === "experiment" && fromLoop ? fromLoop : null,
         external_review: type === "review_fix" && external.trim() ? external : null,
         example_pdf: type === "review_fix" && example ? example : null };
       const v = await post<{ id: string }>(`/projects/${pid}/loops`, body);
@@ -85,7 +95,7 @@ export default function LoopsPage() {
 
       <Card className="mb-8 p-6">
         <form onSubmit={start} className="grid gap-4">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
             {types?.map((t) => (
               <button type="button" key={t.id} onClick={() => { setType(t.id); setParams({}); }} aria-pressed={type === t.id}
                 className={`rounded-xl border p-4 text-left ${type === t.id ? "border-accent bg-accent-soft" : "border-line bg-white hover:border-[#8796a5]"}`}>
@@ -115,6 +125,26 @@ export default function LoopsPage() {
                 <textarea rows={6} value={idea} onChange={(e) => setIdea(e.target.value)} className="rounded-lg border border-line px-3 py-2 font-normal"
                   placeholder="Paste the idea you want attacked: problem, claim, method…" />
               </label>
+            </>
+          ) : type === "experiment" ? (
+            <>
+              {fromLoop && (
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-[#f7f5f1] px-3 py-2 text-sm">
+                  Starts from the experiments review loop <b className="font-mono text-xs">{fromLoop}</b> asked for.
+                  <button type="button" className="ml-auto text-xs text-accent underline" onClick={() => setFromLoop("")}>Don&apos;t use them</button>
+                </div>
+              )}
+              <label className="grid gap-1 text-sm font-medium">Experiments to run {fromLoop ? "(optional — added to the reviewers' list)" : ""}
+                <textarea rows={6} value={experiments} onChange={(e) => setExperiments(e.target.value)} className="rounded-lg border border-line px-3 py-2 font-normal"
+                  placeholder="e.g. Reviewer 2: compare against a keyword-matching baseline on the same 100 projects; ablate the verifier." />
+              </label>
+              <label className="grid gap-1 text-sm font-medium">Paper these are for (optional)
+                <select value={manuscript} onChange={(e) => setManuscript(e.target.value)} className="rounded-lg border border-line px-3 py-2 font-normal">
+                  <option value="">None</option>
+                  {texFiles.map((f) => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </label>
+              <p className="text-xs text-faint">Nothing runs without your click: when the code is ready the loop waits, shows the exact commands, and the server runs them on this computer only after you approve. Results count only if that run wrote them.</p>
             </>
           ) : (
             <>
@@ -165,7 +195,8 @@ export default function LoopsPage() {
             <label className="flex items-center gap-2"><input type="radio" checked={mode === "step"} onChange={() => setMode("step")} /> Pause after every round</label>
           </fieldset>
 
-          <div><button className={btn} disabled={busy || (type === "review_fix" ? !manuscript : !(goal.trim() || idea.trim()))}>Start loop</button></div>
+          <div><button className={btn} disabled={busy || (type === "review_fix" ? !manuscript
+            : type === "experiment" ? !(experiments.trim() || fromLoop) : !(goal.trim() || idea.trim()))}>Start loop</button></div>
         </form>
       </Card>
 
@@ -177,7 +208,7 @@ export default function LoopsPage() {
             <Link href={`/projects/${projectId}/loops/${l.id}`} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm hover:bg-[#f7f5f1]">
               <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[l.status][1]}`}>{STATUS_STYLE[l.status][0]}</span>
               <span className="min-w-0 flex-1 truncate"><b>{l.label}</b> · {l.goal}</span>
-              <span className="text-xs text-faint">round {l.round}{l.score != null ? ` · ${l.score}/100` : ""}{l.verified_major != null ? ` · ${l.verified_major} major` : ""} · {timeAgo(l.created_at)}</span>
+              <span className="text-xs text-faint">round {l.round}{l.score != null ? ` · ${l.score}/100` : ""}{l.verified_major != null ? ` · ${l.verified_major} major` : ""}{l.measured ? ` · ${l.measured} measured` : ""} · {timeAgo(l.created_at)}</span>
             </Link>
           </li>
         ))}

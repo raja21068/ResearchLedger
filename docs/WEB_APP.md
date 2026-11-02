@@ -100,6 +100,24 @@ API: `GET /api/v1/loop-types`, `GET|POST /api/v1/projects/{id}/loops`, `GET /api
 - Optional example paper (PDF): the agent matches its style, length and structure; the gate compares pages, words,
   figures, tables and references (±20%).
 
+**Experiment loop** (`experiment`, `webapi/app/exprun.py`): runs the experiments a reviewer asked for, for real. Start
+it from a review loop's "Run these in an Experiment loop" button (its `needs_experiments` become the request) or paste
+the experiments yourself.
+- *design* (round 1 only): `exp_plan.json` — per experiment a hypothesis, result slots, data, baselines, a command
+  `python code/…py`, and a success criterion (`slot op value` or `slot op other_slot`). Checked, then **frozen** as
+  `preregistration.json` (sha256 + time): hypotheses and criteria cannot change after this. Experiments that cannot
+  run here (no GPU, no data) are marked `runnable: false` with a blocker and are reported, never faked.
+- *code*: the agent writes the scripts. Rejected on a syntax error, a missing script, or **any results file written
+  during this move** — only the approved run may produce results.
+- *run*: the loop **always pauses** ("Approve and run", also in Approvals) showing the exact commands. After the
+  click the server runs them itself (`RL_EXP_PYTHON` or its own Python, workspace folder, `max_minutes` per
+  experiment) and records exit code, runtime, log, script sha256, and which `results/<slot>.json` the run wrote.
+  A slot counts only if a run that exited 0 wrote it. A failed run is never restarted without a click.
+- *analyze*: `verdicts.json` + `analysis.md`. The server computes each verdict from the frozen criterion and rejects
+  a mismatch (e.g. "supported" when the criterion is false), and rejects decimals/percentages not in `results/*.json`.
+- Failures go back to *code* (with the log tail) for up to `max_rounds` (3). Provenance per result:
+  `provenance/experiments.json` (kept outside `results/` so exit codes never count as reportable numbers).
+
 **Quality Check** (`/quality`, `webapi/app/quality.py`, `POST /api/v1/projects/{id}/quality`): the submission gate on
 any `.tex` — compiled and current PDF, page budget, placeholders, cited keys in the `.bib`, reference count, optional
 Crossref/arXiv lookup of every cited reference, numbers in tables/abstract traced to `results/*.json`, vector vs raster

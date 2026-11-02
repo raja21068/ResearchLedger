@@ -287,6 +287,8 @@ class LoopIn(BaseModel):
     params: dict = Field(default_factory=dict)
     mode: str = "auto"
     example_pdf: str | None = None
+    experiments_text: str | None = Field(None, max_length=60_000)
+    from_loop: str | None = None
 
 
 class SteerIn(BaseModel):
@@ -321,7 +323,8 @@ def list_loops(project_id: str):
 def create_loop(project_id: str, body: LoopIn):
     _project(project_id)
     return _loop_call(loops.create, store, project_id, body.type, body.goal, body.idea_text, body.manuscript,
-                      body.external_review, body.params, body.mode, body.example_pdf)
+                      body.external_review, body.params, body.mode, body.example_pdf, body.experiments_text,
+                      body.from_loop)
 
 
 @app.get("/api/v1/projects/{project_id}/loops/{loop_id}")
