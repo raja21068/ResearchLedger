@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-labelledby="title desc">
+<title id="title">ResearchLedger</title>
+<desc id="desc">Evidence-first infrastructure for autonomous scientific research.</desc>
+<rect width="1600" height="420" rx="24" fill="#F8FAFC"/>
+<rect x="24" y="24" width="1552" height="372" rx="18" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="2"/>
+<g opacity=".8" fill="none" stroke-width="2">
+  <path d="M1050 90 L1190 150 L1320 90 L1450 165 L1370 300 L1200 325 L1080 245 Z" stroke="#C7D8E8"/>
+  <path d="M1190 150 L1200 325 M1320 90 L1370 300 M1050 90 L1080 245 M1450 165 L1370 300" stroke="#D6E3ED"/>
+</g>
+<g>
+  <circle cx="1050" cy="90" r="13" fill="#477A9E"/>
+  <circle cx="1190" cy="150" r="18" fill="#4B8D87"/>
+  <circle cx="1320" cy="90" r="12" fill="#9A86B5"/>
+  <circle cx="1450" cy="165" r="16" fill="#D0A66B"/>
+  <circle cx="1370" cy="300" r="17" fill="#4B8D87"/>
+  <circle cx="1200" cy="325" r="12" fill="#477A9E"/>
+  <circle cx="1080" cy="245" r="15" fill="#9A86B5"/>
+</g>
+<g font-family="Inter,Segoe UI,Arial,sans-serif">
+  <text x="100" y="145" font-size="28" font-weight="700" letter-spacing="5" fill="#4B8D87">EVIDENCE-FIRST RESEARCH INFRASTRUCTURE</text>
+  <text x="96" y="230" font-size="76" font-weight="750" letter-spacing="-2" fill="#172B3A">ResearchLedger</text>
+  <text x="102" y="286" font-size="27" fill="#526779">From falsifiable ideas to traceable scientific results.</text>
+  <g font-size="18" font-weight="600" fill="#36556D">
+    <rect x="100" y="324" width="150" height="40" rx="20" fill="#EAF1F7"/><text x="175" y="350" text-anchor="middle">DISCOVER</text>
+    <rect x="264" y="324" width="132" height="40" rx="20" fill="#E8F2F0"/><text x="330" y="350" text-anchor="middle">DRAFT</text>
+    <rect x="410" y="324" width="132" height="40" rx="20" fill="#F0ECF5"/><text x="476" y="350" text-anchor="middle">REVIEW</text>
+    <rect x="556" y="324" width="142" height="40" rx="20" fill="#F6F0E7"/><text x="627" y="350" text-anchor="middle">EXECUTE</text>
+    <rect x="712" y="324" width="130" height="40" rx="20" fill="#EAF1F7"/><text x="777" y="350" text-anchor="middle">VERIFY</text>
+  </g>
+</g>
+</svg>

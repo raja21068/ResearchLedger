@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="430" viewBox="0 0 1500 430" role="img" aria-labelledby="t d">
+<title id="t">ResearchLedger evidence graph</title><desc id="d">Evidence provenance graph connecting hypothesis, protocol, dataset, run, evidence, claim, and audit.</desc>
+<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6" fill="none" stroke="#8296A7" stroke-width="1.3"/></marker>
+<style>.h{font:700 18px Inter,Segoe UI,Arial;fill:#263F52}.p{font:500 14px Inter,Segoe UI,Arial;fill:#63788A}.cap{font:700 13px Inter,Segoe UI,Arial;letter-spacing:1px;fill:#4B8D87}</style></defs>
+<rect width="1500" height="430" rx="18" fill="#FBFCFD"/>
+<text x="55" y="55" class="cap">PROVENANCE GRAPH</text>
+<text x="55" y="87" font-family="Inter,Segoe UI,Arial" font-size="26" font-weight="700" fill="#20384A">Trace each claim back to its evidence</text>
+<g fill="none" stroke="#8296A7" stroke-width="2" marker-end="url(#arr)">
+<path d="M220 210 H260"/><path d="M425 210 H465"/><path d="M630 210 H670"/><path d="M835 210 H875"/><path d="M1040 210 H1080"/><path d="M1245 210 H1285"/>
+</g>
+<g>
+<rect x="55" y="155" width="165" height="110" rx="12" fill="#EAF1F7" stroke="#B8CBD9" stroke-width="1.5"/><text x="137" y="197" text-anchor="middle" class="h">Hypothesis</text><text x="137" y="226" text-anchor="middle" class="p">What is proposed?</text>
+<rect x="260" y="155" width="165" height="110" rx="12" fill="#E8F2F0" stroke="#B9D3CE" stroke-width="1.5"/><text x="342" y="197" text-anchor="middle" class="h">Protocol</text><text x="342" y="226" text-anchor="middle" class="p">What was planned?</text>
+<rect x="465" y="155" width="165" height="110" rx="12" fill="#F0ECF5" stroke="#CFC3DD" stroke-width="1.5"/><text x="547" y="197" text-anchor="middle" class="h">Dataset</text><text x="547" y="226" text-anchor="middle" class="p">Which inputs?</text>
+<rect x="670" y="155" width="165" height="110" rx="12" fill="#F6F0E7" stroke="#E0CFB5" stroke-width="1.5"/><text x="752" y="197" text-anchor="middle" class="h">Run</text><text x="752" y="226" text-anchor="middle" class="p">What executed?</text>
+<rect x="875" y="155" width="165" height="110" rx="12" fill="#E8F2F0" stroke="#B9D3CE" stroke-width="1.5"/><text x="957" y="197" text-anchor="middle" class="h">Evidence</text><text x="957" y="226" text-anchor="middle" class="p">What was measured?</text>
+<rect x="1080" y="155" width="165" height="110" rx="12" fill="#EAF1F7" stroke="#B8CBD9" stroke-width="1.5"/><text x="1162" y="197" text-anchor="middle" class="h">Claim</text><text x="1162" y="226" text-anchor="middle" class="p">What is asserted?</text>
+<rect x="1285" y="155" width="165" height="110" rx="12" fill="#F3F4F6" stroke="#C9D1D9" stroke-width="1.5"/><text x="1367" y="197" text-anchor="middle" class="h">Audit</text><text x="1367" y="226" text-anchor="middle" class="p">What passed?</text>
+</g>
+<g font-family="Inter,Segoe UI,Arial" font-size="13" font-weight="700" fill="#617689">
+<text x="137" y="300" text-anchor="middle">HYPOTHESIS</text><text x="342" y="300" text-anchor="middle">PROTOCOL</text><text x="547" y="300" text-anchor="middle">DATA PROVENANCE</text><text x="752" y="300" text-anchor="middle">R####</text><text x="957" y="300" text-anchor="middle">E###</text><text x="1162" y="300" text-anchor="middle">C###</text><text x="1367" y="300" text-anchor="middle">INTEGRITY</text>
+</g>
+<text x="750" y="365" text-anchor="middle" font-family="Inter,Segoe UI,Arial" font-size="16" fill="#617689">A linked record improves traceability; it does not, by itself, prove scientific validity.</text>
+</svg>

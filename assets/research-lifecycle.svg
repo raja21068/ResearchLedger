@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="350" viewBox="0 0 1500 350" role="img" aria-labelledby="t d">
+<title id="t">Research lifecycle</title><desc id="d">Six connected steps from question to researcher evaluation.</desc>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6" fill="none" stroke="#8296A7" stroke-width="1.3"/></marker>
+<style>
+.t{font:700 19px Inter,Segoe UI,Arial;fill:#263F52}.s{font:500 14px Inter,Segoe UI,Arial;fill:#617689}.n{font:700 14px Inter,Segoe UI,Arial;fill:#fff}
+</style></defs>
+<rect width="1500" height="350" rx="18" fill="#FBFCFD"/>
+<g fill="none" stroke="#8296A7" stroke-width="2" marker-end="url(#a)">
+<path d="M220 160 H270"/><path d="M455 160 H505"/><path d="M690 160 H740"/><path d="M925 160 H975"/><path d="M1160 160 H1210"/>
+</g>
+<g>
+<rect x="40" y="95" width="180" height="130" rx="14" fill="#EAF1F7" stroke="#B8CBD9"/><circle cx="70" cy="75" r="17" fill="#477A9E"/><text x="70" y="80" text-anchor="middle" class="n">1</text><text x="130" y="145" text-anchor="middle" class="t">Question</text><text x="130" y="174" text-anchor="middle" class="s">Research problem</text>
+<rect x="275" y="95" width="180" height="130" rx="14" fill="#E8F2F0" stroke="#B9D3CE"/><circle cx="305" cy="75" r="17" fill="#4B8D87"/><text x="305" y="80" text-anchor="middle" class="n">2</text><text x="365" y="145" text-anchor="middle" class="t">Hypothesis</text><text x="365" y="174" text-anchor="middle" class="s">Falsifiable proposal</text>
+<rect x="510" y="95" width="180" height="130" rx="14" fill="#F0ECF5" stroke="#CFC3DD"/><circle cx="540" cy="75" r="17" fill="#8E7BA8"/><text x="540" y="80" text-anchor="middle" class="n">3</text><text x="600" y="145" text-anchor="middle" class="t">Draft + review</text><text x="600" y="174" text-anchor="middle" class="s">Claims still provisional</text>
+<rect x="745" y="95" width="180" height="130" rx="14" fill="#F6F0E7" stroke="#E0CFB5"/><circle cx="775" cy="75" r="17" fill="#B58A50"/><text x="775" y="80" text-anchor="middle" class="n">4</text><text x="835" y="145" text-anchor="middle" class="t">Experiment</text><text x="835" y="174" text-anchor="middle" class="s">Run + measurements</text>
+<rect x="980" y="95" width="180" height="130" rx="14" fill="#E8F2F0" stroke="#B9D3CE"/><circle cx="1010" cy="75" r="17" fill="#4B8D87"/><text x="1010" y="80" text-anchor="middle" class="n">5</text><text x="1070" y="145" text-anchor="middle" class="t">Evidence + claims</text><text x="1070" y="174" text-anchor="middle" class="s">Bind outputs to results</text>
+<rect x="1215" y="95" width="245" height="130" rx="14" fill="#EAF1F7" stroke="#B8CBD9"/><circle cx="1245" cy="75" r="17" fill="#477A9E"/><text x="1245" y="80" text-anchor="middle" class="n">6</text><text x="1337" y="145" text-anchor="middle" class="t">Audit + evaluate</text><text x="1337" y="174" text-anchor="middle" class="s">Researcher judgment</text>
+</g>
+<text x="750" y="285" text-anchor="middle" font-family="Inter,Segoe UI,Arial" font-size="16" fill="#617689">ResearchLedger preserves provenance across the complete sequence.</text>
+</svg>
