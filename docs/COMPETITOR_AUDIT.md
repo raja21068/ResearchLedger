@@ -10,8 +10,11 @@ downloaded or run). This audit started from an AI-written list of competitors, s
 | **OpenResearch** | Real: `alphaXiv/OpenResearch`, MIT, Rust + React, about 7.8k stars, active (last push 31 Oct 2026) | yes |
 | **Hope Agent** | Real: `shiwenwen/hope-agent`, MIT, Rust/Tauri, about 1.9k stars, active | yes (memory) |
 | **"Hermes Loop"** | No project by that name. The nearest is **Hermes Workspace** (`outsourc-e/hermes-workspace`, MIT, about 6.8k stars), a GUI for Hermes Agent | yes, as a stand-in |
+| **FAROS** (`OpenNSWM-Lab/FAROS`, from the user's blueprint) | Real: MIT, Python, ~3k stars; idea → experiment → paper → review, Docker sandbox with no network + subprocess fallback | yes (sandbox, memory, blueprint) |
+| **ResearchOS** (`Karbo123/ResearchOS`, from the user's blueprint) | Real: TypeScript + Mastra, 0 stars, **no licence** (code may not be reused) | file list only |
+| **Hermes Mission Control** (`JaimeMarques/hermes-mission-control`, from the user's blueprint) | Real: MIT, 0 stars, dashboard for Hermes Agent | description only |
 | **"myxos"** | Only a description on the OpenSSI project page. No public repository found (GitHub repos named myxos are unrelated OS course projects) | no: no code to read |
-| **"ResearchOS" (Mastra + PGlite)** | Not found. Several unrelated "ResearchOS" repos exist; none uses Mastra or PGlite | no |
+| **"ResearchOS" (Mastra + PGlite)** | Not found by that description in the first search; the user's blueprint later pointed to `Karbo123/ResearchOS` (row above) | see above |
 | **EvoScientist** | Real paper, arXiv 2603.08127 (March 2026) | design only, from the paper |
 
 Treat the earlier list's capability claims for the unconfirmed systems as unverified. Two of its claims were wrong
@@ -118,3 +121,5 @@ Sources: [OpenResearch](https://github.com/alphaXiv/OpenResearch) ·
 [Hope Agent](https://github.com/shiwenwen/hope-agent) ·
 [Hermes Workspace](https://github.com/outsourc-e/hermes-workspace) ·
 [EvoScientist, arXiv 2603.08127](https://arxiv.org/abs/2603.08127) · [OpenSSI (myxos mention)](https://openssi.dev/)
+
+The combined plan, merged with the user's blueprint, is in `docs/RESEARCHLEDGER_OS_BLUEPRINT.md`.
