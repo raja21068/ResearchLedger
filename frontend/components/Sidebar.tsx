@@ -1,7 +1,7 @@
 "use client";
 
-// Categorised navigation (Workspace / Research / Production / Resources), recent chats,
-// the current project's documents, and settings at the bottom. Every item opens a real page.
+// Claude-style navigation: New task, Decisions, your Papers (long projects) and Quick jobs (one-off chats),
+// the current paper's documents, and every tool page folded under "Tools". Settings at the bottom.
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -37,39 +37,31 @@ const I = {
 type IconName = keyof typeof I;
 interface Item { href: string; label: string; icon: IconName }
 
-const GROUPS: { id: string; label: string; items: Item[] }[] = [
-  { id: "workspace", label: "Workspace", items: [
-    { href: "/dashboard", label: "Overview", icon: "home" },
-    { href: "/projects", label: "Projects", icon: "folder" },
-    { href: "/paper", label: "Paper Studio", icon: "pen" },
-  ] },
-  { id: "research", label: "Research", items: [
-    { href: "/loops", label: "Research Loops", icon: "loop" },
-    { href: "/brainstorm", label: "Idea Discovery", icon: "spark" },
-    { href: "/tools/literature_review", label: "Literature Review", icon: "lit" },
-    { href: "/tools/research_design", label: "Research Design", icon: "design" },
-    { href: "/tools/data_analysis", label: "Data Analysis", icon: "chart" },
-    { href: "/tools/code_generation", label: "Code Generation", icon: "code" },
-    { href: "/tools/experiments_s4", label: "Experiment Lab", icon: "flask" },
-  ] },
-  { id: "production", label: "Production", items: [
-    { href: "/tools/write_manuscript", label: "Manuscripts", icon: "doc" },
-    { href: "/tools/thesis_to_manuscript", label: "Thesis to Paper", icon: "thesis" },
-    { href: "/tools/quick_review", label: "Peer Review", icon: "review" },
-    { href: "/quality", label: "Quality Check", icon: "evidence" },
-    { href: "/tools?section=evidence", label: "Evidence Center", icon: "evidence" },
-  ] },
-  { id: "resources", label: "Resources", items: [
-    { href: "/tools", label: "All Tools & Skills", icon: "tools" },
-    { href: "/agents", label: "Agent Directory", icon: "bot" },
-    { href: "/library", label: "Library", icon: "book" },
-    { href: "/memory", label: "Research Memory", icon: "brain" },
-    { href: "/results", label: "Results", icon: "results" },
-    { href: "/runs", label: "Run History", icon: "clock" },
-  ] },
+// Every earlier page stays one click away, folded under "Tools" (closed by default).
+const TOOLS: Item[] = [
+  { href: "/dashboard", label: "Overview", icon: "home" },
+  { href: "/paper", label: "Paper Studio", icon: "pen" },
+  { href: "/loops", label: "Research Loops", icon: "loop" },
+  { href: "/brainstorm", label: "Idea Discovery", icon: "spark" },
+  { href: "/tools/literature_review", label: "Literature Review", icon: "lit" },
+  { href: "/tools/research_design", label: "Research Design", icon: "design" },
+  { href: "/tools/data_analysis", label: "Data Analysis", icon: "chart" },
+  { href: "/tools/code_generation", label: "Code Generation", icon: "code" },
+  { href: "/tools/experiments_s4", label: "Experiment Lab", icon: "flask" },
+  { href: "/tools/write_manuscript", label: "Manuscripts", icon: "doc" },
+  { href: "/tools/thesis_to_manuscript", label: "Thesis to Paper", icon: "thesis" },
+  { href: "/tools/quick_review", label: "Peer Review", icon: "review" },
+  { href: "/quality", label: "Quality Check", icon: "evidence" },
+  { href: "/tools?section=evidence", label: "Evidence Center", icon: "evidence" },
+  { href: "/tools", label: "All Tools & Skills", icon: "tools" },
+  { href: "/agents", label: "Agent Directory", icon: "bot" },
+  { href: "/memory", label: "Research Memory", icon: "brain" },
+  { href: "/results", label: "Results", icon: "results" },
+  { href: "/runs", label: "Run History", icon: "clock" },
 ];
 
-interface Recent { id: string; project_id: string; title: string; project_title: string; updated_at: string; last_status: string | null }
+interface Recent { id: string; project_id: string; title: string; project_title: string; project_kind?: string; updated_at: string; last_status: string | null }
+interface PaperRow { id: string; title: string; updated_at: string }
 
 function Icon({ d }: { d: string }) {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
@@ -87,14 +79,15 @@ export function Sidebar() {
   const path = usePathname();
   const search = useSearchParams();
   const [wide, setWide] = useState(true);
-  const [closed, setClosed] = useState<Record<string, boolean>>({});
+  const [closed, setClosed] = useState<Record<string, boolean>>({ tools: true });
   const [recents, setRecents] = useState<Recent[]>([]);
+  const [papers, setPapers] = useState<PaperRow[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [q, setQ] = useState("");
   const [searching, setSearching] = useState(false);
   const [docs, setDocs] = useState<{ path: string }[]>([]);
   const [worker, setWorker] = useState<{ executor: string; worker_connected: boolean; worker_state?: string } | null>(null);
-  const projectId = path.match(/^\/projects\/(prj_[a-z0-9]+)/)?.[1] ?? null;
+  const projectId = path.match(/^\/projects\/(prj_[a-z0-9]+)/)?.[1] ?? search.get("project");
   const [approvals, setApprovals] = useState(0);
   useEffect(() => {
     const tick = () => api<{ counts: { approve: number; retry: number } }>("/inbox")
@@ -102,9 +95,10 @@ export function Sidebar() {
     tick(); const t = setInterval(tick, 10000); return () => clearInterval(t);
   }, [path]);
 
-  useEffect(() => { setWide(readPref("rl-nav-wide", true)); setClosed(readPref("rl-nav-closed", {})); }, []);
+  useEffect(() => { setWide(readPref("rl-nav-wide", true)); setClosed(readPref("rl-nav-closed2", { tools: true })); }, []);
   useEffect(() => {
     api<Recent[]>("/conversations?limit=60").then(setRecents).catch(() => setRecents([]));
+    api<PaperRow[]>("/projects?kind=paper").then(setPapers).catch(() => setPapers([]));
   }, [path, search]);
   useEffect(() => {
     const tick = () => api<{ executor: string; worker_connected: boolean; worker_state?: string }>("/bridge/status").then(setWorker).catch(() => setWorker(null));
@@ -114,21 +108,34 @@ export function Sidebar() {
     if (!projectId) { setDocs([]); return; }
     api<{ path: string; kind: string }[]>(`/projects/${projectId}/files`)
       .then((fs) => setDocs(fs.filter((f) => ["pdf", "docx", "markdown"].includes(f.kind)
-        && !/^(_inputs|control|memory|director)\//.test(f.path)).slice(0, 10)))
+        && !/^(_inputs|control|memory|director|loops)\//.test(f.path)).slice(0, 6)))
       .catch(() => setDocs([]));
   }, [projectId, search]);
   if (path.startsWith("/view/")) return null; // the full-tab document view is chrome-free
 
   const toggleWide = () => { setWide(!wide); writePref("rl-nav-wide", !wide); };
-  const toggleGroup = (id: string) => { const next = { ...closed, [id]: !closed[id] }; setClosed(next); writePref("rl-nav-closed", next); };
+  const toggleGroup = (id: string) => { const next = { ...closed, [id]: !closed[id] }; setClosed(next); writePref("rl-nav-closed2", next); };
   const fullPath = path + (search.toString() ? `?${search}` : "");
   const active = (href: string) => href.includes("?") ? fullPath === href : (path === href || (href !== "/tools" && path.startsWith(href + "/")));
   const current = search.get("conv");
   const row = (on: boolean) => `flex min-h-[34px] items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-[13px] ${on
     ? "bg-[#e9e5dd] font-semibold text-ink" : "text-[#4d4a44] hover:bg-[#edeae4] hover:text-ink"}`;
+  const heading = (id: string, label: string, extra?: React.ReactNode) => (
+    <div className="mt-3 flex items-center justify-between px-2.5 pb-1 text-[10px] font-bold uppercase tracking-[.1em] text-faint">
+      <button onClick={() => toggleGroup(id)} aria-expanded={!closed[id]} className="flex items-center gap-1 uppercase tracking-[.1em] hover:text-ink">
+        {label}<span aria-hidden="true">{closed[id] ? "+" : "–"}</span></button>
+      {extra}
+    </div>
+  );
 
-  const shown = recents.filter((r) => !q || (r.title + " " + r.project_title).toLowerCase().includes(q.toLowerCase()));
-  const visible = showAll || q ? shown : shown.slice(0, 8);
+  const match = (t: string) => !q || t.toLowerCase().includes(q.toLowerCase());
+  const quick = recents.filter((r) => r.project_kind === "quick" && match(r.title + " " + r.project_title));
+  const visibleQuick = showAll || q ? quick : quick.slice(0, 8);
+  const shownPapers = papers.filter((p) => match(p.title)).slice(0, q ? 50 : 8);
+  const dot = (s: string | null) => s === "running" || s === "queued"
+    ? <span className="rl-pulse h-2 w-2 flex-none rounded-full bg-[#3b6fd8]" aria-label="running" />
+    : s === "failed" ? <span className="h-2 w-2 flex-none rounded-full bg-[#b64b43]" aria-label="failed" /> : null;
+  const paperStatus = (pid: string) => recents.find((r) => r.project_id === pid)?.last_status ?? null;
 
   return (
     <nav aria-label="Primary"
@@ -150,80 +157,84 @@ export function Sidebar() {
           className="flex min-h-9 flex-1 items-center gap-2 whitespace-nowrap rounded-lg bg-accent px-3 text-[13px] font-semibold text-white hover:bg-accent-dark">
           <Icon d={I.plus} /><span className={wide ? "" : "lg:hidden"}>New task</span>
         </Link>
-        <button onClick={() => { setSearching(!searching); setQ(""); if (!wide) toggleWide(); }} aria-label="Search chats" title="Search chats"
+        <button onClick={() => { setSearching(!searching); setQ(""); if (!wide) toggleWide(); }} aria-label="Search papers and jobs" title="Search"
           className="hidden h-9 w-9 flex-none items-center justify-center rounded-lg border border-line bg-white text-faint hover:text-ink lg:flex"><Icon d={I.search} /></button>
-      </div>
-      {/* Approvals: the one place where the user decides */}
-      <div className="px-2">
-        <Link href="/inbox" title="Approvals" className={`${row(path === "/inbox")} justify-between`}>
-          <span className="flex items-center gap-2.5"><Icon d={I.review} /><span className={wide ? "" : "lg:hidden"}>Approvals</span></span>
-          {approvals > 0 && <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold text-white">{approvals}</span>}
-        </Link>
       </div>
       {wide && searching && (
         <div className="hidden px-2 pb-2 lg:block">
-          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search chats…" aria-label="Search chats"
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search papers and jobs…" aria-label="Search papers and jobs"
             className="min-h-9 w-full rounded-lg border border-line bg-white px-3 text-sm" />
         </div>
       )}
 
-      {/* Categories */}
       <div className="flex gap-0.5 px-2 lg:flex-col">
-        {GROUPS.map((g) => (
-          <div key={g.id} className="flex gap-0.5 lg:mt-2 lg:flex-col">
-            {wide && (
-              <button onClick={() => toggleGroup(g.id)} aria-expanded={!closed[g.id]}
-                className="hidden items-center justify-between px-2.5 pb-1 text-[10px] font-bold uppercase tracking-[.1em] text-faint hover:text-ink lg:flex">
-                {g.label}<span aria-hidden="true">{closed[g.id] ? "+" : "–"}</span>
-              </button>
-            )}
-            {(!closed[g.id] || !wide) && g.items.map((it) => (
-              <Link key={it.href} href={it.href} title={it.label} aria-label={it.label} className={row(active(it.href))}>
-                <Icon d={I[it.icon]} /><span className={wide ? "" : "lg:hidden"}>{it.label}</span>
-              </Link>
-            ))}
-          </div>
-        ))}
+        <Link href="/inbox" title="Decisions" className={`${row(path === "/inbox")} justify-between`}>
+          <span className="flex items-center gap-2.5"><Icon d={I.review} /><span className={wide ? "" : "lg:hidden"}>Decisions</span></span>
+          {approvals > 0 && <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold text-white">{approvals}</span>}
+        </Link>
+        <Link href="/library" title="Library" className={row(active("/library"))}>
+          <Icon d={I.book} /><span className={wide ? "" : "lg:hidden"}>Library</span>
+        </Link>
+        <Link href="/projects" title="Papers" className={`${row(path === "/projects")} ${wide ? "lg:hidden" : ""}`}>
+          <Icon d={I.doc} /><span className="lg:hidden">Papers</span>
+        </Link>
       </div>
 
       {wide && (
         <div className="hidden px-2 lg:block">
-          {projectId && (
-            <div className="mt-3 rounded-lg bg-[#ece8e1] p-1.5">
-              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-[.1em] text-faint">Current project</div>
-              <div className="flex gap-2 px-2 pb-1 text-xs">
-                <Link href={`/projects/${projectId}/paper`} className="text-accent hover:underline">Paper</Link>
-                <Link href={`/results?project=${projectId}`} className="text-accent hover:underline">Results</Link>
-                <Link href={`/memory?project=${projectId}`} className="text-accent hover:underline">Memory</Link>
-              </div>
-              {docs.length === 0 && <p className="px-2 py-1 text-xs text-faint">No documents yet.</p>}
-              {docs.map((d) => (
-                <Link key={d.path} href={`/view/${projectId}?path=${encodeURIComponent(d.path)}`} target="_blank" title={d.path}
-                  className="flex items-center gap-2 rounded-md px-2 py-1 text-[12px] text-[#4d4a44] hover:bg-[#e2ddd4]">
-                  <Icon d={I.doc} /><span className="min-w-0 truncate">{d.path.split("/").pop()}</span>
-                </Link>
+          {heading("papers", "Papers", <Link href="/projects" className="normal-case tracking-normal hover:text-ink">All</Link>)}
+          {!closed.papers && (
+            <>
+              {papers.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">Long projects appear here — start one by asking to write a paper.</p>}
+              {shownPapers.map((p) => (
+                <div key={p.id}>
+                  <Link href={`/projects/${p.id}`} title={p.title}
+                    className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] ${projectId === p.id ? "bg-[#e9e5dd] font-semibold text-ink" : "text-[#4d4a44] hover:bg-[#edeae4]"}`}>
+                    {dot(paperStatus(p.id)) ?? <Icon d={I.doc} />}<span className="min-w-0 truncate">{p.title}</span>
+                  </Link>
+                  {projectId === p.id && (
+                    <div className="mb-1 ml-9 mt-0.5 text-xs">
+                      <div className="flex flex-wrap gap-x-2.5">
+                        <Link href={`/projects/${p.id}/paper`} className="text-accent hover:underline">Paper</Link>
+                        <Link href={`/loops?project=${p.id}`} className="text-accent hover:underline">Loops</Link>
+                        <Link href={`/quality?project=${p.id}`} className="text-accent hover:underline">Check</Link>
+                        <Link href={`/results?project=${p.id}`} className="text-accent hover:underline">Results</Link>
+                      </div>
+                      {docs.map((d) => (
+                        <Link key={d.path} href={`/view/${p.id}?path=${encodeURIComponent(d.path)}`} target="_blank" title={d.path}
+                          className="block truncate py-0.5 text-[12px] text-[#4d4a44] hover:underline">{d.path.split("/").pop()}</Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
-            </div>
+            </>
           )}
 
-          <div className="mt-3 flex items-center justify-between px-2.5 pb-1 text-[10px] font-bold uppercase tracking-[.1em] text-faint">
-            Recent chats
-          </div>
-          {recents.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">Your chats will appear here.</p>}
-          {visible.map((r) => (
-            <Link key={r.id} href={`/projects/${r.project_id}?conv=${r.id}`} title={`${r.title}\n${r.project_title}`}
-              className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] ${current === r.id ? "bg-[#e9e5dd]" : "hover:bg-[#edeae4]"}`}>
-              {r.last_status === "running" || r.last_status === "queued"
-                ? <span className="rl-pulse h-2 w-2 flex-none rounded-full bg-[#3b6fd8]" aria-label="running" />
-                : r.last_status === "failed" ? <span className="h-2 w-2 flex-none rounded-full bg-[#b64b43]" aria-label="failed" /> : null}
-              <span className="min-w-0 truncate text-[#4d4a44]">{r.title}</span>
+          {heading("quick", "Quick jobs")}
+          {!closed.quick && (
+            <>
+              {quick.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">One-off jobs — a review, a reference check — appear here.</p>}
+              {visibleQuick.map((r) => (
+                <Link key={r.id} href={`/projects/${r.project_id}?conv=${r.id}`} title={`${r.title}\n${r.project_title}`}
+                  className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] ${current === r.id ? "bg-[#e9e5dd]" : "hover:bg-[#edeae4]"}`}>
+                  {dot(r.last_status)}<span className="min-w-0 truncate text-[#4d4a44]">{r.project_title}</span>
+                </Link>
+              ))}
+              {!q && quick.length > 8 && (
+                <button onClick={() => setShowAll(!showAll)} className="px-2.5 py-1 text-xs text-faint hover:text-ink">
+                  {showAll ? "Show less" : `Show all ${quick.length}`}
+                </button>
+              )}
+            </>
+          )}
+
+          {heading("tools", "Tools")}
+          {!closed.tools && TOOLS.map((it) => (
+            <Link key={it.href} href={it.href} title={it.label} className={row(active(it.href))}>
+              <Icon d={I[it.icon]} /><span>{it.label}</span>
             </Link>
           ))}
-          {!q && shown.length > 8 && (
-            <button onClick={() => setShowAll(!showAll)} className="px-2.5 py-1 text-xs text-faint hover:text-ink">
-              {showAll ? "Show less" : `Show all ${shown.length}`}
-            </button>
-          )}
         </div>
       )}
 

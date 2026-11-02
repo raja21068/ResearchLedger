@@ -12,14 +12,15 @@ function ProjectsInner() {
   const params = useSearchParams();
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [kind, setKind] = useState<"paper" | "quick">(params.get("kind") === "quick" ? "quick" : "paper");
   const [creating, setCreating] = useState(params.get("new") === "1");
   const [form, setForm] = useState({ title: "", domain: "", description: "" });
   const [error, setError] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api<Project[]>(`/projects?status=${showArchived ? "archived" : "active"}`).then(setProjects).catch(setError);
-  }, [showArchived]);
+    api<Project[]>(`/projects?status=${showArchived ? "archived" : "active"}&kind=${kind}`).then(setProjects).catch(setError);
+  }, [showArchived, kind]);
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -32,17 +33,25 @@ function ProjectsInner() {
 
   return (
     <main className="mx-auto max-w-[1180px] px-4 py-7 sm:px-8">
-      <PageHeader title="Projects" sub="Each project has its own workspace folder. The agent only works inside the project you open."
+      <PageHeader title={kind === "paper" ? "Papers" : "Quick jobs"}
+        sub={kind === "paper" ? "Long projects that grow into a paper: stages, loops, checks and results in one place."
+          : "One-off jobs — a review, a reference check, a score. Open one and choose Keep as a paper to move it to Papers."}
         actions={<>
+          <div role="radiogroup" aria-label="Kind" className="flex rounded-lg bg-[#ecebe6] p-0.5 text-sm">
+            {(["paper", "quick"] as const).map((k) => (
+              <button key={k} role="radio" aria-checked={kind === k} onClick={() => setKind(k)}
+                className={`rounded-md px-3 py-1 ${kind === k ? "bg-white font-medium shadow-sm" : "text-muted"}`}>{k === "paper" ? "Papers" : "Quick jobs"}</button>
+            ))}
+          </div>
           <button className={btn2} onClick={() => setShowArchived(!showArchived)}>{showArchived ? "Show active" : "Show archived"}</button>
-          <button className={btn} onClick={() => setCreating(true)}>New project</button>
+          <button className={btn} onClick={() => setCreating(true)}>New paper</button>
         </>} />
       <ErrorBox error={error} />
 
       {creating && (
         <Card className="mb-6 p-5">
           <form onSubmit={create} className="grid gap-4">
-            <h2 className="text-lg font-semibold">New project</h2>
+            <h2 className="text-lg font-semibold">New paper</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-1 text-sm font-medium">Title
                 <input required maxLength={200} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -66,8 +75,9 @@ function ProjectsInner() {
       )}
 
       {projects && !projects.length && !creating && (
-        <Empty title={showArchived ? "No archived projects" : "No projects yet"}>
-          {!showArchived && <button className="text-accent underline" onClick={() => setCreating(true)}>Create a project</button>}
+        <Empty title={showArchived ? "Nothing archived" : kind === "paper" ? "No papers yet" : "No quick jobs yet"}>
+          {!showArchived && kind === "paper" && <button className="text-accent underline" onClick={() => setCreating(true)}>Start a paper</button>}
+          {!showArchived && kind === "quick" && <Link className="text-accent underline" href="/">Start a quick job</Link>}
         </Empty>
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

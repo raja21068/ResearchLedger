@@ -65,13 +65,36 @@ def _assign(recipe_id: str, paths: list[str]) -> dict[str, list[str]]:
     return out
 
 
-def start(store: Store, project_id: str, goal: str, files: list[str], model: str | None = None) -> dict:
+def tool_label(decision: dict) -> str:
+    """What the home box shows next to 'Tool:' before the user presses Start."""
+    if decision["mode"] == "loop":
+        return loops.TYPES[decision["loop"]]["label"]
+    if decision["mode"] == "paper":
+        return "Write a paper (Paper Studio)"
+    if decision["mode"] == "recipe":
+        return recipes.R[decision["recipe"]]["name"]
+    return "Research Director (plans first)"
+
+
+def classify_with_repeat(goal: str, filenames: list[str], repeat: str | None) -> dict:
+    """'Repeat until' turns a one-pass tool into its loop: review -> review_fix (needs the .tex), idea -> idea_forge."""
+    if repeat == "review":
+        if not any(f.lower().endswith(".tex") for f in filenames):
+            raise ValueError("Repeat-until review needs the manuscript's .tex file (attach it)")
+        return {"mode": "loop", "loop": "review_fix", "why": "you asked to repeat review → fix until it is clean"}
+    if repeat == "idea":
+        return {"mode": "loop", "loop": "idea_forge", "why": "you asked to repeat attack → score → redesign until it passes"}
+    return classify(goal, filenames)
+
+
+def start(store: Store, project_id: str, goal: str, files: list[str], model: str | None = None,
+          repeat: str | None = None) -> dict:
     """Start the right pipeline in `project_id` (files are workspace-relative uploads)."""
     root = workspace.project_root(project_id)
     for f in files:
         if not workspace.resolve(project_id, f).is_file():
             raise ValueError(f"file not found: {f}")
-    decision = classify(goal, [Path(f).name for f in files])
+    decision = classify_with_repeat(goal, [Path(f).name for f in files], repeat)
     if decision["mode"] == "paper":
         ptype = decision["paper_type"]
         if not paper_studio.load(project_id):

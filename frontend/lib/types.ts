@@ -1,7 +1,7 @@
 export type RunStatus = "queued" | "running" | "succeeded" | "failed" | "cancelled";
 
 export interface Project {
-  id: string; title: string; description: string; domain: string; status: string;
+  id: string; title: string; description: string; domain: string; status: string; kind: "paper" | "quick";
   created_at: string; updated_at: string; conversations?: Conversation[];
 }
 

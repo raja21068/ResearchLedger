@@ -58,6 +58,9 @@ class Store:
         self._lock = threading.Lock()
         with self.conn() as c:
             c.executescript(SCHEMA)
+            # 'paper' = a long project with stages; 'quick' = a one-off job (review a PDF, check references, ...).
+            if "kind" not in {r[1] for r in c.execute("PRAGMA table_info(projects)")}:
+                c.execute("ALTER TABLE projects ADD COLUMN kind TEXT NOT NULL DEFAULT 'paper'")
             # A server restart orphans any in-flight run: record that honestly.
             c.execute("UPDATE runs SET status='failed', error='server restarted while run was active', "
                       "finished_at=? WHERE status IN ('queued','running')", (now(),))

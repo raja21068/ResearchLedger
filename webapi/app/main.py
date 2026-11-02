@@ -45,6 +45,7 @@ class ProjectIn(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     description: str = Field(default="", max_length=4000)
     domain: str = Field(default="", max_length=200)
+    kind: str = Field(default="paper", pattern="^(paper|quick)$")
 
 
 class ProjectPatch(BaseModel):
@@ -52,6 +53,7 @@ class ProjectPatch(BaseModel):
     description: str | None = Field(default=None, max_length=4000)
     domain: str | None = Field(default=None, max_length=200)
     status: str | None = Field(default=None, pattern="^(active|archived)$")
+    kind: str | None = Field(default=None, pattern="^(paper|quick)$")
 
 
 class ConversationIn(BaseModel):
@@ -241,6 +243,23 @@ class AutopilotIn(BaseModel):
     goal: str = Field(default="", max_length=20_000)
     files: list[str] = Field(default_factory=list, max_length=30)
     model: str | None = Field(default=None, pattern=r"^[A-Za-z0-9._\-\[\]]{1,80}$")
+    repeat: str | None = Field(default=None, pattern="^(review|idea)$")
+
+
+class ClassifyIn(BaseModel):
+    goal: str = Field(default="", max_length=20_000)
+    filenames: list[str] = Field(default_factory=list, max_length=30)
+    repeat: str | None = Field(default=None, pattern="^(review|idea)$")
+
+
+@app.post("/api/v1/autopilot/classify")
+def autopilot_classify(body: ClassifyIn):
+    """Preview for the home box: which tool would run, and why. Starts nothing."""
+    try:
+        d = autopilot.classify_with_repeat(body.goal, body.filenames, body.repeat)
+    except ValueError as exc:
+        return {"mode": "invalid", "tool": None, "why": str(exc)}
+    return {**d, "tool": autopilot.tool_label(d)}
 
 
 class AutopilotToggleIn(BaseModel):
@@ -258,9 +277,12 @@ def autopilot_start(project_id: str, body: AutopilotIn):
     if not body.goal.strip() and not body.files:
         raise HTTPException(400, "say what you want or upload a file")
     try:
-        return autopilot.start(store, project_id, body.goal, body.files, body.model)
+        out = autopilot.start(store, project_id, body.goal, body.files, body.model, body.repeat)
     except (ValueError, workspace.PathError) as exc:
         raise HTTPException(400, str(exc))
+    if out.get("mode") == "paper":  # writing a whole paper turns a quick job into a paper project
+        store.exec("UPDATE projects SET kind='paper' WHERE id=?", (project_id,))
+    return out
 
 
 @app.put("/api/v1/projects/{project_id}/paper/autopilot")
@@ -482,9 +504,11 @@ def get_paper(project_id: str):
 def create_paper(project_id: str, body: PaperIn):
     _project(project_id)
     try:
-        return paper_studio.create(store, project_id, body.type, body.venue, body.topic)
+        out = paper_studio.create(store, project_id, body.type, body.venue, body.topic)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+    store.exec("UPDATE projects SET kind='paper' WHERE id=?", (project_id,))
+    return out
 
 
 @app.post("/api/v1/projects/{project_id}/paper/stages/{stage_id}/run", status_code=201)
@@ -679,15 +703,17 @@ def dashboard():
 
 # ---------------------------------------------------------------- projects
 @app.get("/api/v1/projects")
-def list_projects(status: str = "active"):
+def list_projects(status: str = "active", kind: str | None = None):
+    if kind:
+        return store.all("SELECT * FROM projects WHERE status=? AND kind=? ORDER BY updated_at DESC", (status, kind))
     return store.all("SELECT * FROM projects WHERE status=? ORDER BY updated_at DESC", (status,))
 
 
 @app.post("/api/v1/projects", status_code=201)
 def create_project(body: ProjectIn):
     pid, ts = new_id("prj"), now()
-    store.exec("INSERT INTO projects(id,title,description,domain,created_at,updated_at) VALUES (?,?,?,?,?,?)",
-               (pid, body.title.strip(), body.description, body.domain, ts, ts))
+    store.exec("INSERT INTO projects(id,title,description,domain,kind,created_at,updated_at) VALUES (?,?,?,?,?,?,?)",
+               (pid, body.title.strip(), body.description, body.domain, body.kind, ts, ts))
     workspace.project_root(pid)
     store.log_activity(pid, "project_created", body.title)
     return _project(pid)
@@ -732,7 +758,7 @@ def create_conversation(project_id: str, body: ConversationIn):
 def recent_conversations(limit: int = 20):
     """Recent chats across all projects (sidebar 'Recents')."""
     return store.all(
-        "SELECT c.id, c.project_id, c.title, c.updated_at, p.title project_title, "
+        "SELECT c.id, c.project_id, c.title, c.updated_at, p.title project_title, p.kind project_kind, "
         "(SELECT status FROM runs r WHERE r.conversation_id=c.id ORDER BY r.created_at DESC LIMIT 1) last_status "
         "FROM conversations c JOIN projects p ON p.id=c.project_id WHERE p.status='active' "
         "AND EXISTS (SELECT 1 FROM runs r WHERE r.conversation_id=c.id) "

@@ -228,9 +228,22 @@ export default function ProjectStudio({ params }: { params: Promise<{ id: string
     <div className="flex h-[calc(100vh-0px)] min-h-0 flex-col max-lg:h-[calc(100vh-72px)]">
       {/* Top bar */}
       <div className="flex flex-wrap items-center gap-2 border-b border-line bg-white px-4 py-2.5">
-        <Link href="/projects" className="text-sm text-faint hover:text-ink">Projects</Link>
+        <Link href="/projects" className="text-sm text-faint hover:text-ink">{project?.kind === "quick" ? "Quick jobs" : "Papers"}</Link>
         <span className="text-faint">/</span>
         <h1 className="mr-2 truncate font-semibold">{project?.title ?? "…"}</h1>
+        {project?.kind === "quick" && (
+          <button className={btn2} title="Move this job to your Papers so it can grow into a full paper"
+            onClick={async () => { try { setProject(await api<Project>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify({ kind: "paper" }), headers: { "Content-Type": "application/json" } })); } catch (e) { setError(e); } }}>
+            Keep as a paper</button>
+        )}
+        {project?.kind === "paper" && (
+          <nav aria-label="This paper" className="flex gap-3 text-sm">
+            <Link className="text-accent hover:underline" href={`/projects/${id}/paper`}>Paper</Link>
+            <Link className="text-accent hover:underline" href={`/loops?project=${id}`}>Loops</Link>
+            <Link className="text-accent hover:underline" href={`/quality?project=${id}`}>Check</Link>
+            <Link className="text-accent hover:underline" href={`/results?project=${id}`}>Results</Link>
+          </nav>
+        )}
         {conv && <span className="min-w-0 max-w-[40ch] truncate text-sm text-muted" title={conv.title}>· {conv.title}</span>}
         <button className={btn2} onClick={newChat}>New chat</button>
         <div className="ml-auto flex items-center gap-2">
