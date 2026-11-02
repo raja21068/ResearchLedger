@@ -167,6 +167,12 @@ so you can check that a result reproduces. Each run's receipt is kept in `result
 **Trace** shows the full chain from claim to evidence to run. These checks support your judgment; they are not
 proof of correctness or publication readiness.
 
+**Independent review by another model.** On the paper page, **Independent review by another model** builds a
+packet (a zip with the manuscript, an evidence summary and the Referee-Lean reviewer prompt, plus the exact answer
+format). Take it to a different tool, such as a ChatGPT temporary chat, and paste its table back. ResearchLedger keeps
+a concern as **verified** only if its quote is really in the manuscript; the rest are shown but never acted on. One
+click sends the verified concerns to the Revise stage. Nothing is sent anywhere from the website.
+
 **Plan lock and the draft before coding.** For a research article:
 - When you approve the *Method & experiment plan*, the protocol and the declared result slots are **frozen**. If
   either changes later, nothing after the Method stage can continue until you record an **amendment** (a reason, and

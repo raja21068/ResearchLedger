@@ -13,6 +13,7 @@ import { BridgeBanner } from "@/components/BridgeStatus";
 import { Markdown } from "@/components/Markdown";
 import { PaperDocument } from "@/components/PaperDocument";
 import { ProtocolLock } from "@/components/ProtocolLock";
+import { ExternalReview } from "@/components/ExternalReview";
 import { btn, btn2, ErrorBox } from "@/components/ui";
 
 export default function PaperStudio({ params }: { params: Promise<{ id: string }> }) {
@@ -138,6 +139,7 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
       )}
 
       <ProtocolLock projectId={id} onChanged={load} />
+      <ExternalReview projectId={id} onChanged={load} />
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Stage rail */}
         <ol className="flex-none space-y-1 md:w-64">

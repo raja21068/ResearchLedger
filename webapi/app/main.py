@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (review_packet, manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1179,6 +1179,47 @@ def loop_parent(project_id: str, body: ParentIn):
         st["parent"] = body.parent
         loops._save(project_id, st)
     return {"loop_id": loop_id, "parent": body.parent}
+
+
+# ---------------------------------------------------------------- independent review packet
+def _rp(fn, *args):
+    try:
+        return fn(*args)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+class PacketIn(BaseModel):
+    path: str
+
+
+@app.get("/api/v1/projects/{project_id}/review/external")
+def external_review_list(project_id: str):
+    """Packets built and external reviews imported, and the .tex manuscripts that can be reviewed."""
+    _project(project_id)
+    return review_packet.listing(project_id)
+
+
+@app.post("/api/v1/projects/{project_id}/review/packet", status_code=201)
+def external_review_packet(project_id: str, body: PacketIn):
+    """Build the folder and zip to take to an outside reviewer (manuscript, evidence summary, reviewer prompt)."""
+    _project(project_id)
+    rel = _path(project_id, body.path).relative_to(workspace.project_root(project_id)).as_posix()
+    return _rp(review_packet.build, store, project_id, rel)
+
+
+class ImportIn(BaseModel):
+    path: str
+    text: str = Field(..., max_length=200_000)
+    source: str = Field("External reviewer", max_length=80)
+
+
+@app.post("/api/v1/projects/{project_id}/review/import", status_code=201)
+def external_review_import(project_id: str, body: ImportIn):
+    """Parse the outside reviewer's reply; a concern is VERIFIED only if its quote is really in the manuscript."""
+    _project(project_id)
+    rel = _path(project_id, body.path).relative_to(workspace.project_root(project_id)).as_posix()
+    return _rp(review_packet.import_reply, store, project_id, rel, body.text, body.source)
 
 
 # ---------------------------------------------------------------- methodology lock
