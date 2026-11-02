@@ -63,9 +63,13 @@ AGENTS = [
                     "editing, quick review and citation verification — each a fixed task with named output files.",
      "inputs": ["Form fields", "Workspace files"], "outputs": ["Named files per workflow"],
      "permissions": "Same as the Claude Code research agent."},
-    {"id": "research_director", "name": "Research Director", "category": "Orchestration", "status": "planned",
-     "implementation_ref": None, "description": "Multi-agent planner with approval gates.",
-     "inputs": [], "outputs": [], "permissions": ""},
+    {"id": "research_director", "name": "Research Director", "category": "Orchestration", "status": "integrated",
+     "implementation_ref": "webapi/app/director.py",
+     "description": "Turns a research goal into a plan of research workflows. Nothing runs until the user approves the "
+                    "plan; steps then run one at a time in the chat and the plan stops at the first failure or on "
+                    "request. Not yet a parallel, dependency-aware orchestrator.",
+     "inputs": ["Research goal (chat)"], "outputs": ["director/plan_<conversation>.json", "Each step's workflow files"],
+     "permissions": "Same as the Claude Code research agent; plan execution needs the user's approval."},
 ]
 
 

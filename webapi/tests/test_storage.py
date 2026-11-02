@@ -89,3 +89,13 @@ def test_bridge_hands_out_one_task_per_project_at_a_time():
     task = bridge.claim(s)
     assert task and task["run_id"] == "run_3"
     assert bridge.claim(s) is None  # run_2 waits: its project already has a running task
+
+
+def test_registry_status_matches_the_code():
+    from webapi.app import registry
+    for a in registry.agents():
+        if a["status"] == "integrated" and a["implementation_present"] is not None:
+            assert a["implementation_present"], f"{a['id']} is marked integrated but {a['implementation_ref']} is missing"
+        if a["status"] == "planned":
+            assert not a.get("implementation_ref"), f"{a['id']} is marked planned but has an implementation"
+    assert {a["id"]: a["status"] for a in registry.agents()}["research_director"] == "integrated"

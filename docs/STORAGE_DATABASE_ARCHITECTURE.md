@@ -172,7 +172,26 @@ Uploads replace today's `.v1/.v2` suffix renames: a re-upload is simply a new ve
 
 ## 8. Executing experiment code (decision needed)
 
-Today an approved script runs on the host as the user's account. The review recommends Docker for every run, with no
+There are three ways experiment code runs today, and they do not share one boundary:
+
+| Path | How it runs | Approval | Provenance |
+|---|---|---|---|
+| Factory S4 (`factory/`) | Docker | CLI workflow | run manifests in `researchledger/` |
+| Experiment loop (`webapi/app/exprun.py`) | host Python, `subprocess.Popen` | user click per run | `run_log.json`: script hash, exit code, fresh-results check |
+| Paper Studio "Run experiments" stage | the agent itself runs `python` (CLI mode grants `Bash(python:*)` and `pip install`; in bridge mode the Claude app worker runs it) | stage approval only, after the fact | `collect()` with the run-start freshness check (Phase 0) |
+
+A second review said Paper Studio "cannot run Python because its tools are LaTeX-only". That is not accurate:
+`claude_runner.EXTRA_TOOLS_BY_KIND` grants Python and pip to `paper:experiments`. The real problem is the one in the
+table: the agent executes code outside the experiment loop's approval gate and run log.
+
+**Target: one execution service.**
+- Factory, Paper Studio and the experiment loops all submit a job: script path, arguments, declared inputs, expected
+  result slots and a time limit.
+- The service runs it in the chosen runner, captures inputs, outputs, hashes and the exit code, and is the only path
+  that may write `results/`.
+- Paper Studio's experiment stage then writes and plans code, but submits runs instead of executing them.
+
+**Runner choice.** Today an approved script runs on the host as the user's account. The review recommends Docker for every run, with no
 network, CPU, memory and time limits, and only the workspace mounted.
 
 I agree with the goal, but I recommend a **pluggable runner** instead of "Docker or nothing":
@@ -185,18 +204,63 @@ Reason: the target user runs on a Windows laptop where Docker Desktop is often a
 push them to run scripts by hand, with no provenance at all. **This is the user's decision.** Until it is made, the
 current approval gate stays.
 
-## 9. Phases
+## 9. Workflow state and memory
+
+**Workflow state today:**
+- SQLite holds runs and events;
+- JSON files hold loop state and Paper Studio state;
+- Markdown holds memory;
+- background threads drive the loops.
+
+None of this is wrong in itself, but nothing owns the lifecycle. **Target:** a `tasks` table as the one authority for
+every unit of work (agent turn, loop move, experiment job, Director step).
+- **Record:** id, kind, parent, state, inputs, outputs, attempt, lease and checkpoint.
+- **Loop and Paper Studio JSON** stay as *views* of task results, so the files remain readable by people and engines.
+- **Recovery:** on restart, every non-terminal task is resumed or re-queued from its checkpoint. This already happens
+  for bridge tasks.
+- **Retries:** idempotent by task id. A move that already wrote its outputs is never run twice.
+
+**Memory.** `memory/research_memory.md` stays as the readable summary. Underneath it, a small typed store
+(`memory_items`) holds:
+- kind: fact | assumption | decision | failed_approach | source_claim;
+- the source (run, file, DOI);
+- status: active | superseded | contradicted;
+- links to C/E/R ledger ids.
+
+The Markdown is generated from these items. No vector database; SQLite FTS5 is enough for search at this scale.
+
+## 10. The five contracts
+
+These are adopted from the review, and the phases above implement them:
+1. Every agent task is structured and carries explicit permissions.
+2. Every execution has a persistent id, state, inputs and outputs (the `tasks` table, plus `run_inputs` and
+   `run_outputs`).
+3. Every artifact has a verifiable origin and version (`file_versions`).
+4. Every reported result traces to a real execution or a named external source (the execution service, `collect()`
+   freshness, the C/E/R ledger).
+5. Every important workflow survives an interruption (journal plus task checkpoints).
+
+## 11. Phases
 
 | Phase | Content | Done when |
 |---|---|---|
-| 0 ✅ | provenance freshness in `collect()`; hash-based snapshots with deletions; WAL, indexes, `schema_migrations`; one agent task per project; CI fixes + webapi/frontend CI jobs | 104 webapi tests pass, including the 5 new ones in `test_storage.py` |
+| 0 ✅ | provenance freshness in `collect()`; hash-based snapshots with deletions; WAL, indexes, `schema_migrations`; one agent task per project; CI fixes + webapi/frontend CI jobs; honest agent registry | 105 webapi tests pass, including the 6 in `test_storage.py` |
 | 1 | object store + `blobs/files/file_versions`; atomic upload path; ZIP import into versions with rollback; FK rebuild for `artifacts`; DB moved to `database/` | every write path creates versions; a crash-injection test leaves no partial state |
 | 2 | history, compare, restore, rename/move, trash in the API and file panel; dataset records | restore never loses later versions (tests) |
 | 3 | per-run staging, base-version tracking, conflict detection, merge UI, leases | two parallel runs on one project never lose a change (test) |
 | 4 | automatic verified backups, project export/import, startup journal recovery, integrity audit | restore from backup reproduces every hash |
 | 5 | reuse the `researchledger` package's atomic writes, locks and hash-chained run manifests; link files to C/E/R claims and evidence | one provenance implementation, used by both the CLI and the web app |
+| 6 | one execution service for Factory, Paper Studio and loops (§8); the `tasks` table with checkpoints and recovery (§9) | Paper Studio can no longer write `results/` outside a recorded job |
+| 7 | typed memory items behind `research_memory.md` (§9); cross-project search with FTS5 | a superseded decision is never shown as current |
 
-## 10. Repository hygiene (decision needed)
+Phase 0 also corrected the agent registry: the Research Director was listed as "planned" although
+`webapi/app/director.py` implements it. A test now fails if an "integrated" entry points at missing code, or a
+"planned" entry has an implementation.
+
+**Not planned now:** PostgreSQL, Redis, Kubernetes, vector databases and more agents. None of them fixes the problems
+above.
+
+## 12. Repository hygiene (decision needed)
 
 On the feature branch:
 - 61 build files are tracked: `.aux/.log/.bcf/.fls/.pyc` and `__pycache__`;
