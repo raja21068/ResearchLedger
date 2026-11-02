@@ -4,6 +4,7 @@ ledger's own rules."""
 import json
 
 from webapi.app import workspace
+from webapi.app.main import store
 from webapi.tests.test_api import H, client
 from webapi.tests.test_lab import _run_paper_experiment
 
@@ -70,6 +71,9 @@ def test_preregistered_verdicts_become_claims_bound_to_their_runs():
         "jobs": [{"id": "E1", "command": "python code/x.py --exp E1", "exit_code": 0, "ok": True, "slots": {"v": {"ok": True, "value": 0}}},
                  {"id": "E2", "command": "python code/x.py --exp E2", "exit_code": 0, "ok": True, "slots": {"p": {"ok": True, "value": 0.0}}}]}),
         encoding="utf-8")
+    conv = client.post(f"/api/v1/projects/{pid}/conversations", json={}, headers=H).json()["id"]
+    store.exec("INSERT INTO runs(id,project_id,conversation_id,kind,prompt,status,provider,created_at) VALUES "
+               "('run_pre1',?,?,'loop:experiment','p','succeeded','server_exec','2026-11-02T01:00:00+00:00')", (pid, conv))
     ov = _ev(pid)
     assert ov["valid"], ov["issues"]
     claims = {c["name"].split(":")[0]: c for c in ov["claims"]}

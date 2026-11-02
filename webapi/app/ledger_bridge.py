@@ -185,7 +185,10 @@ def sync(store: Store, project_id: str) -> dict:
         return {"evidence_added": 0, "claims_added": 0}  # nothing measured yet: do not create an empty ledger
     ws = ws_for(project_id)
     added, job_evidence = 0, {}
+    known = {x["id"] for x in store.all("SELECT id FROM runs WHERE project_id=?", (project_id,))}
     for r in sorted(receipts, key=lambda x: x["finished_at"] or ""):
+        if r["run_id"] not in known:  # a file an agent wrote into the workspace is not a run the server executed
+            continue
         try:
             log = json.loads((root / r["file"]).read_text(encoding="utf-8"))
         except (OSError, ValueError):
