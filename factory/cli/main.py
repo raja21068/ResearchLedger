@@ -145,6 +145,11 @@ def run_command(project_id, start=None, stop=None, resume=False, retry_budget=1)
 
 
 def main(argv=None):
+    for stream in (sys.stdout, sys.stderr):  # never crash on a non-UTF-8 console (Windows cp1252)
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
     parser = argparse.ArgumentParser(prog="researchctl")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("doctor")
@@ -154,7 +159,7 @@ def main(argv=None):
     status.add_argument("project_id")
     audit_parser = commands.add_parser("audit", help="write honest evidence/readiness audit")
     audit_parser.add_argument("project_id")
-    ledger_parser = commands.add_parser("ledger", help="validate claim → evidence → Docker run provenance")
+    ledger_parser = commands.add_parser("ledger", help="validate claim -> evidence -> Docker run provenance")
     ledger_parser.add_argument("project_id")
     protocol_cmd = commands.add_parser('protocol', help='scaffold, lock, or inspect a research protocol')
     protocol_cmd.add_argument('operation', choices=['scaffold', 'lock', 'check'])

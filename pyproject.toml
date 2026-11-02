@@ -12,6 +12,8 @@ dependencies = ["pypdf>=4", "matplotlib>=3.7", "PyYAML>=6.0", "jsonschema>=4.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "ruff>=0.4"]
+# Bundled Referee / Idea Discovery V5 scripts call web APIs (CI runs their offline tests with this extra).
+referee = ["requests>=2.31"]
 
 [project.scripts]
 researchctl = "factory.cli.main:main"

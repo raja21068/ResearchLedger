@@ -125,15 +125,37 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def snapshot(project_id: str) -> dict[str, tuple[float, int]]:
+SNAPSHOT_HASH_LIMIT = 64 * 1024 * 1024  # larger files are compared by time and size only
+
+
+def snapshot(project_id: str) -> dict[str, tuple[float, int, str]]:
+    """path -> (mtime, size, sha256); the hash makes change detection content-based, not timestamp-based."""
     root = project_root(project_id)
-    return {p.relative_to(root).as_posix(): (p.stat().st_mtime, p.stat().st_size) for p in _walk(root)}
+    out = {}
+    for p in _walk(root):
+        st = p.stat()
+        out[p.relative_to(root).as_posix()] = (st.st_mtime, st.st_size,
+                                               sha256(p) if st.st_size <= SNAPSHOT_HASH_LIMIT else "")
+    return out
 
 
 def diff_snapshot(project_id: str, before: dict) -> list[tuple[str, str]]:
-    after = snapshot(project_id)
-    changes = [(p, "created") for p in after if p not in before]
-    changes += [(p, "modified") for p in after if p in before and after[p] != before[p]]
+    """created / modified (content differs) / deleted, between `before` and now."""
+    root = project_root(project_id)
+    changes, alive = [], set()
+    for p in _walk(root):
+        rel = p.relative_to(root).as_posix()
+        alive.add(rel)
+        if rel not in before:
+            changes.append((rel, "created"))
+            continue
+        mtime, size, digest = before[rel]
+        st = p.stat()
+        if (st.st_mtime, st.st_size) == (mtime, size):
+            continue  # untouched
+        if not digest or st.st_size != size or sha256(p) != digest:
+            changes.append((rel, "modified"))
+    changes += [(rel, "deleted") for rel in before if rel not in alive]
     return sorted(changes)
 
 

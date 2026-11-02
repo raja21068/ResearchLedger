@@ -493,7 +493,9 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     state = load(project_id)
     st = state["stages"].setdefault(stage_id, {})
     if stage_id in {"experiments", "extract"}:  # measured values enter the log only now, from results/*.json
-        st["collected"] = experiments.collect(workspace.project_root(project_id), st.get("run_id"))
+        run = store.one("SELECT created_at FROM runs WHERE id=?", (st["run_id"],)) if st.get("run_id") else None
+        st["collected"] = experiments.collect(workspace.project_root(project_id), st.get("run_id"),
+                                              run and run["created_at"])
     st["approved_at"] = now()
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)

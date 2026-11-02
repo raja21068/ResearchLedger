@@ -11,6 +11,7 @@ import hashlib
 import json
 import math
 import re
+from datetime import datetime
 from pathlib import Path
 
 from .db import now
@@ -57,8 +58,18 @@ def _read_result(path: Path) -> tuple[dict | None, str | None]:
     return data, None
 
 
-def collect(root: Path, run_id: str | None = None) -> dict:
-    """Fill the log from results/*.json. Returns {slots, measured, pending, issues}."""
+def _epoch(iso: str | None) -> float | None:
+    try:
+        return datetime.fromisoformat(iso).timestamp() if iso else None
+    except ValueError:
+        return None
+
+
+def collect(root: Path, run_id: str | None = None, since: str | None = None) -> dict:
+    """Fill the log from results/*.json. Returns {slots, measured, pending, issues}.
+
+    `since` (ISO time the run was created): a results file last written before it was not produced by this run, so
+    it is never attributed to `run_id`; an unchanged file keeps the provenance it already had."""
     log = root / LOG
     if not log.is_file():
         return {"slots": 0, "measured": 0, "pending": 0, "issues": [f"{LOG} is missing"]}
@@ -78,6 +89,7 @@ def collect(root: Path, run_id: str | None = None) -> dict:
         else:
             found[p.stem] = (p, data)
     lines = text.splitlines()
+    since_ts = _epoch(since)
     prov_path = root / PROVENANCE
     try:
         prov = json.loads(prov_path.read_text(encoding="utf-8")) if prov_path.is_file() else {}
@@ -91,9 +103,17 @@ def collect(root: Path, run_id: str | None = None) -> dict:
         cells = _cells(lines[s["line"]])
         cells[5] = str(value)
         lines[s["line"]] = "| " + " | ".join(cells) + " |"
+        sha = hashlib.sha256(p.read_bytes()).hexdigest()
+        attributed = run_id
+        if since_ts is not None and p.stat().st_mtime < since_ts:
+            old = prov.get(s["slot_id"])
+            if old and old.get("sha256") == sha:
+                continue  # unchanged file from an earlier run: keep its provenance as it was
+            attributed = None
+            issues.append(f"results/{p.name}: written before this run started, so it is not attributed to it")
         prov[s["slot_id"]] = {"file": f"results/{p.name}", "value": value, "unit": data.get("unit"),
-                              "seed": data.get("seed"), "source": data.get("source"), "location": data.get("location"), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
-                              "run_id": run_id, "collected_at": now()}
+                              "seed": data.get("seed"), "source": data.get("source"), "location": data.get("location"), "sha256": sha,
+                              "run_id": attributed, "collected_at": now()}
     if found:
         log.write_text("\n".join(lines) + ("\n" if text.endswith("\n") else ""), encoding="utf-8")
         prov_path.parent.mkdir(parents=True, exist_ok=True)

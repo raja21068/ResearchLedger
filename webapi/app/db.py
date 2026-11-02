@@ -38,7 +38,31 @@ CREATE TABLE IF NOT EXISTS artifacts (
 CREATE TABLE IF NOT EXISTS activity (
   id INTEGER PRIMARY KEY AUTOINCREMENT, project_id TEXT, ts TEXT NOT NULL,
   kind TEXT NOT NULL, detail TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL);
 """
+
+
+def _add_project_kind(c: sqlite3.Connection) -> None:
+    # 'paper' = a long project with stages; 'quick' = a one-off job (review a PDF, check references, ...).
+    if "kind" not in {r[1] for r in c.execute("PRAGMA table_info(projects)")}:
+        c.execute("ALTER TABLE projects ADD COLUMN kind TEXT NOT NULL DEFAULT 'paper'")
+
+
+def _add_indexes(c: sqlite3.Connection) -> None:
+    c.executescript("""
+CREATE INDEX IF NOT EXISTS conversations_project ON conversations(project_id);
+CREATE INDEX IF NOT EXISTS runs_project_status ON runs(project_id, status);
+CREATE INDEX IF NOT EXISTS runs_conversation_status ON runs(conversation_id, status);
+CREATE INDEX IF NOT EXISTS artifacts_run ON artifacts(run_id);
+CREATE INDEX IF NOT EXISTS artifacts_project_path ON artifacts(project_id, path);
+CREATE INDEX IF NOT EXISTS activity_project ON activity(project_id, id);
+""")
+
+
+# Ordered, append-only. Each step must be safe on a database that already has its effect (older databases
+# were migrated ad hoc before this table existed). Never edit or reorder a released step; add a new one.
+MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes)]
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
 
@@ -57,10 +81,15 @@ class Store:
         self.path = path
         self._lock = threading.Lock()
         with self.conn() as c:
+            # WAL: readers do not block the writer and a crash mid-write cannot corrupt the main file.
+            c.execute("PRAGMA journal_mode=WAL")
             c.executescript(SCHEMA)
-            # 'paper' = a long project with stages; 'quick' = a one-off job (review a PDF, check references, ...).
-            if "kind" not in {r[1] for r in c.execute("PRAGMA table_info(projects)")}:
-                c.execute("ALTER TABLE projects ADD COLUMN kind TEXT NOT NULL DEFAULT 'paper'")
+            done = {r[0] for r in c.execute("SELECT version FROM schema_migrations")}
+            for version, name, step in MIGRATIONS:
+                if version not in done:
+                    step(c)
+                    c.execute("INSERT INTO schema_migrations(version, name, applied_at) VALUES (?,?,?)",
+                              (version, name, now()))
             ts = now()
             if keep_agent_runs:
                 # Claude app bridge: agent tasks live in the queue, not in this process, so a restart loses nothing.
@@ -79,9 +108,10 @@ class Store:
     @contextmanager
     def conn(self):
         with self._lock:
-            c = sqlite3.connect(self.path)
+            c = sqlite3.connect(self.path, timeout=15)  # wait for another process's write instead of failing
             c.row_factory = sqlite3.Row
             c.execute("PRAGMA foreign_keys=ON")
+            c.execute("PRAGMA synchronous=NORMAL")  # safe with WAL; fewer fsyncs
             try:
                 yield c
                 c.commit()

@@ -119,13 +119,17 @@ def queue(store: Store, run_id: str) -> None:
 
 
 def claim(store: Store) -> dict | None:
-    """Atomically take the oldest queued agent run and return everything the worker needs."""
+    """Atomically take the oldest queued agent run and return everything the worker needs.
+
+    One agent at a time per project: a run whose project already has a running agent task waits in the queue, so
+    two workers can never edit the same workspace at once."""
     global _last_poll
     _last_poll = time.time()
     requeue_stale(store)
     with _lock:
         run = store.one("SELECT * FROM runs WHERE status='queued' AND provider='claude_code_cli' "
-                        "ORDER BY created_at LIMIT 1")
+                        "AND project_id NOT IN (SELECT project_id FROM runs WHERE status='running' "
+                        "AND provider='claude_code_cli') ORDER BY created_at LIMIT 1")
         if not run:
             return None
         store.update_run(run["id"], status="running", started_at=now())

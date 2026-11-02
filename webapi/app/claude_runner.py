@@ -169,7 +169,30 @@ def cancel_run(store: Store, run_id: str) -> bool:
     return True
 
 
+_project_locks: dict[str, threading.Lock] = {}
+
+
+def _project_lock(project_id: str) -> threading.Lock:
+    with _procs_lock:
+        return _project_locks.setdefault(project_id, threading.Lock())
+
+
 def _execute(store: Store, run_id: str) -> None:
+    """One agent process at a time per project, so two runs never edit the same workspace concurrently."""
+    project_id = store.one("SELECT project_id FROM runs WHERE id=?", (run_id,))["project_id"]
+    lock = _project_lock(project_id)
+    if not lock.acquire(blocking=False):
+        store.add_event(run_id, "status", {"text": "Waiting for another agent task in this project to finish"})
+        lock.acquire()
+    try:
+        if store.one("SELECT status FROM runs WHERE id=?", (run_id,))["status"] == "cancelled":
+            return
+        _execute_locked(store, run_id)
+    finally:
+        lock.release()
+
+
+def _execute_locked(store: Store, run_id: str) -> None:
     run = store.one("SELECT * FROM runs WHERE id=?", (run_id,))
     conv = store.one("SELECT * FROM conversations WHERE id=?", (run["conversation_id"],))
     project_id = run["project_id"]
@@ -250,18 +273,18 @@ def _execute(store: Store, run_id: str) -> None:
 
 
 def _record_artifacts(store: Store, run_id: str, project_id: str, before: dict) -> list[str]:
-    """Hash every file the run created or changed; return the non-build ones."""
+    """Hash every file the run created or changed, record deletions; return the non-build files that still exist."""
     root = workspace.project_root(project_id)
     changes = workspace.diff_snapshot(project_id, before)
     for rel, change in changes:
         p = root / rel
-        if not p.is_file():
+        if change != "deleted" and not p.is_file():
             continue
+        digest, size = ("", 0) if change == "deleted" else (workspace.sha256(p), p.stat().st_size)
         store.exec("INSERT INTO artifacts(run_id, project_id, path, sha256, size, change, created_at) "
-                   "VALUES (?,?,?,?,?,?,?)",
-                   (run_id, project_id, rel, workspace.sha256(p), p.stat().st_size, change, now()))
+                   "VALUES (?,?,?,?,?,?,?)", (run_id, project_id, rel, digest, size, change, now()))
     shown = [{"path": r, "change": c} for r, c in changes
              if not workspace.is_build_output(r) and r != memory.MEMORY_PATH]
     if shown:
         store.add_event(run_id, "artifacts", {"files": shown})
-    return [f["path"] for f in shown]
+    return [f["path"] for f in shown if f["change"] != "deleted"]
