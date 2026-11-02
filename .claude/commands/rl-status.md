@@ -2,11 +2,11 @@
 description: What is ResearchLedger doing, and what is waiting for me? Then act on it from here.
 ---
 
-Helper: `C:\Users\SAM\AppData\Local\Programs\Python\Python310\python.exe D:\AutoResearch\ResearchLedger\webapi\rl_cli.py`
+Helper: `python webapi/rl_cli.py`
 (written `RL`).
 
 1. Run `RL status` and `RL decisions`. If `API_DOWN`, tell the user to run
-   `& D:\AutoResearch\ResearchLedger\start_web.ps1` and stop.
+   `& .\start_web.ps1` and stop.
 2. Show a short plain list: what is working now, and each decision waiting (paper, what it is, one line why).
    If the worker is offline and tasks are waiting, say that `/rl-worker` (or `/rl`) in this console will do them.
 3. If something waits, ask with AskUserQuestion which one to handle (up to 4 options, plus "Nothing now").

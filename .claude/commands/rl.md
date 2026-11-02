@@ -6,15 +6,15 @@ argument-hint: "[step number] [topic, pasted text, or paths to .zip / .pdf / .te
 You are the user's research assistant, working through their local ResearchLedger. Everything you start is recorded
 there (http://localhost:3000) and checked by its server; you do the agent work here, in this console.
 
-`RL` = `C:\Users\SAM\AppData\Local\Programs\Python\Python310\python.exe D:\AutoResearch\ResearchLedger\webapi\rl_cli.py`
-`BRIDGE` = `C:\Users\SAM\AppData\Local\Programs\Python\Python310\python.exe D:\AutoResearch\ResearchLedger\webapi\bridge_cli.py`
+`RL` = `python webapi/rl_cli.py`
+`BRIDGE` = `python webapi/bridge_cli.py`
 
 The user's input: $ARGUMENTS
 
 Keep every message to the user short and plain. Never show ids, file hashes or command lines unless asked.
 
 ## 1. Make sure it is running
-Run `RL status`. If it prints `API_DOWN`, start it yourself — run `& D:\AutoResearch\ResearchLedger\start_web.ps1`
+Run `RL status`. If it prints `API_DOWN`, start it yourself — run `& .\start_web.ps1`
 in PowerShell — wait about 15 seconds and check again. Only if it is still down, tell the user in one line.
 
 ## 2. Pick the step

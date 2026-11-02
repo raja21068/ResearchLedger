@@ -54,6 +54,9 @@ flowchart LR
 
 ## 🖥️ Use it: the website and the Claude console
 
+> **New here?** Follow [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) — install, start the website, connect
+> the Claude app, and run your first task, step by step.
+
 The same **seven research steps** appear in the local website and in the Claude console. They are defined once in
 [`webapi/app/steps.py`](webapi/app/steps.py), so the two never drift apart.
 
