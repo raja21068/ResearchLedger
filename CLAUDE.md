@@ -19,7 +19,8 @@ model work, so it must be started from a normal terminal, not inherited from a p
 
 When the user asks how to use ResearchLedger, says they want to do research work (ideas, a paper, code, a
 revision) without a specific instruction, or greets you in a new session here, offer the `/rl` menu:
-1. Idea generation · 2. Full paper · 3. Code only · 4. Revise paper — and run `/rl` with their choice.
+the numbered pipeline menu (1 Understand papers · 2 Idea generation · 3 Experiment design · 4 Code · 5 Figures ·
+6 Full paper · 7 Slides · 8 Revise paper · 9 Final check · 0 Status) — run `/rl` and let them pick a number.
 `/rl-status` shows what is running and waiting.
 
 To let this Claude Code session do the website's agent work (no separate CLI login needed), the

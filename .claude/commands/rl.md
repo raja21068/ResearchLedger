@@ -16,30 +16,58 @@ The user's input: $ARGUMENTS
 Run `RL status`. If it prints `API_DOWN`, tell the user in one line to start the website with
 `& D:\AutoResearch\ResearchLedger\start_web.ps1`, and stop.
 
-## 2. The menu — ask only what is missing
-From the input, find: (a) the goal, (b) file or zip paths, (c) pasted text (a prompt, an idea, or a review from ChatGPT).
-If the input is empty or the goal is not clear, show the menu with AskUserQuestion, header "Start", question
-"What do you want to do?", exactly these options in this order:
-1. "1. Idea generation" — 5 candidate ideas, 50+ papers searched for competitors, scored /100, redesigned until it passes
-2. "2. Full paper" — from idea to a compiled LaTeX paper, stage by stage; you approve each stage
-3. "3. Code only" — a runnable, documented experiment repository from your idea, method or paper
-4. "4. Revise paper" — review and fix your paper until clean, or answer reviewer comments
-(the user can type anything else: run experiments, check before submitting, reference check, slides…)
+## 2. The menu — your research pipeline, step by step
+From the input, find: (a) a menu number (e.g. `/rl 2 zk oracles`), (b) the goal, (c) file or zip paths, (d) pasted text
+(a prompt, an idea, or a review from ChatGPT). If there is no number and the goal is not clear, print this menu
+exactly (it follows the user's own pipeline: PDF → understand → ideas → experiments → code → figures → paper →
+slides → reviewer → final paper) and wait for the user's number:
 
-Then ask only what that choice still needs, in one AskUserQuestion call (up to 3 questions):
-- 1 Idea generation: the topic (free text) if not given; "Generate candidates" or "I'll paste my idea".
-  → `RL start <project> "<topic or idea>" --repeat idea` (paste the idea as a file first if given).
-- 2 Full paper: the idea or topic if not given (an accepted idea from `ideas/` in a paper also works); venue
-  (Journal · IEEE · Elsevier · Springer). → new paper (`RL new "<title>" --paper`), then
-  `RL start <project> "Write a full research paper about: <idea>. Target: <venue>."`
-- 3 Code only: the idea, method or paper file if not given; framework (PyTorch · TensorFlow · scikit-learn · any).
-  → `RL start <project> "Generate research code (<framework>) for: <description>" --files <uploaded paper or idea file>`
-  (the code is written, never run, until the user approves a run in an experiment loop).
-- 4 Revise paper: "My draft — review and fix it" (needs the .tex; a pasted ChatGPT review is used if given →
-  `--repeat review`) or "Reviewer comments from a journal" (needs the manuscript and the comments →
-  `RL start <project> "Revise the paper and write a response to the reviewers"`).
-Then ask "Where" only if the user has papers (`RL list`) and did not say: options "Just this once (quick job)" or the
-2–3 most relevant papers by title. A full paper always goes into a paper, not a quick job.
+```
+ResearchLedger — choose a number
+
+ IDEA
+  1. Understand papers      PDFs in → summary, method and gap table
+  2. Idea generation        5 ideas → 50+ papers searched → scored /100 → redesigned until it passes
+
+ BUILD
+  3. Experiment design      a plan locked before anything runs (baselines, ablations, success rule)
+  4. Code                   runnable experiment code (written only; runs after your approval)
+  5. Figures                journal-style vector figures from your real results only
+
+ WRITE
+  6. Full paper             idea → LaTeX paper → PDF, stage by stage, you approve each stage
+  7. Slides                 a talk from your paper
+
+ REVIEW & SUBMIT
+  8. Revise paper           strict review → fixes → new PDF until clean, or answer journal reviewers
+  9. Final check            journal-ready check: references, numbers, figures, placeholders, pages
+
+  0. Status                 what is running and what waits for you
+
+ Type a number (and your topic, files or pasted text), e.g.  2 zero-knowledge proofs for AI oracles
+```
+
+Then ask only what that number still needs (one AskUserQuestion call, up to 3 questions), and do it:
+- 1 Understand papers: the PDFs or a zip if not given. → `RL start <p> "Understand and compare these papers: method,
+  data, results, limitations, research gap" --files <uploaded PDFs>`
+- 2 Idea generation: the topic (free text) if not given; "Generate candidates" or "I'll paste my idea".
+  → `RL start <p> "<topic or idea>" --repeat idea` (save a pasted idea as a file and add it first).
+- 3 Experiment design: what to test (idea file, or text), the paper's .tex if there is one.
+  → `RL experiment <p> "<what to test>" [--tex <tex>]` (it plans, writes code, then waits for the user's approval to run).
+- 4 Code: the idea, method or paper file if not given; framework (PyTorch · TensorFlow · scikit-learn · any).
+  → `RL start <p> "Generate research code (<framework>) for: <description>" --files <file>`
+- 5 Figures: the paper (.tex) and its results folder. → `RL start <p> "Redraw the paper's figures in top-journal style
+  as vector PDF, using only values from results/*.json; list any figure that has no data" --files <tex>`
+- 6 Full paper: the idea or topic if not given; venue (Journal · IEEE · Elsevier · Springer). → new paper
+  (`RL new "<title>" --paper`), then `RL start <p> "Write a full research paper about: <idea>. Target: <venue>."`
+- 7 Slides: the paper PDF or .tex. → `RL start <p> "Make slides from my paper" --files <file>`
+- 8 Revise paper: "My draft — review and fix it" (needs the .tex; a pasted ChatGPT review is used if given →
+  `--repeat review`) or "Reviewer comments from a journal" (manuscript + comments →
+  `RL start <p> "Revise the paper and write a response to the reviewers" --files …`).
+- 9 Final check: the .tex. → `RL check <p> <tex>`; report and stop.
+- 0 Status: do what `/rl-status` does.
+Where: ask only if the user has papers (`RL list`) and did not say — "Just this once (quick job)" or the 2–3 most
+relevant papers by title. Steps 3–9 normally belong to a paper; 6 always does.
 
 ## 3. Set it up
 - Quick job: `RL new "<short title>"`; new paper: `RL new "<title>" --paper`; else use the chosen paper id.
