@@ -129,6 +129,17 @@ surgical edits, keep the template, finished deliverables, objective scoring, che
 explanation) are appended to the agent's system instructions for every task (CLI and Claude app worker).
 Stored in `webapi_data/preferences.json`; `GET|PUT /api/v1/preferences`, `POST /api/v1/preferences/reset`.
 
+## Use it from the Claude console (/rl)
+
+In any Claude Code session (the Claude app's Code tab), type **`/rl`** followed by what you want, pasted text, or
+file/zip paths — e.g. `/rl review and fix this D:\papers\draft.zip` or `/rl` and paste a ChatGPT review. It asks
+what you want with clickable options (Review and fix · Improve an idea · Run experiments · Check before submitting),
+creates a quick job or adds to a paper, uploads files (zips are unpacked safely into `uploads/<zip name>/`), starts
+the job in ResearchLedger, does the agent work right there in the console, and stops to ask you before anything
+runs code or is accepted. **`/rl-status`** shows what is running and waiting, and lets you act on it.
+**`/rl-worker`** works the queue. The commands live in `.claude/commands/` (and a copy with absolute paths in
+`%USERPROFILE%\.claude\commands\` so they work from any folder). Helper: `webapi/rl_cli.py` (standard library).
+
 ## Paper Studio (guided paper writing)
 
 Sidebar → **Paper Studio**, or *Use this idea for a paper* on a Brainstorm idea card. One stage path per paper
