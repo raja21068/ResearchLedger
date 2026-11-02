@@ -52,6 +52,37 @@ flowchart LR
 
 **Exploration mode** is the default and yields exploratory results. **Validation mode** is opt-in and requires an operator-reviewed, prospectively locked protocol and declared result contracts. It does not retroactively turn a pilot into a confirmatory study.
 
+## 🖥️ Use it: the website and the Claude console
+
+The same **seven research steps** appear in the local website and in the Claude console. They are defined once in
+[`webapi/app/steps.py`](webapi/app/steps.py), so the two never drift apart.
+
+| # | Step | You give | You get | Engines behind it |
+| --- | --- | --- | --- | --- |
+| 1 | Literature | PDFs, a zip, or a topic | summary, methods and research-gap table | literature skills |
+| 2 | Idea | a topic or your idea | an idea scored /100 that survived a 50+ paper novelty search | Idea Discovery v5, Phase 10–13 prompts |
+| 3 | Method and code | your idea or method | experiment plan and runnable code (written, not run) | PaperCompiler, research code agent v4 |
+| 4 | Run experiments | what to test | measured results, each traced to its script and run | experiment loop (plan locked first, runs after your click) |
+| 5 | Write paper | idea and results | LaTeX paper with figures and PDF | PaperOrchestra |
+| 6 | Review and revise | your `.tex` (and any review) | fixed paper, re-reviewed until clean or your score targets are met | Referee Lean, auto-review loop |
+| 7 | Final check | your `.tex` | ready / not ready: references, numbers, figures, placeholders, pages | submission gate |
+| 8 | Guided paper | an idea or topic | steps 1 → 7 in order, you approve each one | Paper Studio |
+
+**Website** — start it with `& .\start_web.ps1` (API on port 8000, GUI on http://localhost:3000). The home page has
+one box (drop files or type; it shows which tool will run) and the seven steps. Every step opens the same screen:
+drop files (a `.zip` is unpacked safely) or paste text, choose *just this once* or one of your papers, press
+**Start**. Finished jobs show **Your result** (open / download) and **Next step →**. *Decisions* lists everything
+waiting for you; each paper has an overview page (where it stands, what needs you, loops, documents).
+
+**Claude console** — in a Claude Code session type **`/rl`** for the numbered menu, or jump straight in:
+`/rl 2 zero-knowledge proofs for AI oracles`, `/rl 6 D:\papers\draft.zip`. It starts the website if needed, asks
+only what is missing, does the agent work in the console and stops before anything runs code or is accepted.
+**`/rl-status`** shows what is running and waiting. Details: [docs/WEB_APP.md](docs/WEB_APP.md).
+
+Safeguards built into every step: review quotes must occur in the paper, numbers in tables and the abstract must
+come from `results/*.json`, a sample of every reference list is looked up at Crossref/arXiv, experiment plans are
+locked before code runs, and code only runs after your click.
+
 ## 🚀 Quick start
 
 ### Prerequisites
