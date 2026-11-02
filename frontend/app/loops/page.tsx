@@ -42,7 +42,8 @@ export default function LoopsPage() {
   useEffect(() => { api<LoopType[]>("/loop-types").then(setTypes).catch(setError); }, []);
   useEffect(() => {  // "Run these experiments" on a review loop links here with ?type=experiment&from=<loop>
     const q = new URLSearchParams(window.location.search);
-    if (q.get("type") === "experiment") setType("experiment");
+    const t = q.get("type");
+    if (t === "experiment" || t === "idea_forge" || t === "review_fix") setType(t);
     if (q.get("from")) setFromLoop(q.get("from")!);
   }, []);
   useEffect(() => {

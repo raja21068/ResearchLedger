@@ -43,3 +43,12 @@ def test_dismiss_a_decision():
     item = next(i for i in client.get("/api/v1/inbox", headers=H).json()["approve"] if i.get("loop_id") == lid)
     after = client.post("/api/v1/inbox/dismiss", json={"key": item["key"]}, headers=H).json()
     assert not any(i.get("loop_id") == lid for i in after["approve"])
+
+
+def test_steps_menu_is_one_list_for_console_and_gui():
+    r = client.get("/api/v1/steps", headers=H).json()
+    assert [s["n"] for s in r["steps"]] == [1, 2, 3, 4, 5, 6, 7]
+    assert all(s["href"] and s["console"] and s["engines"] for s in r["steps"])
+    for s in r["steps"]:
+        assert f"{s['n']}. {s['name']}" in r["menu"]
+    assert "8. Guided paper" in r["menu"] and "0. Status" in r["menu"]

@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (autopilot, inbox, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -338,6 +338,12 @@ def _loop_call(fn, *args):
         return fn(*args)
     except (loops.LoopError, workspace.PathError) as exc:
         raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/steps")
+def pipeline_steps():
+    """The seven numbered research steps shown in both the console (/rl) and the GUI home."""
+    return {"pipeline": steps.PIPELINE, "steps": steps.STEPS, "extras": steps.EXTRAS, "menu": steps.menu_text()}
 
 
 @app.get("/api/v1/loop-types")

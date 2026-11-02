@@ -16,58 +16,29 @@ The user's input: $ARGUMENTS
 Run `RL status`. If it prints `API_DOWN`, tell the user in one line to start the website with
 `& D:\AutoResearch\ResearchLedger\start_web.ps1`, and stop.
 
-## 2. The menu — your research pipeline, step by step
+## 2. The menu — the same seven steps as the website
 From the input, find: (a) a menu number (e.g. `/rl 2 zk oracles`), (b) the goal, (c) file or zip paths, (d) pasted text
-(a prompt, an idea, or a review from ChatGPT). If there is no number and the goal is not clear, print this menu
-exactly (it follows the user's own pipeline: PDF → understand → ideas → experiments → code → figures → paper →
-slides → reviewer → final paper) and wait for the user's number:
+(a prompt, an idea, or a review from ChatGPT). If there is no number and the goal is not clear, run `RL menu`, show its
+output to the user exactly as printed (in a code block), and wait for their number.
 
-```
-ResearchLedger — choose a number
-
- IDEA
-  1. Understand papers      PDFs in → summary, method and gap table
-  2. Idea generation        5 ideas → 50+ papers searched → scored /100 → redesigned until it passes
-
- BUILD
-  3. Experiment design      a plan locked before anything runs (baselines, ablations, success rule)
-  4. Code                   runnable experiment code (written only; runs after your approval)
-  5. Figures                journal-style vector figures from your real results only
-
- WRITE
-  6. Full paper             idea → LaTeX paper → PDF, stage by stage, you approve each stage
-  7. Slides                 a talk from your paper
-
- REVIEW & SUBMIT
-  8. Revise paper           strict review → fixes → new PDF until clean, or answer journal reviewers
-  9. Final check            journal-ready check: references, numbers, figures, placeholders, pages
-
-  0. Status                 what is running and what waits for you
-
- Type a number (and your topic, files or pasted text), e.g.  2 zero-knowledge proofs for AI oracles
-```
-
-Then ask only what that number still needs (one AskUserQuestion call, up to 3 questions), and do it:
-- 1 Understand papers: the PDFs or a zip if not given. → `RL start <p> "Understand and compare these papers: method,
-  data, results, limitations, research gap" --files <uploaded PDFs>`
-- 2 Idea generation: the topic (free text) if not given; "Generate candidates" or "I'll paste my idea".
-  → `RL start <p> "<topic or idea>" --repeat idea` (save a pasted idea as a file and add it first).
-- 3 Experiment design: what to test (idea file, or text), the paper's .tex if there is one.
-  → `RL experiment <p> "<what to test>" [--tex <tex>]` (it plans, writes code, then waits for the user's approval to run).
-- 4 Code: the idea, method or paper file if not given; framework (PyTorch · TensorFlow · scikit-learn · any).
-  → `RL start <p> "Generate research code (<framework>) for: <description>" --files <file>`
-- 5 Figures: the paper (.tex) and its results folder. → `RL start <p> "Redraw the paper's figures in top-journal style
-  as vector PDF, using only values from results/*.json; list any figure that has no data" --files <tex>`
-- 6 Full paper: the idea or topic if not given; venue (Journal · IEEE · Elsevier · Springer). → new paper
-  (`RL new "<title>" --paper`), then `RL start <p> "Write a full research paper about: <idea>. Target: <venue>."`
-- 7 Slides: the paper PDF or .tex. → `RL start <p> "Make slides from my paper" --files <file>`
-- 8 Revise paper: "My draft — review and fix it" (needs the .tex; a pasted ChatGPT review is used if given →
-  `--repeat review`) or "Reviewer comments from a journal" (manuscript + comments →
-  `RL start <p> "Revise the paper and write a response to the reviewers" --files …`).
-- 9 Final check: the .tex. → `RL check <p> <tex>`; report and stop.
+Then ask only what that number still needs (one AskUserQuestion call, up to 3 questions) and start it. Each step's
+console command is in `RL menu`'s source (`webapi/app/steps.py`, field `console`); in short:
+- 1 Literature: PDFs / zip / topic → `RL start <p> "Understand and compare these papers: method, data, results,
+  limitations, research gap" --files <PDFs>`
+- 2 Idea: topic (free text) and "Generate candidates" or "I'll paste my idea" → `RL start <p> "<topic or idea>" --repeat idea`
+- 3 Method and code: idea or method (file or text); framework (PyTorch · TensorFlow · scikit-learn · any) →
+  `RL start <p> "Generate research code (<framework>) for: <description>" --files <file>` (written only, never run)
+- 4 Run experiments: what to test; the paper's .tex if any → `RL experiment <p> "<what to test>" [--tex <tex>]`
+- 5 Write paper: idea and results in the project → `RL start <p> "Write my paper from the idea and results in this project"`
+- 6 Review and revise: "My draft — review and fix it" (needs the .tex; a pasted ChatGPT review is used if given →
+  `--repeat review`) or "Reviewer comments from a journal" (`RL start <p> "Revise the paper and write a response to
+  the reviewers" --files …`)
+- 7 Final check: the .tex → `RL check <p> <tex>`; report and stop.
+- 8 Guided paper (all steps): idea or topic, venue (Journal · IEEE · Elsevier · Springer) → `RL new "<title>" --paper`,
+  then `RL start <p> "Write a full research paper about: <idea>. Target: <venue>."`
 - 0 Status: do what `/rl-status` does.
 Where: ask only if the user has papers (`RL list`) and did not say — "Just this once (quick job)" or the 2–3 most
-relevant papers by title. Steps 3–9 normally belong to a paper; 6 always does.
+relevant papers by title. Steps 3–7 normally belong to a paper; 8 always does.
 
 ## 3. Set it up
 - Quick job: `RL new "<short title>"`; new paper: `RL new "<title>" --paper`; else use the chosen paper id.

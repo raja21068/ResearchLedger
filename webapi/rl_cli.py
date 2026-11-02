@@ -1,5 +1,6 @@
 """ResearchLedger from the Claude console (standard library only). Used by the /rl and /rl-status commands.
 
+    python webapi/rl_cli.py menu                                    the numbered research steps (same as the GUI)
     python webapi/rl_cli.py status                                  worker, decisions, what is running
     python webapi/rl_cli.py list                                    your papers and recent quick jobs (with ids)
     python webapi/rl_cli.py new "title" [--paper]                   create a quick job (or a paper); prints its id
@@ -93,6 +94,7 @@ def main():
             pass
     ap = argparse.ArgumentParser(description="ResearchLedger from the Claude console")
     sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("menu")
     sub.add_parser("status")
     sub.add_parser("list")
     sub.add_parser("decisions")
@@ -112,7 +114,9 @@ def main():
     p = sub.add_parser("check"); p.add_argument("project"); p.add_argument("tex")
     a = ap.parse_args()
 
-    if a.cmd == "status":
+    if a.cmd == "menu":
+        print(call("GET", "/steps")["menu"])
+    elif a.cmd == "status":
         b = call("GET", "/bridge/status")
         inbox = call("GET", "/inbox")
         print(f"Worker: {b['worker_state']} (executor {b['executor']}), tasks waiting for it: {b['queued']}")

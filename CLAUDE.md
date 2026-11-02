@@ -18,9 +18,10 @@ model work, so it must be started from a normal terminal, not inherited from a p
 ## Using ResearchLedger from this console
 
 When the user asks how to use ResearchLedger, says they want to do research work (ideas, a paper, code, a
-revision) without a specific instruction, or greets you in a new session here, offer the `/rl` menu:
-the numbered pipeline menu (1 Understand papers · 2 Idea generation · 3 Experiment design · 4 Code · 5 Figures ·
-6 Full paper · 7 Slides · 8 Revise paper · 9 Final check · 0 Status) — run `/rl` and let them pick a number.
+revision) without a specific instruction, or greets you in a new session here, offer the `/rl` menu — the
+same seven numbered steps as the website (defined once in `webapi/app/steps.py`): 1 Literature · 2 Idea ·
+3 Method and code · 4 Run experiments · 5 Write paper · 6 Review and revise · 7 Final check · 8 Guided paper (all
+steps) · 0 Status. Run `/rl` and let them pick a number.
 `/rl-status` shows what is running and waiting.
 
 To let this Claude Code session do the website's agent work (no separate CLI login needed), the

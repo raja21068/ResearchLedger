@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { api, post } from "@/lib/api";
 import { parseCommand, runCommand, useCommands } from "@/lib/commands";
 import type { Project } from "@/lib/types";
-import type { Recipe } from "@/lib/recipes";
 import { Composer } from "@/components/Composer";
 import { ErrorBox } from "@/components/ui";
 
@@ -21,12 +20,9 @@ const REPEAT: [string, string][] = [
   ["review", "Review → fix until clean or your targets (needs the .tex)"],
   ["idea", "Attack → score → redesign until the idea passes"],
 ];
-// Tools that are not ready-made recipes: loops and checks the home box can open directly.
-const EXTRA: { label: string; hint: string; href?: string; repeat?: string; prompt?: string }[] = [
-  { label: "Novelty attack", hint: "50+ papers vs your idea, repeated", repeat: "idea", prompt: "Why is this idea not novel? " },
-  { label: "Submission check", hint: ".tex gate: refs, numbers, figures", href: "/quality" },
-  { label: "Run an experiment", hint: "pre-registered, runs after your click", href: "/loops?type=experiment" },
-];
+// The seven research steps come from the server (webapi/app/steps.py) — the same list the console's /rl shows.
+interface Step { n: number; id: string; group: string; name: string; give: string; get: string; engines: string[]; href: string }
+interface Steps { pipeline: { name: string; does: string; href: string }; steps: Step[]; extras: { id: string; name: string; href: string }[] }
 
 interface Recent { id: string; project_id: string; title: string; project_title: string; project_kind?: string; updated_at: string; last_status: string | null }
 interface Preview { mode: string; tool: string | null; why: string }
@@ -46,7 +42,7 @@ export default function Home() {
   const [repeat, setRepeat] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<Preview | null>(null);
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [steps, setSteps] = useState<Steps | null>(null);
   const [recent, setRecent] = useState<Recent[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -61,7 +57,7 @@ export default function Home() {
       setPapers(ps);
       if (ps.some((p) => p.id === q.get("project"))) setWhere(q.get("project")!);
     }).catch(setError);
-    api<Recipe[]>("/recipes").then(setRecipes).catch(() => {});
+    api<Steps>("/steps").then(setSteps).catch(() => {});
     api<Recent[]>("/conversations?limit=8").then(setRecent).catch(() => {});
   }, []);
 
@@ -144,25 +140,34 @@ export default function Home() {
           } />
         {error ? <div className="mt-3"><ErrorBox error={error} /></div> : null}
 
-        <h2 className="mb-2 mt-10 text-xs font-bold uppercase tracking-[.1em] text-faint">Quick tools — work without a project</h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {recipes.map((r) => (
-            <Link key={r.id} href={`/do/${r.id}`} className="rounded-xl border border-line bg-white px-3 py-2.5 hover:border-accent">
-              <div className="text-sm font-semibold">{r.name}</div>
-              <div className="truncate text-xs text-faint" title={r.pitch}>{r.pitch}</div>
-            </Link>
-          ))}
-          {EXTRA.map((x) => x.href ? (
-            <Link key={x.label} href={x.href} className="rounded-xl border border-line bg-white px-3 py-2.5 hover:border-accent">
-              <div className="text-sm font-semibold">{x.label}</div><div className="truncate text-xs text-faint">{x.hint}</div>
-            </Link>
-          ) : (
-            <button key={x.label} onClick={() => { setRepeat(x.repeat ?? ""); setPrompt(x.prompt ?? ""); document.getElementById("composer")?.focus(); }}
-              className="rounded-xl border border-line bg-white px-3 py-2.5 text-left hover:border-accent">
-              <div className="text-sm font-semibold">{x.label}</div><div className="truncate text-xs text-faint">{x.hint}</div>
-            </button>
-          ))}
-        </div>
+        {steps && (
+          <>
+            <h2 className="mb-2 mt-10 text-xs font-bold uppercase tracking-[.1em] text-faint">Your research steps — use one, or all in order</h2>
+            <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {steps.steps.map((st) => (
+                <li key={st.id}>
+                  <Link href={st.href} title={`Engines: ${st.engines.join(" · ")}`}
+                    className="flex h-full gap-3 rounded-xl border border-line bg-white px-3 py-2.5 hover:border-accent">
+                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">{st.n}</span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold">{st.name} <span className="font-normal text-faint">· {st.group}</span></span>
+                      <span className="block text-xs text-muted">{st.give} → {st.get}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link href={steps.pipeline.href} className="flex h-full gap-3 rounded-xl border-2 border-accent bg-accent-soft px-3 py-2.5">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">8</span>
+                  <span><span className="block text-sm font-semibold">{steps.pipeline.name}</span>
+                    <span className="block text-xs text-muted">Runs 1 → 7 in order; you approve each step.</span></span>
+                </Link>
+              </li>
+            </ol>
+            <p className="mt-2 text-xs text-faint">Also: {steps.extras.map((e, i) => <span key={e.id}>{i ? " · " : ""}<Link className="text-accent hover:underline" href={e.href}>{e.name}</Link></span>)}
+              {" "}· In the Claude console type <span className="font-mono">/rl</span> for the same menu.</p>
+          </>
+        )}
 
         {recent.length > 0 && (
           <>
