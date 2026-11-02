@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1178,6 +1178,14 @@ def loop_parent(project_id: str, body: ParentIn):
         st["parent"] = body.parent
         loops._save(project_id, st)
     return {"loop_id": loop_id, "parent": body.parent}
+
+
+# ---------------------------------------------------------------- mission control
+@app.get("/api/v1/mission")
+def mission_overview(hours: int = 24):
+    """Every task in one view: running, queued (and what it waits for), interrupted, failed, completed in the last
+    `hours`, what needs your decision, and each paper's stage pipeline."""
+    return mission.overview(store, min(max(hours, 1), 168))
 
 
 # ---------------------------------------------------------------- evidence ledger (C/E/R)

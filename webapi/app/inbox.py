@@ -7,6 +7,8 @@ existing endpoints (approve stage, run stage with feedback, approve plan).
 from __future__ import annotations
 
 import json
+import os
+import time
 from datetime import datetime, timedelta, timezone
 
 from . import director, loops, paper_studio
@@ -29,8 +31,18 @@ def dismiss(key: str) -> None:
     """Hide one decision. Its key includes its state, so it comes back if anything about it changes."""
     d = dismissed()
     d[key] = now()
-    _dismissed_file().parent.mkdir(parents=True, exist_ok=True)
-    _dismissed_file().write_text(json.dumps(d, indent=2), encoding="utf-8")
+    f = _dismissed_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    tmp = f.with_suffix(".tmp")
+    tmp.write_text(json.dumps(d, indent=2), encoding="utf-8")
+    for attempt in range(5):  # Windows: a reader holding the file briefly makes replace fail; try again
+        try:
+            os.replace(tmp, f)
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 
 def _key(item: dict) -> str:

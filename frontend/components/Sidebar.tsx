@@ -174,6 +174,9 @@ export function Sidebar() {
         <Link href="/library" title="Library" className={row(active("/library"))}>
           <Icon d={I.book} /><span className={wide ? "" : "lg:hidden"}>Library</span>
         </Link>
+        <Link href="/mission" title="Mission control" className={row(active("/mission"))}>
+          <Icon d={I.chart} /><span className={wide ? "" : "lg:hidden"}>Mission control</span>
+        </Link>
         <Link href="/memory" title="Memory" className={row(active("/memory"))}>
           <Icon d={I.brain} /><span className={wide ? "" : "lg:hidden"}>Memory</span>
         </Link>
