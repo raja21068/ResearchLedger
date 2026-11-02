@@ -12,6 +12,7 @@ import type { Conversation, RunEvent } from "@/lib/types";
 import { BridgeBanner } from "@/components/BridgeStatus";
 import { Markdown } from "@/components/Markdown";
 import { PaperDocument } from "@/components/PaperDocument";
+import { ProtocolLock } from "@/components/ProtocolLock";
 import { btn, btn2, ErrorBox } from "@/components/ui";
 
 export default function PaperStudio({ params }: { params: Promise<{ id: string }> }) {
@@ -136,6 +137,7 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
         </p>
       )}
 
+      <ProtocolLock projectId={id} onChanged={load} />
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Stage rail */}
         <ol className="flex-none space-y-1 md:w-64">

@@ -1181,6 +1181,58 @@ def loop_parent(project_id: str, body: ParentIn):
     return {"loop_id": loop_id, "parent": body.parent}
 
 
+# ---------------------------------------------------------------- methodology lock
+def _lockcall(fn, *args):
+    try:
+        return fn(*args)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/projects/{project_id}/paper/lock")
+def paper_lock(project_id: str):
+    """Whether the approved plan is locked, how the protocol and declared slots differ from the lock, amendments, and
+    checks on the pre-experiment draft."""
+    _project(project_id)
+    return _lockcall(paper_studio.lock_status, project_id)
+
+
+class AmendmentIn(BaseModel):
+    reason: str = Field(..., max_length=2000)
+    affects: str = Field("", max_length=1000)
+
+
+@app.post("/api/v1/projects/{project_id}/paper/lock/amendments", status_code=201)
+def paper_amendment(project_id: str, body: AmendmentIn):
+    _project(project_id)
+    return _lockcall(paper_studio.propose_amendment, store, project_id, body.reason, body.affects)
+
+
+class AmendmentDecisionIn(BaseModel):
+    approve: bool
+
+
+@app.post("/api/v1/projects/{project_id}/paper/lock/amendments/{amendment_id}/decision")
+def paper_amendment_decide(project_id: str, amendment_id: str, body: AmendmentDecisionIn):
+    """Approving makes the changed protocol the new lock version and reopens the stages after Method; rejecting puts
+    the locked protocol back."""
+    _project(project_id)
+    return _lockcall(paper_studio.decide_amendment, store, project_id, amendment_id, body.approve)
+
+
+@app.post("/api/v1/projects/{project_id}/paper/lock", status_code=201)
+def paper_lock_now(project_id: str):
+    """Freeze an already-approved plan (for papers approved before locking existed)."""
+    _project(project_id)
+    return _lockcall(paper_studio.lock_plan_now, store, project_id)
+
+
+@app.post("/api/v1/projects/{project_id}/paper/lock/restore")
+def paper_lock_restore(project_id: str):
+    _project(project_id)
+    return _lockcall(paper_studio.restore_locked_protocol, store, project_id)
+
+
 # ---------------------------------------------------------------- manuscript trace
 @app.get("/api/v1/projects/{project_id}/manuscript/trace")
 def manuscript_trace_view(project_id: str, path: str):

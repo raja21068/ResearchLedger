@@ -12,7 +12,7 @@ import json
 import os
 from pathlib import Path
 
-from . import claude_runner, experiments, exprun, review_loop, workspace
+from . import claude_runner, experiments, exprun, protocol_lock, review_loop, workspace
 from .config import REPO_ROOT
 from .db import Store, new_id, now
 
@@ -112,9 +112,12 @@ RESEARCH_ARTICLE = [
                  "skills/paper-orchestra-refine/SKILL.md", f"{PO}/methods/prompts/outline_agent.py",
                  f"{PO}/methods/prompts/section_writing_agent.py", f"{PO}/methods/prompts/content_refinement_agent.py"],
      "reads": ["paper/idea.md", "paper/literature.md", "paper/refs.bib", "paper/protocol.md",
-               "paper/experimental_log.md", "results/"],
+               "paper/experimental_log.md", "paper/pre_experiment_draft.md", "results/"],
      "outputs": ["paper/outline.md", "paper/main.tex", "paper/main.pdf"],
-     "task": ("Run the PaperOrchestra sequence (outline → sections → figures plan → refine). Write `paper/outline.md`, "
+     "task": ("If `paper/pre_experiment_draft.md` exists, build the paper from it: keep its Introduction, Related work, "
+              "Methodology and Experimental setup (convert to LaTeX), and add Results, Discussion, Limitations, "
+              "Conclusion and the abstract only from the measured results. "
+              "Run the PaperOrchestra sequence (outline → sections → figures plan → refine). Write `paper/outline.md`, "
               "then `paper/main.tex` using the venue template (copy needed .sty/.bst files from the template folder "
               "into `paper/`). Use `paper/refs.bib`. For results: use measured values from `results/*.json` when they "
               "exist (`results/provenance.json` says which run produced each; cite the slot id in a comment); otherwise keep \\PFVAL{slot_id} and \\PFFIG{slot_id}, and define "
@@ -304,6 +307,9 @@ def create(store: Store, project_id: str, paper_type: str, venue: str, topic: st
     state = {"type": paper_type, "venue": venue, "topic": topic.strip(), "conversation_id": cid,
              "created_at": ts, "autopilot": os.environ.get("RL_PAPER_AUTOPILOT", "1") != "0",
              "stages": {s["id"]: {} for s in PAPER_TYPES[paper_type]["stages"]}}
+    if paper_type == "research_article":
+        state["pre_draft"] = True
+        state["stages"]["draft"] = {}
     _save(project_id, state)
     store.log_activity(project_id, "paper_created", paper_type)
     autoadvance(store, project_id)  # Autopilot: start the first stage right away when it needs no uploads
@@ -372,8 +378,36 @@ def _coverage(root: Path) -> dict:
             "missing": [c for c in comments if c not in closure][:50]}
 
 
+PRE_DRAFT = {"id": "draft", "title": "Draft before coding",
+             "purpose": "Result-independent sections and empty tables, written before any code runs.",
+             "engines": ["skills/paper-orchestra-outline/SKILL.md", "skills/paper-orchestra-sections/SKILL.md",
+                         "skills/research-narrative/SKILL.md"],
+             "reads": ["paper/idea.md", "paper/literature.md", "paper/refs.bib", "paper/protocol.md",
+                       "paper/experimental_log.md", "paper/planned_tables.md"],
+             "outputs": ["paper/pre_experiment_draft.md"],
+             "task": ("Write `paper/pre_experiment_draft.md`, the result-independent part of the paper, in Markdown: "
+                      "a working title; Introduction (problem, gap, contribution) written from `paper/idea.md` and "
+                      "`paper/literature.md`; Related work using only references that are in `paper/refs.bib` and "
+                      "verified; Methodology and Experimental setup fully specified from the LOCKED `paper/protocol.md` "
+                      "(datasets and splits, baselines, metrics, statistical plan, seeds, ablations); the planned "
+                      "tables, copied from `paper/planned_tables.md` with every cell left Pending; figure "
+                      "SPECIFICATIONS (what each plot will show, axes, which slots feed it) with no invented data; a "
+                      "Discussion framework (the questions the results will answer, and what each outcome would mean); "
+                      "known limitations so far; and the failure criteria from the protocol. Do NOT write a Results "
+                      "section, a Conclusion, or an abstract that states findings; a provisional abstract may state "
+                      "only the question and the planned method. Do not put any measured or hypothetical number in "
+                      "the draft. Do not change the protocol: if you find a problem with it, list it under 'Proposed "
+                      "protocol changes' with the reason, and the user decides.")}
+
+
 def _stages(state: dict) -> list[dict]:
-    return PAPER_TYPES[state["type"]]["stages"]
+    stages = PAPER_TYPES[state["type"]]["stages"]
+    if state.get("pre_draft"):  # new research articles only; existing projects keep their stage list
+        ids = [s["id"] for s in stages]
+        if "method" in ids and "draft" not in ids:
+            i = ids.index("method") + 1
+            return stages[:i] + [PRE_DRAFT] + stages[i:]
+    return stages
 
 
 def view(store: Store, project_id: str) -> dict | None:
@@ -410,6 +444,9 @@ def view(store: Store, project_id: str) -> dict | None:
             "venue_label": VENUES[state["venue"]]["label"], "topic": state["topic"],
             "conversation_id": state["conversation_id"], "stages": out,
             "autopilot": state.get("autopilot", True),
+            "lock": ({"locked": bool(state.get("lock")), "version": (state.get("lock") or {}).get("version"),
+                      "pending": any(a["status"] == "pending" for a in state.get("amendments", []))}
+                     if "method" in [s["id"] for s in _stages(state)] else None),
             "results": experiments.summary(root) if _has(state, "experiments") or state["type"] == "thesis_to_paper" else None,
             "collected": (state["stages"].get("experiments") or state["stages"].get("extract") or {}).get("collected"),
             "job_plan": _job_plan_view(root) if _has(state, "experiments") else None,
@@ -478,6 +515,7 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
         raise ValueError("upload your files first (" + PAPER_TYPES[state["type"]].get("inputs", "files in uploads/") + ")")
     if v[stage_id]["status"] == "running":
         raise ValueError("this stage is already running")
+    _lock_gate(state, project_id, stage_id)
     stage = next(s for s in _stages(state) if s["id"] == stage_id)
     cid = state["conversation_id"]
     root = workspace.project_root(project_id)
@@ -490,6 +528,8 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
                             root / "results" / "run_log.json", meta={"experiment": "paper"})
         ts = now()
     else:
+        if stage_id == "draft":  # the empty tables come from the declared slots, not from a model
+            (root / protocol_lock.PLANNED_TABLES).write_text(protocol_lock.planned_tables(root), encoding="utf-8")
         prompt = _prompt(state, stage, root, notes, feedback)
         rid, ts = new_id("run"), now()
         store.exec("INSERT INTO runs(id,project_id,conversation_id,kind,prompt,status,provider,created_at) "
@@ -501,6 +541,8 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
     ids = [s["id"] for s in _stages(state)]
     for later in ids[ids.index(stage_id) + 1:]:
         state["stages"].setdefault(later, {}).pop("approved_at", None)
+    if stage_id == "method" and state.get("lock"):  # re-planning before approval starts a new lock; the old files stay
+        state.setdefault("lock_history", []).append(state.pop("lock"))
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_started", f"{stage_id} {rid}")
     if not stage.get("server_run"):
@@ -540,10 +582,16 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     if v[stage_id]["status"] != "needs_review":
         raise ValueError(f"stage is {v[stage_id]['status']}; it can be approved after a successful run with all outputs")
     state = load(project_id)
+    _lock_gate(state, project_id, stage_id)
     st = state["stages"].setdefault(stage_id, {})
     if stage_id in {"experiments", "extract"}:  # measured values enter the log only now, from results/*.json
         st["collected"] = collect_results(store, project_id, stage_id, st.get("run_id"))
     st["approved_at"] = now()
+    if stage_id == "method":  # approving the plan freezes it
+        try:
+            _lock_now(store, state, project_id, "plan approved")
+        except ValueError:
+            pass  # no protocol file: nothing to lock (the stage cannot be approved without it)
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)
     if stage_id in {"review", "revise"}:
@@ -551,6 +599,130 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
         memory_store.safe(memory_store.ingest_reviews, store, project_id)
     autoadvance(store, project_id)
     return view(store, project_id)
+
+
+# ---------------------------------------------------------------- methodology lock
+def _lock_gate(state: dict, project_id: str, stage_id: str) -> None:
+    """Nothing after the Method stage may continue while the protocol differs from its lock."""
+    lock = state.get("lock")
+    ids = [s["id"] for s in _stages(state)]
+    if not lock or "method" not in ids or stage_id not in ids or ids.index(stage_id) <= ids.index("method"):
+        return
+    try:
+        cmp = protocol_lock.compare(workspace.project_root(project_id), lock)
+    except (OSError, ValueError, KeyError):
+        cmp = {"changed": True}
+    if cmp["changed"]:
+        raise ValueError("The protocol or the declared result slots changed after the plan was locked. Open "
+                         "\"Protocol lock\" on this page and record an amendment (a reason, and what it affects), or "
+                         "restore the locked protocol. Nothing after the Method stage can continue until then.")
+
+
+def _lock_now(store: Store, state: dict, project_id: str, reason: str) -> dict:
+    """Create the next lock version from the current protocol and slots."""
+    root = workspace.project_root(project_id)
+    ver = int(state.get("lock_version", 0)) + 1
+    lock = protocol_lock.take(root, ver)
+    lock["locked_at"] = now()
+    lock["reason"] = reason
+    state["lock"], state["lock_version"] = lock, ver
+    (root / protocol_lock.PLANNED_TABLES).write_text(protocol_lock.planned_tables(root), encoding="utf-8")
+    store.log_activity(project_id, "protocol_locked", f"v{ver}: {reason}")
+    try:
+        from . import memory_store
+        memory_store.add(store, project_id, "decision", f"Protocol locked (version {ver})",
+                         f"{reason}. Hypotheses, datasets, baselines, metrics and the statistical plan are frozen; a "
+                         "change needs a recorded amendment and your approval.", "system",
+                         evidence=[{"kind": "file", "ref": lock["protocol_file"]}, {"kind": "file", "ref": lock["slots_file"]}],
+                         tags=["protocol", "lock"], source_key=f"lock:{project_id}:v{ver}")
+    except Exception:  # noqa: BLE001 — memory must never block the lock
+        pass
+    return lock
+
+
+def lock_status(project_id: str) -> dict:
+    state = load(project_id)
+    if not state:
+        raise ValueError("this project has no paper yet")
+    root = workspace.project_root(project_id)
+    lock = state.get("lock")
+    base = {"has_method_stage": "method" in [s["id"] for s in _stages(state)], "draft": protocol_lock.draft_report(root),
+            "method_approved": bool(state["stages"].get("method", {}).get("approved_at")),
+            "planned_tables": (root / protocol_lock.PLANNED_TABLES).is_file()}
+    if not lock:
+        return {**base, "locked": False, "amendments": state.get("amendments", [])}
+    try:
+        cmp = protocol_lock.compare(root, lock)
+    except (OSError, ValueError, KeyError):
+        cmp = {"changed": True, "protocol_changed": True, "slots_added": [], "slots_removed": [], "slots_changed": [],
+               "diff": [], "error": "the locked copy could not be read"}
+    am = state.get("amendments", [])
+    return {**base, "locked": True, "version": lock["version"], "locked_at": lock["locked_at"], "reason": lock.get("reason"),
+            "protocol_file": lock["protocol_file"], **cmp, "amendments": am,
+            "pending": any(a["status"] == "pending" for a in am)}
+
+
+def lock_plan_now(store: Store, project_id: str) -> dict:
+    """Lock a plan that was approved before locking existed (the user's click is the approval of freezing it)."""
+    state = load(project_id)
+    if not state or "method" not in [s["id"] for s in _stages(state)]:
+        raise ValueError("this paper has no method stage")
+    if state.get("lock"):
+        raise ValueError("the plan is already locked")
+    if not state["stages"].get("method", {}).get("approved_at"):
+        raise ValueError("approve the Method & experiment plan first; approving it locks it")
+    _lock_now(store, state, project_id, "plan locked by the user after approval")
+    _save(project_id, state)
+    return lock_status(project_id)
+
+
+def propose_amendment(store: Store, project_id: str, reason: str, affects: str) -> dict:
+    state = load(project_id)
+    st = lock_status(project_id)
+    if not st["locked"] or not st["changed"]:
+        raise ValueError("nothing has changed since the lock, so there is nothing to amend")
+    if len((reason or "").strip()) < 10:
+        raise ValueError("explain why the change is necessary (at least a sentence)")
+    if st["pending"]:
+        raise ValueError("an amendment is already waiting for your decision")
+    am = {"id": f"A{len(state.get('amendments', [])) + 1}", "proposed_at": now(), "status": "pending",
+          "reason": reason.strip()[:2000], "affects": (affects or "").strip()[:1000], "from_version": st["version"],
+          "protocol_changed": st["protocol_changed"], "slots_added": st["slots_added"], "slots_removed": st["slots_removed"],
+          "slots_changed": st["slots_changed"], "diff": st["diff"][:80]}
+    state.setdefault("amendments", []).append(am)
+    _save(project_id, state)
+    store.log_activity(project_id, "protocol_amendment_proposed", f"{am['id']}: {am['reason'][:200]}")
+    return lock_status(project_id)
+
+
+def decide_amendment(store: Store, project_id: str, amendment_id: str, approve_it: bool) -> dict:
+    state = load(project_id)
+    am = next((a for a in state.get("amendments", []) if a["id"] == amendment_id), None)
+    if not am or am["status"] != "pending":
+        raise ValueError("that amendment is not waiting for a decision")
+    root = workspace.project_root(project_id)
+    if approve_it:
+        lock = _lock_now(store, state, project_id, f"amendment {am['id']}: {am['reason'][:200]}")
+        am.update(status="approved", decided_at=now(), version_after=lock["version"])
+        # work built on the old plan must be looked at again: reopen every stage after Method
+        ids = [s["id"] for s in _stages(state)]
+        for later in ids[ids.index("method") + 1:]:
+            state["stages"].setdefault(later, {}).pop("approved_at", None)
+    else:
+        protocol_lock.restore(root, state["lock"])
+        am.update(status="rejected", decided_at=now())
+    _save(project_id, state)
+    store.log_activity(project_id, "protocol_amendment_" + ("approved" if approve_it else "rejected"), am["id"])
+    return lock_status(project_id)
+
+
+def restore_locked_protocol(store: Store, project_id: str) -> dict:
+    state = load(project_id)
+    if not state or not state.get("lock"):
+        raise ValueError("the plan is not locked")
+    out = protocol_lock.restore(workspace.project_root(project_id), state["lock"])
+    store.log_activity(project_id, "protocol_restored", f"v{state['lock']['version']}")
+    return {**lock_status(project_id), "slots_note": out["slots_note"]}
 
 
 def start_review_round(store: Store, project_id: str) -> dict:

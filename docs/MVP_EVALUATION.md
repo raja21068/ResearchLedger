@@ -61,6 +61,7 @@ lesson. Path:
 | 2 Nov | claiming | One claim was lost between two commands (the task was re-queued), and had to be claimed again. Cause not found. | open |
 | 2 Nov | C5 round 1 | Paper search, score and redesign all ran through the loop's own state machine and were accepted by the server's checks. The competitor list has 46 verified papers, below the 50 the plan asks for; the shortfall is stated in the attack. | n/a |
 | 2 Nov | memory | Added verified reviewer findings and their resolutions to memory (the first slice of the Experience Engine idea). On the DeFi paper it recorded 6 of 8 concerns; the other 2 were not stored (1 unverified, 1 whose quote was not found). Whether agents reuse these lessons is still to be observed. | n/a |
+| 2 Nov | trial exception | Built P6 (manuscript evidence panel) and the protocol lock with the draft-before-coding stage while the trial was paused, at your request. They do not change the trial's rules; the trial now has two more things to test: whether the lock is ever triggered, and whether the pre-experiment draft saves rewriting. | n/a |
 | 2 Nov | memory use | The redesign read `memory/remembered.md` and applied the locality pilot's lessons (validate on a known answer; state a falsifier). This is one observation, made by the agent writing this log, so it counts as weak evidence for the memory criterion. | n/a |
 
 ## Stop rule

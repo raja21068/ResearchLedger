@@ -167,6 +167,17 @@ so you can check that a result reproduces. Each run's receipt is kept in `result
 **Trace** shows the full chain from claim to evidence to run. These checks support your judgment; they are not
 proof of correctness or publication readiness.
 
+**Plan lock and the draft before coding.** For a research article:
+- When you approve the *Method & experiment plan*, the protocol and the declared result slots are **frozen**. If
+  either changes later, nothing after the Method stage can continue until you record an **amendment** (a reason, and
+  which results it affects) and approve it, or restore the locked protocol. The locked copies are kept in
+  `paper/locked/` and never overwritten. Papers approved before this existed show a **Lock the approved plan now**
+  button.
+- A new stage, **Draft before coding**, comes right after the plan. It writes the introduction, related work,
+  methods, planned figure specifications and a discussion framework, with **no results, no conclusion and no
+  findings in the abstract**. The empty result tables come from the declared slots and every cell says *Pending*.
+  The paper is then built from this draft once real results exist.
+
 **Evidence panel for manuscripts.** Open any `.tex` file and an **Evidence** panel appears beside it. It lists the
 numbers in the tables and abstract and says where each comes from:
 - **backed:** matches a measured result whose evidence you checked or verified;
