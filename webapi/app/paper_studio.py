@@ -487,7 +487,7 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
             raise ValueError("The job list from the Code stage has problems; ask the Code stage to fix them: "
                              + "; ".join(problems[:5]))
         rid = exprun.submit(store, project_id, cid, f"paper:{stage_id}", root, jobs, root / "results" / "logs",
-                            root / "results" / "run_log.json")
+                            root / "results" / "run_log.json", meta={"experiment": "paper"})
         ts = now()
     else:
         prompt = _prompt(state, stage, root, notes, feedback)

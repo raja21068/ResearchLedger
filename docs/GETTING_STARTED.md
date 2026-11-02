@@ -143,6 +143,17 @@ esearchledger_web.sqlite3`.
 
 ---
 
+**Experiments.** A project's **Experiment records** page (button on the project page, or *Experiments* under the
+project in the sidebar) lists every run, and what it started from:
+- fingerprints of `code/` and `data/`;
+- the Python version and package versions;
+- the commands, their exit codes, logs and measured values.
+
+Experiments are shown as a tree under the idea or loop they came from. While a run is going, you see each job's
+progress and a live log. Tick two runs and click **Compare** to see which values, files or package versions changed.
+**Repeat** runs the same commands again as a new, separate record and leaves your project's results as they were,
+so you can check that a result reproduces. Each run's receipt is kept in `results/receipts/`.
+
 **Memory.** The **Memory** page (left sidebar) lists what earlier work found, by kind:
 - **Failures:** ideas that did not pass scoring, and pre-registered experiments that were not supported.
 - **Decisions, experiment results, strategies and literature notes.**

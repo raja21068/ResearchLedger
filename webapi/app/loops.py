@@ -618,7 +618,8 @@ def _start_move(store: Store, project_id: str, st: dict, n: int, move: str, retr
     _save(project_id, st)
     store.log_activity(project_id, "loop_move_started", f"{st['id']} r{n} {move} {rid}")
     if server_run:
-        exprun.start(store, rid, workspace.project_root(project_id), jobs, rdir, rdir / "run_log.json")
+        exprun.start(store, rid, workspace.project_root(project_id), jobs, rdir, rdir / "run_log.json",
+                     meta={"experiment": st["id"], "round": n})
     else:
         claude_runner.start_run(store, rid)
 
@@ -1246,6 +1247,8 @@ def _round_files(project_id: str, st: dict, n: int) -> list[str]:
 def list_view(store: Store, project_id: str) -> list[dict]:
     out = []
     for st in all_states(project_id):
+        if not {"id", "type", "goal", "status", "created_at"} <= st.keys() or st["type"] not in TYPES:
+            continue  # an incomplete or foreign state file must not break the loop list or the Decisions inbox
         last = st.get("rounds", {}).get(str(st.get("round", 0)), {}).get("metrics", {})
         runnable = [e for e in _prereg(st) if e["runnable"]]
         out.append({"id": st["id"], "type": st["type"], "label": TYPES[st["type"]]["label"], "goal": st["goal"],

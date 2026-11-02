@@ -13,7 +13,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1111,6 +1111,72 @@ def _backfill_memory():
     """Recorded loop outcomes become memories once (idempotent), so older projects get them too."""
     for p in store.all("SELECT id FROM projects"):
         memory_store.safe(memory_store.ingest_loops, store, p["id"])
+
+
+# ---------------------------------------------------------------- experiment laboratory
+def _lab(fn, *args):
+    try:
+        return fn(*args)
+    except lab.LabError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/v1/projects/{project_id}/lab")
+def lab_tree(project_id: str):
+    """Experiments (with their parent links), every recorded run with its fingerprints, and runs in progress."""
+    _project(project_id)
+    return lab.tree(store, project_id)
+
+
+@app.get("/api/v1/projects/{project_id}/lab/runs/{run_id}")
+def lab_run(project_id: str, run_id: str):
+    _project(project_id)
+    return _lab(lab.receipt, project_id, run_id)
+
+
+@app.get("/api/v1/projects/{project_id}/lab/compare")
+def lab_compare(project_id: str, a: str, b: str):
+    _project(project_id)
+    return _lab(lab.compare, project_id, a, b)
+
+
+@app.post("/api/v1/projects/{project_id}/lab/runs/{run_id}/repeat", status_code=201)
+def lab_repeat(project_id: str, run_id: str):
+    """Run the same commands again as a new, separately recorded run. The user's click is the approval;
+    the project's results files are put back afterwards, so a repeat only checks reproducibility."""
+    _project(project_id)
+    rid = _lab(lab.repeat, store, project_id, run_id)
+    store.log_activity(project_id, "experiment_repeated", f"{run_id} -> {rid}")
+    return {"run_id": rid, "repeat_of": run_id}
+
+
+class ParentIn(BaseModel):
+    loop_id: str
+    parent: str | None = None
+
+
+@app.post("/api/v1/projects/{project_id}/lab/parent")
+def loop_parent(project_id: str, body: ParentIn):
+    """Link an experiment to the experiment or loop it builds on (shown as a tree in the lab)."""
+    _project(project_id)
+    loop_id = body.loop_id
+    st = loops.load(project_id, loop_id)
+    if not st:
+        raise HTTPException(404, "unknown loop")
+    if body.parent and (body.parent == loop_id or not loops.load(project_id, body.parent)):
+        raise HTTPException(400, "the parent must be another loop in this project")
+    seen, cur = {loop_id}, body.parent
+    while cur:  # refuse cycles
+        if cur in seen:
+            raise HTTPException(400, "that link would make a loop of parents")
+        seen.add(cur)
+        ps = loops.load(project_id, cur) or {}
+        cur = ps.get("parent") or (ps.get("inputs") or {}).get("from_loop")
+    with loops._lock:
+        st = loops.load(project_id, loop_id)
+        st["parent"] = body.parent
+        loops._save(project_id, st)
+    return {"loop_id": loop_id, "parent": body.parent}
 
 
 # ---------------------------------------------------------------- research memory v2

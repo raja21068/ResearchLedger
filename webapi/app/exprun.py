@@ -57,17 +57,32 @@ def _sha(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
 
 
-def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: Path, out_json: Path) -> None:
-    """Run each job in order and write run_log.json. jobs: [{id, argv, slots, timeout_s}]."""
+def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: Path, out_json: Path | None,
+             meta: dict | None = None, keep_results: bool = False) -> None:
+    """Run each job in order and write run_log.json. jobs: [{id, argv, slots, timeout_s}].
+
+    Every run also leaves a permanent receipt, results/receipts/<run_id>.json (never overwritten): the run log plus
+    fingerprints of code/, data/ and the Python environment taken before the run. keep_results=True (a repeat) puts
+    every results/<slot>.json back as it was afterwards, so a check run never changes the project's results."""
     store.update_run(run_id, status="running", started_at=now())
     project_id = store.one("SELECT project_id FROM runs WHERE id=?", (run_id,))["project_id"]
     versions.safe_sync(store, project_id, "external")
+    receipt = fingerprint(root)
+    kept = {}
+    if keep_results:
+        for job in jobs:
+            for slot in job["slots"]:
+                p = root / "results" / f"{slot}.json"
+                kept[p] = p.read_bytes() if p.is_file() else None
     store.add_event(run_id, "status", {"text": f"Running {len(jobs)} experiment(s) on the server"})
+    for job in jobs:
+        store.add_event(run_id, "job", {"id": job["id"], "state": "queued", "command": " ".join(job["argv"])})
     log_dir.mkdir(parents=True, exist_ok=True)
     results = []
     for job in jobs:
         if run_id in _cancelled:
             break
+        store.add_event(run_id, "job", {"id": job["id"], "state": "running"})
         script_rel = job.get("script", job["argv"][1])
         rec = {"id": job["id"], "command": " ".join(job["argv"]), "script": script_rel,
                "script_sha256": _sha(root / script_rel), "started_at": now(), "slots": {}, "runner": RUNNER}
@@ -111,15 +126,27 @@ def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: P
                                       "seed": data.get("seed"), "sha256": _sha(p), "file": f"results/{slot}.json"}
         rec["ok"] = rec.get("exit_code") == 0 and all(s["ok"] for s in rec["slots"].values())
         results.append(rec)
+        store.add_event(run_id, "job", {"id": job["id"], "state": "done" if rec["ok"] else "failed",
+                                        "exit_code": rec.get("exit_code"), "seconds": rec["seconds"]})
         if job.get("required") and not rec["ok"]:
             store.add_event(run_id, "status", {"text": f"{job['id']} failed; the remaining jobs were not started"})
             break
         store.add_event(run_id, "status", {"text": f"{job['id']}: exit {rec.get('exit_code')}, "
                                                    f"{sum(s['ok'] for s in rec['slots'].values())}/{len(job['slots'])} "
                                                    f"result(s) in {rec['seconds']}s"})
-    out_json.parent.mkdir(parents=True, exist_ok=True)
-    out_json.write_text(json.dumps({"python": python_exe(), "runner": RUNNER, "run_id": run_id, "finished_at": now(),
-                                    "jobs": results}, indent=2), encoding="utf-8")
+    for p, data in kept.items():  # a repeat checks; it does not replace the project's results
+        if data is None:
+            p.unlink(missing_ok=True)
+        else:
+            p.write_bytes(data)
+    log = {"python": python_exe(), "runner": RUNNER, "run_id": run_id, "finished_at": now(), "jobs": results,
+           "receipt": receipt, **(meta or {})}
+    if out_json is not None:
+        out_json.parent.mkdir(parents=True, exist_ok=True)
+        out_json.write_text(json.dumps(log, indent=2), encoding="utf-8")
+    rdir = root / RECEIPTS
+    rdir.mkdir(parents=True, exist_ok=True)
+    (rdir / f"{run_id}.json").write_text(json.dumps(log, indent=2), encoding="utf-8")
     versions.safe_sync(store, project_id, "server_exec", run_id)
     if run_id in _cancelled:
         _cancelled.discard(run_id)
@@ -128,9 +155,55 @@ def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: P
     store.add_event(run_id, "done", {"status": "succeeded"})
 
 
-def start(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: Path, out_json: Path) -> None:
-    threading.Thread(target=run_jobs, args=(store, run_id, root, jobs, log_dir, out_json), daemon=True,
-                     name=f"exp-{run_id}").start()
+def start(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: Path, out_json: Path | None,
+          meta: dict | None = None, keep_results: bool = False) -> None:
+    threading.Thread(target=run_jobs, args=(store, run_id, root, jobs, log_dir, out_json, meta, keep_results),
+                     daemon=True, name=f"exp-{run_id}").start()
+
+
+RECEIPTS = "results/receipts"
+_ENV_PROBE = ("import json, sys, platform, importlib.metadata as m\n"
+              "out = {'python': sys.version.split()[0], 'platform': platform.platform(), 'packages': {}}\n"
+              "for n in sys.argv[1:]:\n"
+              "    try: out['packages'][n] = m.version(n)\n"
+              "    except Exception: out['packages'][n] = None\n"
+              "print(json.dumps(out))")
+
+
+def _tree(base: Path, root: Path) -> dict:
+    """Content fingerprint of every file under `base`: per-file SHA-256 and one hash of the whole tree."""
+    files = []
+    if base.is_dir():
+        for p in sorted(base.rglob("*")):
+            if not p.is_file() or "__pycache__" in p.parts or any(x.startswith(".") for x in p.relative_to(base).parts):
+                continue
+            size = p.stat().st_size
+            digest = _sha(p) if size <= versions.MAX_VERSIONED_BYTES else f"size:{size}"
+            files.append({"path": p.relative_to(root).as_posix(), "sha256": digest, "size": size})
+    whole = hashlib.sha256("\n".join(f"{f['path']} {f['sha256']}" for f in files).encode()).hexdigest() if files else None
+    return {"tree_sha256": whole, "files": files[:500], "count": len(files)}
+
+
+def fingerprint(root: Path) -> dict:
+    """What the run started from: code/, data/, and the interpreter with the packages code/requirements.txt names."""
+    req = root / "code" / "requirements.txt"
+    names = []
+    if req.is_file():
+        for line in req.read_text(encoding="utf-8", errors="replace").splitlines():
+            name = line.split("#")[0].strip().split(";")[0].split("[")[0]
+            for sep in ("==", ">=", "<=", "~=", "!=", ">", "<", " "):
+                name = name.split(sep)[0]
+            if name and not name.startswith("-"):
+                names.append(name.strip())
+    env = {"python": None, "platform": None, "packages": {}}
+    try:
+        out = subprocess.run([python_exe(), "-c", _ENV_PROBE, *names[:60]], capture_output=True, text=True,
+                             timeout=60, stdin=subprocess.DEVNULL)
+        env = json.loads(out.stdout.strip().splitlines()[-1])
+    except (OSError, ValueError, IndexError, subprocess.TimeoutExpired):
+        env["error"] = "could not read the Python environment"
+    return {"taken_at": now(), "code": _tree(root / "code", root), "data": _tree(root / "data", root),
+            "environment": {**env, "interpreter": python_exe()}}
 
 
 def cancel(store: Store, run_id: str) -> bool:
@@ -204,14 +277,14 @@ def requirements_job(root: Path) -> dict | None:
 
 
 def submit(store: Store, project_id: str, conversation_id: str, kind: str, root: Path, jobs: list[dict],
-           log_dir: Path, out_json: Path) -> str:
+           log_dir: Path | None, out_json: Path | None, meta: dict | None = None, keep_results: bool = False) -> str:
     """Record a server run for approved jobs and start it. Returns the run id."""
     from .db import new_id
     rid, ts = new_id("run"), now()
     prompt = "Server run of the approved commands:\n" + "\n".join(f"- {j['id']}: {' '.join(j['argv'])}" for j in jobs)
     store.exec("INSERT INTO runs(id,project_id,conversation_id,kind,prompt,status,provider,created_at) "
                "VALUES (?,?,?,?,?,?,?,?)", (rid, project_id, conversation_id, kind, prompt, "queued", PROVIDER, ts))
-    start(store, rid, root, jobs, log_dir, out_json)
+    start(store, rid, root, jobs, log_dir or (root / RECEIPTS / f"{rid}_logs"), out_json, meta, keep_results)
     return rid
 
 
