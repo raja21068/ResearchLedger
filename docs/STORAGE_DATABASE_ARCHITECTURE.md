@@ -1,6 +1,6 @@
 # Storage and database architecture
 
-Status: Phase 0 is done; Phase 1 is mostly done (file versions, see below); the rest is planned. This document is the contract the storage work is
+Status: Phases 0 and 1 are done, Phase 2 is done except dataset records, and Phase 4 is done except project export/import. Phases 3 and 5–7 are planned. This document is the contract the storage work is
 built against. It covers the schema, layout, APIs, concurrency, versioning, backup and migration.
 
 ## 1. Where we are (checked against the code, November 2026)
@@ -258,10 +258,10 @@ These are adopted from the review, and the phases above implement them:
 | Phase | Content | Done when |
 |---|---|---|
 | 0 ✅ | provenance freshness in `collect()`; hash-based snapshots with deletions; WAL, indexes, `schema_migrations`; one agent task per project; CI fixes + webapi/frontend CI jobs; honest agent registry | 105 webapi tests pass, including the 6 in `test_storage.py` |
-| 1 (mostly ✅) | **done:** object store + `blobs/files/file_versions/audit_events` (migration 3, `webapi/app/versions.py`); versions captured before and after every agent run (CLI and bridge), server experiment run and upload; re-uploads become versions instead of `.v1` copies; ZIP contents versioned. **Left:** ZIP import rollback, journal and crash-injection test, FK rebuild for `artifacts`, DB moved to `database/` | every write path creates versions (7 tests in `test_versions.py`) |
-| 2 (started) | **done:** history, view and restore in the API and a History panel in the file viewer; a restore refuses to run while an agent works in the project and saves unsaved edits first. **Left:** side-by-side compare, rename/move, a trash view of deleted files, dataset records | restore never loses later versions (tested) |
+| 1 ✅ | object store + `blobs/files/file_versions/audit_events` (migration 3, `webapi/app/versions.py`); versions captured before and after every agent run (CLI and bridge), server experiment run and upload; re-uploads become versions instead of `.v1` copies; ZIP import is all-or-nothing (limits checked first, unpacked in a temp folder, files it overwrites saved first); `artifacts.project_id` foreign key (migration 4; rows of missing projects kept in `artifacts_orphaned`); an automatic database copy before any migration. **Not done, by decision:** moving the DB to `database/` (no safety gain, breaks existing setups) and a separate write-ahead journal (every write is already object-first then one DB transaction, so a crash leaves at most an unreferenced object, which the integrity check reports) | 13 tests in `test_versions.py`; migration 4 tested on a copy of the live database (86 of 86 artifacts kept) |
+| 2 (mostly ✅) | history, view, restore, side-by-side compare, rename/move (history moves with the file) and a Trash page; restore and rename are refused while an agent works in the project, and unsaved edits are saved first. **Left:** dataset records (source, DOI, licence) | restore never loses later versions (tested) |
 | 3 | per-run staging, base-version tracking, conflict detection, merge UI, leases | two parallel runs on one project never lose a change (test) |
-| 4 | automatic verified backups, project export/import, startup journal recovery, integrity audit | restore from backup reproduces every hash |
+| 4 (mostly ✅) | automatic verified database backups (at start-up if older than a day, then daily, last 14 kept; `webapi/app/backup.py`), Back up now, and a read-only integrity check that re-hashes saved versions (Settings → Backups and safety check). **Left:** project export/import | a damaged stored version is detected (tested) |
 | 5 | reuse the `researchledger` package's atomic writes, locks and hash-chained run manifests; link files to C/E/R claims and evidence | one provenance implementation, used by both the CLI and the web app |
 | 6 | one execution service for Factory, Paper Studio and loops (§8); the `tasks` table with checkpoints and recovery (§9) | Paper Studio can no longer write `results/` outside a recorded job |
 | 7 | typed memory items behind `research_memory.md` (§9); cross-project search with FTS5 | a superseded decision is never shown as current |

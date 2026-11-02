@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, fileUrl, post, ApiError } from "@/lib/api";
+import { FileCompare } from "./FileCompare";
 import { FileHistory } from "./FileHistory";
 import { Markdown } from "./Markdown";
 import { btn2, ErrorBox } from "./ui";
@@ -27,9 +28,10 @@ export function kindOf(path: string): string {
   return "text";
 }
 
-export function FileViewer({ projectId, path, version = 0, fullPage = false, onExported }: {
+export function FileViewer({ projectId, path, version = 0, fullPage = false, onExported, onRenamed }: {
   projectId: string; path: string; version?: number; fullPage?: boolean;
   onExported?: (newPath: string) => void;
+  onRenamed?: (newPath: string) => void;
 }) {
   const kind = kindOf(path);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -39,6 +41,21 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
   const [showSource, setShowSource] = useState(false);
   const [bust, setBust] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  const [compareWith, setCompareWith] = useState<number | null>(null);
+
+  useEffect(() => { setCompareWith(null); }, [path]);
+
+  async function rename() {
+    const next = window.prompt("New name or folder for this file (inside the project):", path)?.trim();
+    if (!next || next === path) return;
+    setError(null);
+    try {
+      const res = await post<{ to: string }>(`/projects/${projectId}/files/rename`, { path, new_path: next });
+      if (onRenamed) onRenamed(res.to);
+      else if (fullPage) window.location.replace(`/view/${projectId}?path=${encodeURIComponent(res.to)}`);
+      else onExported?.(res.to);
+    } catch (e) { setError(e); }
+  }
 
   const load = useCallback(async () => {
     setError(null);
@@ -84,6 +101,7 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
           </>
         )}
         <button className={btn2} onClick={() => setBust((b) => b + 1)} aria-label="Reload file">Reload</button>
+        <button className={btn2} onClick={rename}>Rename</button>
         <button className={btn2} aria-pressed={showHistory} onClick={() => setShowHistory(!showHistory)}>
           {showHistory ? "Hide history" : "History"}
         </button>
@@ -98,6 +116,10 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
 
       <div className="flex min-h-0 flex-1">
       <div className="min-h-0 flex-1 overflow-auto bg-[#e9ecef]">
+        {compareWith !== null && (
+          <FileCompare projectId={projectId} path={path} old={compareWith} onClose={() => setCompareWith(null)} />
+        )}
+        {compareWith === null && (<>
         {kind === "pdf" && <iframe title={name} src={raw} className="h-full min-h-[480px] w-full border-0 bg-white" />}
         {kind === "image" && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -126,8 +148,10 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
             : <p className="p-5 text-sm text-muted">{preview.warnings?.join(" ") ?? "No text preview for this file type. Use Download."}</p>
         )}
         {!preview && !error && kind !== "pdf" && kind !== "image" && <p className="rl-pulse p-5 text-sm text-faint">Loading…</p>}
+        </>)}
       </div>
-      {showHistory && <FileHistory projectId={projectId} path={path} onRestored={() => setBust((b) => b + 1)} />}
+      {showHistory && <FileHistory projectId={projectId} path={path} onRestored={() => { setCompareWith(null); setBust((b) => b + 1); }}
+        onCompare={(v) => setCompareWith(v)} />}
       </div>
     </div>
   );

@@ -191,3 +191,73 @@ def safe_sync(store: Store, project_id: str, author: str, run_id: str | None = N
         if run_id:
             store.add_event(run_id, "status", {"text": f"File versions were not saved: {exc}"})
         return {"saved": [], "deleted": [], "error": str(exc)}
+
+
+def trash(store: Store, project_id: str) -> list[dict]:
+    """Deleted files whose content is still kept, newest deletion first."""
+    rows = store.all("SELECT id, path, current_version, deleted_at FROM files WHERE project_id=? "
+                     "AND deleted_at IS NOT NULL ORDER BY deleted_at DESC", (project_id,))
+    for r in rows:
+        v = store.one("SELECT size, author_kind, created_at FROM file_versions WHERE file_id=? AND version=?",
+                      (r.pop("id"), r["current_version"]))
+        r.update(last_size=v and v["size"], last_saved_at=v and v["created_at"])
+    return rows
+
+
+MAX_DIFF_BYTES = 2_000_000
+
+
+def _text(p: Path) -> list[str]:
+    if p.stat().st_size > MAX_DIFF_BYTES:
+        raise VersionError("this file is too large to compare here (over 2 MB); download both versions instead")
+    data = p.read_bytes()
+    if b"\x00" in data[:8192]:
+        raise VersionError("only text files can be compared")
+    return data.decode("utf-8", errors="replace").splitlines()
+
+
+def compare(store: Store, project_id: str, rel: str, old: int, new: int | None = None) -> dict:
+    """Side-by-side line changes from version `old` to version `new` (None = the file as it is now).
+    Returns blocks: {tag: equal|replace|delete|insert, a: [lines], b: [lines], a_start, b_start}."""
+    import difflib
+    a = _text(version_object(store, project_id, rel, old))
+    if new is None:
+        cur = workspace.project_root(project_id) / rel
+        if not cur.is_file():
+            raise VersionError("the file no longer exists; compare two saved versions instead")
+        b = _text(cur)
+    else:
+        b = _text(version_object(store, project_id, rel, new))
+    blocks, added, removed = [], 0, 0
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+        if tag == "equal" and i2 - i1 > 6:  # keep 3 lines of context around changes, fold the rest
+            blocks.append({"tag": "equal", "a": a[i1:i1 + 3], "b": b[j1:j1 + 3], "a_start": i1 + 1, "b_start": j1 + 1})
+            blocks.append({"tag": "skip", "a": [], "b": [], "a_start": i1 + 4, "b_start": j1 + 4, "count": i2 - i1 - 6})
+            blocks.append({"tag": "equal", "a": a[i2 - 3:i2], "b": b[j2 - 3:j2], "a_start": i2 - 2, "b_start": j2 - 2})
+            continue
+        removed += i2 - i1 if tag in {"replace", "delete"} else 0
+        added += j2 - j1 if tag in {"replace", "insert"} else 0
+        blocks.append({"tag": tag, "a": a[i1:i2], "b": b[j1:j2], "a_start": i1 + 1, "b_start": j1 + 1})
+    return {"path": rel, "old": old, "new": new, "added": added, "removed": removed, "blocks": blocks}
+
+
+def rename(store: Store, project_id: str, src: str, dst: str) -> dict:
+    """Move a file to a new path inside the workspace; its whole history moves with it."""
+    root = workspace.project_root(project_id)
+    s, d = root / src, root / dst
+    if not s.is_file():
+        raise VersionError("file not found")
+    if d.exists():
+        raise VersionError(f"{dst} already exists; choose another name")
+    if _file_row(store, project_id, dst):
+        raise VersionError(f"a deleted file named {dst} is in the trash; restore it or choose another name")
+    record(store, project_id, src, "external", note="saved automatically before a rename")
+    d.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(s, d)
+    f = _file_row(store, project_id, src)
+    if f:
+        st = d.stat()
+        store.exec("UPDATE files SET path=?, mtime=?, size=? WHERE id=?", (dst, st.st_mtime, st.st_size, f["id"]))
+    store.exec("INSERT INTO audit_events(project_id, ts, actor, action, detail) VALUES (?,?,?,?,?)",
+               (project_id, now(), "user", "file_renamed", f"{src} -> {dst}"))
+    return {"from": src, "to": dst}

@@ -13,7 +13,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1026,16 +1026,85 @@ def file_restore(project_id: str, body: RestoreIn):
     """Make an earlier version current again. It is added as a new version; later versions are kept."""
     _project(project_id)
     rel = _path(project_id, body.path).relative_to(workspace.project_root(project_id)).as_posix()
-    busy = store.one("SELECT id FROM runs WHERE project_id=? AND status='running' AND provider='claude_code_cli'",
-                     (project_id,))
-    if busy:
-        raise HTTPException(409, "An agent is working in this project right now. Restore when it has finished.")
+    _agent_busy(project_id)
     try:
         new = versions.restore(store, project_id, rel, body.version)
     except versions.VersionError as exc:
         raise HTTPException(404, str(exc))
     store.log_activity(project_id, "file_restored", f"{rel} v{body.version}")
     return {"path": rel, "restored": body.version, "current_version": new}
+
+
+def _agent_busy(project_id: str) -> None:
+    if store.one("SELECT id FROM runs WHERE project_id=? AND status='running' AND provider='claude_code_cli'",
+                 (project_id,)):
+        raise HTTPException(409, "An agent is working in this project right now. Try again when it has finished.")
+
+
+@app.get("/api/v1/projects/{project_id}/files/trash")
+def file_trash(project_id: str):
+    """Deleted files whose content is kept; bring one back with files/restore (its last version)."""
+    _project(project_id)
+    versions.safe_sync(store, project_id, "external")
+    return versions.trash(store, project_id)
+
+
+@app.get("/api/v1/projects/{project_id}/files/compare")
+def file_compare(project_id: str, path: str, old: int, new: int | None = None):
+    """Line-by-line changes from version `old` to version `new` (omit `new` for the file as it is now)."""
+    _project(project_id)
+    rel = _path(project_id, path).relative_to(workspace.project_root(project_id)).as_posix()
+    try:
+        return versions.compare(store, project_id, rel, old, new)
+    except versions.VersionError as exc:
+        raise HTTPException(400, str(exc))
+
+
+class RenameIn(BaseModel):
+    path: str
+    new_path: str
+
+
+@app.post("/api/v1/projects/{project_id}/files/rename")
+def file_rename(project_id: str, body: RenameIn):
+    """Rename or move a file inside the workspace; its history moves with it."""
+    _project(project_id)
+    root = workspace.project_root(project_id)
+    src = _path(project_id, body.path).relative_to(root).as_posix()
+    dst = _path(project_id, body.new_path.strip()).relative_to(root).as_posix()
+    if Path(dst).suffix.lower() != Path(src).suffix.lower():
+        raise HTTPException(400, "keep the same file extension")
+    _agent_busy(project_id)
+    try:
+        out = versions.rename(store, project_id, src, dst)
+    except versions.VersionError as exc:
+        raise HTTPException(400, str(exc))
+    store.log_activity(project_id, "file_renamed", f"{src} -> {dst}")
+    return out
+
+
+@app.get("/api/v1/backups")
+def backups_list():
+    return {"backups": backup.listing(store), "folder": str(backup.backups_dir())}
+
+
+@app.post("/api/v1/backups", status_code=201)
+def backups_create():
+    try:
+        return backup.create(store, "manual")
+    except RuntimeError as exc:
+        raise HTTPException(500, str(exc))
+
+
+@app.get("/api/v1/integrity")
+def integrity(project_id: str | None = None, full: bool = False):
+    """Read-only check: re-hash saved versions (a sample, or all with full=true) and compare database and disk."""
+    return backup.audit(store, project_id, None if full else 200)
+
+
+@app.on_event("startup")
+def _start_daily_backups():
+    backup.start_daily(store)
 
 
 @app.post("/api/v1/projects/{project_id}/files", status_code=201)
@@ -1064,6 +1133,7 @@ async def upload(project_id: str, file: UploadFile = File(...), folder: str = "u
     version = versions.record(store, project_id, rel, "user", note="uploaded")
     store.log_activity(project_id, "file_uploaded", rel)
     if unzip and ext == ".zip":  # the paper's folder as a zip: unpack next to it, return every file
+        versions.safe_sync(store, project_id, "external")  # files the zip overwrites keep their old version
         try:
             files = workspace.unzip_into(dest, dest.with_suffix(""))
         except workspace.PathError as exc:

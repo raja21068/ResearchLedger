@@ -31,15 +31,19 @@ ZIP_SKIP = {"__MACOSX", ".git", "node_modules", "__pycache__", ".DS_Store", ".ve
 
 
 def unzip_into(zip_path: Path, dest: Path, max_files: int = 400, max_bytes: int = 300 * 1024 * 1024) -> list[Path]:
-    """Unpack an uploaded zip safely: regular files with relative names only, known file types, size limits."""
+    """Unpack an uploaded zip safely: regular files with relative names only, known file types, size limits.
+
+    All or nothing: the limits are checked before anything is written, everything is unpacked into a temporary
+    folder first, and only a complete extraction is moved into `dest`. A damaged zip leaves `dest` untouched."""
     import shutil
+    import tempfile
     import zipfile
-    out, total = [], 0
     try:
         z = zipfile.ZipFile(zip_path)
     except zipfile.BadZipFile as exc:
         raise PathError("that zip file could not be opened") from exc
     with z:
+        accepted, total = [], 0
         for info in z.infolist():
             name = info.filename.replace("\\", "/")
             parts = [p for p in name.split("/") if p]
@@ -48,13 +52,29 @@ def unzip_into(zip_path: Path, dest: Path, max_files: int = 400, max_bytes: int 
                     or Path(parts[-1]).suffix.lower() not in UPLOAD_EXT - {".zip"}):
                 continue
             total += info.file_size
-            if len(out) >= max_files or total > max_bytes:
+            if len(accepted) >= max_files or total > max_bytes:
                 raise PathError(f"the zip is too large (limit {max_files} files / {max_bytes // 2**20} MB)")
+            accepted.append((info, parts))
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        staging = Path(tempfile.mkdtemp(prefix=".unzip_", dir=dest.parent))
+        try:
+            for info, parts in accepted:
+                target = staging.joinpath(*parts)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with z.open(info) as src, open(target, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+        except (zipfile.BadZipFile, OSError, EOFError) as exc:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise PathError("the zip file is damaged; nothing was unpacked") from exc
+    out = []
+    try:
+        for _, parts in accepted:
             target = dest.joinpath(*parts)
             target.parent.mkdir(parents=True, exist_ok=True)
-            with z.open(info) as src, open(target, "wb") as dst:
-                shutil.copyfileobj(src, dst)
+            os.replace(staging.joinpath(*parts), target)
             out.append(target)
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
     return out
 
 

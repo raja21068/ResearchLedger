@@ -133,6 +133,13 @@ content is kept. Open the file and click **History** to see each version (who ch
 or **Restore** it. Restoring adds a new version, so you can always undo it. The saved copies are in
 `webapi_data\objects\`; don't edit that folder by hand.
 
+- **Compare:** in History, see what changed between an old version and the file now.
+- **Rename:** move or rename a file; its history goes with it.
+- **Trash:** deleted files are listed on the project's **Trash** page, ready to bring back.
+- **Backups:** the database is copied and checked every day, and the last 14 copies are kept in
+  `webapi_dataackups\`. **Settings → Backups and safety check** has *Back up now* and *Check everything*.
+  To restore a backup, stop the server and copy the backup over `webapi_dataesearchledger_web.sqlite3`.
+
 ---
 
 ## 8. Your own prompts and the offline skills pack (optional)

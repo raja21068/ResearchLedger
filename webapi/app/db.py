@@ -80,10 +80,36 @@ CREATE INDEX IF NOT EXISTS audit_events_project ON audit_events(project_id, id);
 """)
 
 
+def _backups_and_artifact_fk(c: sqlite3.Connection) -> None:
+    c.execute("CREATE TABLE IF NOT EXISTS backups (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, path TEXT NOT NULL, "
+              "db_sha256 TEXT NOT NULL, objects INTEGER NOT NULL, verified_at TEXT, reason TEXT)")
+    # artifacts.project_id had no foreign key; SQLite can only add one by rebuilding the table. Rows whose project
+    # no longer exists are kept in artifacts_orphaned instead of being dropped.
+    sql = c.execute("SELECT sql FROM sqlite_master WHERE name='artifacts'").fetchone()[0]
+    if "project_id TEXT NOT NULL REFERENCES projects" in sql:
+        return
+    c.executescript("""
+CREATE TABLE artifacts_new (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL REFERENCES runs(id),
+  project_id TEXT NOT NULL REFERENCES projects(id), path TEXT NOT NULL, sha256 TEXT NOT NULL, size INTEGER NOT NULL,
+  change TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS artifacts_orphaned AS SELECT * FROM artifacts WHERE 0;
+INSERT INTO artifacts_orphaned SELECT * FROM artifacts
+  WHERE project_id NOT IN (SELECT id FROM projects) OR run_id NOT IN (SELECT id FROM runs);
+INSERT INTO artifacts_new SELECT * FROM artifacts
+  WHERE project_id IN (SELECT id FROM projects) AND run_id IN (SELECT id FROM runs);
+DROP TABLE artifacts;
+ALTER TABLE artifacts_new RENAME TO artifacts;
+CREATE INDEX IF NOT EXISTS artifacts_run ON artifacts(run_id);
+CREATE INDEX IF NOT EXISTS artifacts_project_path ON artifacts(project_id, path);
+""")
+
+
 # Ordered, append-only. Each step must be safe on a database that already has its effect (older databases
 # were migrated ad hoc before this table existed). Never edit or reorder a released step; add a new one.
 MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes),
-              (3, "file versions", _add_file_versions)]
+              (3, "file versions", _add_file_versions),
+              (4, "backups table, artifacts.project_id foreign key", _backups_and_artifact_fk)]
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
 
@@ -106,6 +132,15 @@ class Store:
             c.execute("PRAGMA journal_mode=WAL")
             c.executescript(SCHEMA)
             done = {r[0] for r in c.execute("SELECT version FROM schema_migrations")}
+            pending = [v for v, _, _ in MIGRATIONS if v not in done]
+            if pending and c.execute("SELECT COUNT(*) FROM projects").fetchone()[0]:
+                # an existing database is about to change shape: keep a copy of it as it was
+                bdir = path.parent / "backups"
+                bdir.mkdir(parents=True, exist_ok=True)
+                out = sqlite3.connect(bdir / f"before-migration-{min(pending)}-{uuid.uuid4().hex[:6]}.sqlite3")
+                c.commit()
+                c.backup(out)
+                out.close()
             for version, name, step in MIGRATIONS:
                 if version not in done:
                     step(c)

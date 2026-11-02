@@ -26,8 +26,8 @@ function size(n: number) {
   return n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1048576).toFixed(1)} MB`;
 }
 
-export function FileHistory({ projectId, path, onRestored }: {
-  projectId: string; path: string; onRestored: () => void;
+export function FileHistory({ projectId, path, onRestored, onCompare }: {
+  projectId: string; path: string; onRestored: () => void; onCompare?: (version: number) => void;
 }) {
   const [hist, setHist] = useState<History | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -76,6 +76,9 @@ export function FileHistory({ projectId, path, onRestored }: {
               {v.note && <div className="text-xs text-faint">{v.note}</div>}
               <div className="mt-1 flex gap-2">
                 <a className={btn2} href={versionUrl(projectId, path, v.version)} target="_blank" rel="noreferrer">View</a>
+                {!current && onCompare && !hist.deleted_at && (
+                  <button className={btn2} onClick={() => onCompare(v.version)}>Compare</button>
+                )}
                 {!current && (
                   <button className={btn2} disabled={busy !== null} onClick={() => restore(v.version)}>
                     {busy === v.version ? "Restoring…" : "Restore"}
