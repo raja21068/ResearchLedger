@@ -13,6 +13,7 @@ import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, eventsUrl, post } from "@/lib/api";
 import type { Conversation, Project, Run, RunEvent, WorkspaceFile } from "@/lib/types";
 import { FileViewer } from "@/components/FileViewer";
+import { NextStep } from "@/components/NextStep";
 import { Markdown } from "@/components/Markdown";
 import { btn, btn2, ErrorBox, RunBadge } from "@/components/ui";
 
@@ -464,13 +465,11 @@ function RunView({ run, onOpen }: { run: Run; onOpen: (p: string) => void }) {
           </div>
         )}
         {!live && artifacts.some((a) => a.path === "ideas/ideas.json") && <IdeaList projectId={run.project_id} compact />}
+        {run.status === "succeeded" && run.kind.startsWith("recipe:") && <NextStep projectId={run.project_id} kind={run.kind} files={[]} />}
         <div className="flex flex-wrap items-center gap-2 text-xs text-faint">
           <RunBadge status={run.status} />
           {live && <span className="rl-pulse">{String(status?.payload.text ?? "Working…")}</span>}
           {run.duration_ms != null && <span>{(run.duration_ms / 1000).toFixed(1)} s</span>}
-          {typeof resultEvent?.payload.cost_usd === "number" && resultEvent.payload.cost_usd > 0 &&
-            <span>cost reported by CLI: ${(resultEvent.payload.cost_usd as number).toFixed(4)}</span>}
-          <span className="font-mono">{run.id}</span>
         </div>
       </div>
     </div>
@@ -652,7 +651,6 @@ function FileList({ files, onOpen, onRefresh, onUpload }: {
               <span className="block truncate text-sm font-medium">{f.path}</span>
               <span className="block text-xs text-faint">
                 {(f.size / 1024).toFixed(1)} KB · {new Date(f.modified * 1000).toLocaleString()}
-                {f.last_run_id && <> · from <span className="font-mono">{f.last_run_id}</span></>}
               </span>
             </span>
           </button>

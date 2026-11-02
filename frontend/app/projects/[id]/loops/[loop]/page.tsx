@@ -10,6 +10,7 @@ import { api, post } from "@/lib/api";
 import type { Loop, LoopRound } from "@/lib/loops";
 import { SCORE_KEYS, STATUS_STYLE } from "@/lib/loops";
 import { BridgeBanner } from "@/components/BridgeStatus";
+import { NextStep } from "@/components/NextStep";
 import { btn, btn2, Card, ErrorBox, PageHeader } from "@/components/ui";
 
 export default function LoopPage() {
@@ -66,12 +67,9 @@ export default function LoopPage() {
         {(v.status === "finished" || v.status === "stopped" || v.status === "failed") && v.stop_reason && (
           <p className="text-sm"><b>{v.status === "failed" ? "Stopped on a problem" : "Stop rule"}:</b> {v.stop_reason}</p>
         )}
-        {v.status === "finished" && v.final_files.length > 0 && (
-          <div className="mt-3 text-sm">Best result: round {v.best_round} ·{" "}
-            {v.final_files.map((f) => <Link key={f} target="_blank" className="mr-2 font-mono text-xs text-accent underline" href={view(f)}>{f}</Link>)}
-          </div>
-        )}
-        {v.accepted && v.accepted_files && <p className="mt-2 text-sm text-[#1d6b3a]">Accepted → {v.accepted_files.join(", ")}</p>}
+        {v.accepted && <p className="mt-2 text-sm text-[#1d6b3a]">Accepted.</p>}
+        {v.status === "finished" && v.best_round != null && <p className="mt-2 text-xs text-faint">Best round: {v.best_round}</p>}
+        {v.status === "finished" && <div className="mt-3"><NextStep projectId={id} kind={v.type} files={v.accepted_files ?? v.final_files} /></div>}
 
         <div className="mt-4 flex flex-wrap gap-2">
           {v.status === "paused" && <button className={btn} disabled={busy} onClick={() => act("continue")}>{v.awaiting === "run" ? "Approve and run" : "Continue"}</button>}
@@ -165,7 +163,7 @@ function ExperimentPanel({ v, view }: { v: Loop; view: (p: string) => string }) 
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-xs text-faint">Every value was written by the server&apos;s own run of the approved script. Full record: provenance/experiments.json. Next: "Review and fix" can now put these numbers in the paper.</p>
+          <p className="mt-2 text-xs text-faint">Every value was written by the server&apos;s own run of the approved script. Next: "Review and fix" can now put these numbers in the paper.</p>
         </>
       )}
     </Card>

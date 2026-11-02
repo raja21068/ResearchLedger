@@ -343,7 +343,24 @@ def _loop_call(fn, *args):
 @app.get("/api/v1/steps")
 def pipeline_steps():
     """The seven numbered research steps shown in both the console (/rl) and the GUI home."""
-    return {"pipeline": steps.PIPELINE, "steps": steps.STEPS, "extras": steps.EXTRAS, "menu": steps.menu_text()}
+    return {"pipeline": steps.PIPELINE, "steps": steps.STEPS, "extras": steps.EXTRAS, "menu": steps.menu_text(),
+            "recipe_step": steps.RECIPE_STEP, "loop_step": steps.LOOP_STEP}
+
+
+class StepIn(BaseModel):
+    text: str = Field(default="", max_length=200_000)
+    files: list[str] = Field(default_factory=list, max_length=50)
+    options: dict = Field(default_factory=dict)
+
+
+@app.post("/api/v1/projects/{project_id}/steps/{step_id}/start", status_code=201)
+def start_step(project_id: str, step_id: str, body: StepIn):
+    """Start one of the seven steps from files and/or pasted text; errors are plain sentences."""
+    _project(project_id)
+    try:
+        return steps.start(store, project_id, step_id, body.text, body.files, body.options)
+    except (steps.StepError, recipes.RecipeError, loops.LoopError, workspace.PathError, ValueError) as exc:
+        raise HTTPException(400, str(exc).rstrip(".") + ".")
 
 
 @app.get("/api/v1/loop-types")
@@ -971,7 +988,7 @@ def preview_file(project_id: str, path: str):
 
 
 @app.post("/api/v1/projects/{project_id}/files", status_code=201)
-async def upload(project_id: str, file: UploadFile = File(...), folder: str = "uploads"):
+async def upload(project_id: str, file: UploadFile = File(...), folder: str = "uploads", unzip: bool = False):
     _project(project_id)
     name = (file.filename or "").replace("\\", "/").split("/")[-1]
     ext = "." + name.rsplit(".", 1)[-1].lower() if "." in name else ""
@@ -994,8 +1011,15 @@ async def upload(project_id: str, file: UploadFile = File(...), folder: str = "u
             n += 1
         shutil.move(dest, v)
     tmp.replace(dest)
-    rel = dest.relative_to(workspace.project_root(project_id)).as_posix()
+    root = workspace.project_root(project_id)
+    rel = dest.relative_to(root).as_posix()
     store.log_activity(project_id, "file_uploaded", rel)
+    if unzip and ext == ".zip":  # the paper's folder as a zip: unpack next to it, return every file
+        try:
+            files = workspace.unzip_into(dest, dest.with_suffix(""))
+        except workspace.PathError as exc:
+            raise HTTPException(400, str(exc))
+        return {"path": rel, "size": size, "files": [f.relative_to(root).as_posix() for f in files]}
     return {"path": rel, "size": size}
 
 

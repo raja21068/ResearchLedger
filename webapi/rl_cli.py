@@ -1,5 +1,8 @@
 """ResearchLedger from the Claude console (standard library only). Used by the /rl and /rl-status commands.
 
+    python webapi/rl_cli.py step PROJECT STEP [--text "..."] [--files F ...] [--option name=value]
+                                                                    start step 1-7 (literature, idea, code, experiments,
+                                                                    write, review, check) exactly like the website
     python webapi/rl_cli.py menu                                    the numbered research steps (same as the GUI)
     python webapi/rl_cli.py status                                  worker, decisions, what is running
     python webapi/rl_cli.py list                                    your papers and recent quick jobs (with ids)
@@ -46,9 +49,9 @@ def call(method, path, body=None, raw=None, ctype="application/json", timeout=60
             detail = json.loads(detail).get("detail", detail)
         except ValueError:
             pass
-        sys.exit(f"ERROR {e.code}: {detail}")
+        sys.exit(f"PROBLEM: {detail}")
     except urllib.error.URLError as e:
-        sys.exit(f"API_DOWN: cannot reach ResearchLedger at {API} ({e.reason}). Start it with: "
+        sys.exit("API_DOWN: ResearchLedger is not running. Start it with: "
                  r"& D:\AutoResearch\ResearchLedger\start_web.ps1")
 
 
@@ -95,6 +98,9 @@ def main():
     ap = argparse.ArgumentParser(description="ResearchLedger from the Claude console")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("menu")
+    p = sub.add_parser("step"); p.add_argument("project"); p.add_argument("step")
+    p.add_argument("--text", default=""); p.add_argument("--text-file")
+    p.add_argument("--files", nargs="*", default=[]); p.add_argument("--option", action="append", default=[])
     sub.add_parser("status")
     sub.add_parser("list")
     sub.add_parser("decisions")
@@ -114,7 +120,13 @@ def main():
     p = sub.add_parser("check"); p.add_argument("project"); p.add_argument("tex")
     a = ap.parse_args()
 
-    if a.cmd == "menu":
+    if a.cmd == "step":
+        text = Path(a.text_file).read_text(encoding="utf-8") if a.text_file else a.text
+        opts = dict(o.split("=", 1) for o in a.option if "=" in o)
+        r = call("POST", f"/projects/{a.project}/steps/{a.step}/start", {"text": text, "files": a.files, "options": opts})
+        print(f"Started: {r['label']}
+Open: {WEB}{r['url']}")
+    elif a.cmd == "menu":
         print(call("GET", "/steps")["menu"])
     elif a.cmd == "status":
         b = call("GET", "/bridge/status")

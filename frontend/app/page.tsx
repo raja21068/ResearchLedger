@@ -1,8 +1,8 @@
 "use client";
 
-// Home: one box for any job. Drop files or type; the box shows which tool will run (Tool), where the work is
-// kept (Where: a quick job, or one of your papers), and whether it repeats until a stop rule (Repeat until).
-// Below: quick tools that work without a project, and one Recent list for quick jobs and papers.
+// Home: one box for any job — drop files or type; it shows which tool will run and where the work is kept.
+// Below: the seven research steps (same as the console's /rl menu) and one Recent list.
+// No "repeat" switch on purpose: Idea and Review already repeat until they pass, so a second control only confused.
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,11 +15,6 @@ import { ErrorBox } from "@/components/ui";
 
 const QUICK = "__quick";
 const NEW_PAPER = "__new";
-const REPEAT: [string, string][] = [
-  ["", "Off · one pass"],
-  ["review", "Review → fix until clean or your targets (needs the .tex)"],
-  ["idea", "Attack → score → redesign until the idea passes"],
-];
 // The seven research steps come from the server (webapi/app/steps.py) — the same list the console's /rl shows.
 interface Step { n: number; id: string; group: string; name: string; give: string; get: string; engines: string[]; href: string }
 interface Steps { pipeline: { name: string; does: string; href: string }; steps: Step[]; extras: { id: string; name: string; href: string }[] }
@@ -39,7 +34,6 @@ export default function Home() {
   const [model, setModel] = useState("");
   const [papers, setPapers] = useState<Project[]>([]);
   const [where, setWhere] = useState(QUICK);
-  const [repeat, setRepeat] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [steps, setSteps] = useState<Steps | null>(null);
@@ -63,14 +57,14 @@ export default function Home() {
 
   // Live preview of the tool that Start will use (server-side rules, nothing starts).
   useEffect(() => {
-    if (!prompt.trim() && !files.length && !repeat) { setPreview(null); return; }
+    if (!prompt.trim() && !files.length) { setPreview(null); return; }
     if (prompt.startsWith("/")) { setPreview({ mode: "command", tool: prompt.split(" ")[0], why: "the tool you typed" }); return; }
     const t = setTimeout(() => {
-      post<Preview>("/autopilot/classify", { goal: prompt, filenames: files.map((f) => f.name), repeat: repeat || null })
+      post<Preview>("/autopilot/classify", { goal: prompt, filenames: files.map((f) => f.name) })
         .then(setPreview).catch(() => setPreview(null));
     }, 350);
     return () => clearTimeout(t);
-  }, [prompt, files, repeat]);
+  }, [prompt, files]);
 
   async function target(): Promise<string> {
     if (where !== QUICK && where !== NEW_PAPER) return where;
@@ -88,12 +82,13 @@ export default function Home() {
       const paths: string[] = [];
       for (const f of files) {
         const fd = new FormData(); fd.append("file", f);
-        paths.push((await api<{ path: string }>(`/projects/${pid}/files?folder=uploads`, { method: "POST", body: fd })).path);
+        const r = await api<{ path: string; files?: string[] }>(`/projects/${pid}/files?folder=uploads&unzip=true`, { method: "POST", body: fd });
+        paths.push(...(r.files ?? [r.path]));
       }
       const parsed = parseCommand(prompt, commands);
       if (parsed) { router.push(await runCommand(pid, parsed.cmd, parsed.rest, workflows, paths, model || null)); return; }
       const r = await post<{ url: string }>(`/projects/${pid}/autopilot/start`,
-        { goal: prompt, files: paths, model: model || null, repeat: repeat || null });
+        { goal: prompt, files: paths, model: model || null });
       router.push(r.url);
     } catch (e) { setError(e); setBusy(false); }
   }
@@ -129,13 +124,9 @@ export default function Home() {
                     <option value={NEW_PAPER}>+ New paper</option>
                   </select>
                 </label>
-                <label className="flex items-center gap-1.5">Repeat until:
-                  <select value={repeat} onChange={(e) => setRepeat(e.target.value)} className={`${select} max-w-[260px]`} aria-label="Repeat until">
-                    {REPEAT.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                  </select>
-                </label>
               </div>
-              {preview?.why && preview.mode !== "invalid" && preview.mode !== "command" && <span>Why: {preview.why}</span>}
+              {preview?.why && preview.mode !== "invalid" && preview.mode !== "command" &&
+                <span>{preview.mode === "loop" ? "Repeats round by round until it passes or stops improving — " : ""}{preview.why}</span>}
             </div>
           } />
         {error ? <div className="mt-3"><ErrorBox error={error} /></div> : null}

@@ -27,6 +27,37 @@ class PathError(ValueError):
     pass
 
 
+ZIP_SKIP = {"__MACOSX", ".git", "node_modules", "__pycache__", ".DS_Store", ".venv"}
+
+
+def unzip_into(zip_path: Path, dest: Path, max_files: int = 400, max_bytes: int = 300 * 1024 * 1024) -> list[Path]:
+    """Unpack an uploaded zip safely: regular files with relative names only, known file types, size limits."""
+    import shutil
+    import zipfile
+    out, total = [], 0
+    try:
+        z = zipfile.ZipFile(zip_path)
+    except zipfile.BadZipFile as exc:
+        raise PathError("that zip file could not be opened") from exc
+    with z:
+        for info in z.infolist():
+            name = info.filename.replace("\\", "/")
+            parts = [p for p in name.split("/") if p]
+            if (info.is_dir() or not parts or name.startswith("/") or ".." in parts or ":" in parts[0]
+                    or any(p in ZIP_SKIP for p in parts) or (info.external_attr >> 16) & 0o170000 == 0o120000
+                    or Path(parts[-1]).suffix.lower() not in UPLOAD_EXT - {".zip"}):
+                continue
+            total += info.file_size
+            if len(out) >= max_files or total > max_bytes:
+                raise PathError(f"the zip is too large (limit {max_files} files / {max_bytes // 2**20} MB)")
+            target = dest.joinpath(*parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with z.open(info) as src, open(target, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+            out.append(target)
+    return out
+
+
 def project_root(project_id: str) -> Path:
     root = settings.projects_dir / project_id / "workspace"
     root.mkdir(parents=True, exist_ok=True)

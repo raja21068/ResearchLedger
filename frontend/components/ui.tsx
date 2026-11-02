@@ -49,11 +49,27 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
   );
 }
 
+/** One plain sentence: what happened and what to do. Technical detail stays behind "Details". */
+export function friendlyError(error: unknown): { text: string; detail?: string } {
+  const status = (error as { status?: number })?.status;
+  const raw = error instanceof Error ? error.message : String(error);
+  const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+  if (status === 0) return { text: "The ResearchLedger server isn't running. Start it with start_web.ps1, then try again.", detail: raw };
+  if (status === 404) return { text: "That item no longer exists — it may have been deleted or archived.", detail: raw };
+  if (status === 413) return { text: "That file is too large to upload." };
+  if (status === 415) return { text: cap(raw.replace(/^file type/, "This file type")) + ". Use PDF, Word, .tex, .bib, Markdown, CSV or a .zip." };
+  if (status === 422 || raw.startsWith("[{")) return { text: "Something in the form is missing or not valid. Check it and try again.", detail: raw };
+  if (status && status >= 500) return { text: "Something went wrong on the server. Try again; if it keeps happening, look at the API window.", detail: raw };
+  return { text: cap(raw) };
+}
+
 export function ErrorBox({ error }: { error: unknown }) {
   if (!error) return null;
+  const { text, detail } = friendlyError(error);
   return (
     <div role="alert" className="whitespace-pre-wrap break-words rounded-lg border border-[#e8b4b4] bg-[#fdf2f2] p-3 text-sm text-[#7f1d1d]">
-      {error instanceof Error ? error.message : String(error)}
+      {text}
+      {detail && detail !== text && <details className="mt-1 text-xs opacity-80"><summary className="cursor-pointer">Details</summary>{detail}</details>}
     </div>
   );
 }

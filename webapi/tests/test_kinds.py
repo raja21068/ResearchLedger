@@ -52,3 +52,35 @@ def test_steps_menu_is_one_list_for_console_and_gui():
     for s in r["steps"]:
         assert f"{s['n']}. {s['name']}" in r["menu"]
     assert "8. Guided paper" in r["menu"] and "0. Status" in r["menu"]
+
+
+def test_start_steps_from_files_or_text():
+    p = client.post("/api/v1/projects", json={"title": "steps", "kind": "quick"}, headers=H).json()["id"]
+    up = lambda name, body: client.post(f"/api/v1/projects/{p}/files?folder=uploads", headers=H,
+                                        files={"file": (name, body.encode(), "text/plain")}).json()["path"]
+    go = lambda sid, **b: client.post(f"/api/v1/projects/{p}/steps/{sid}/start", json=b, headers=H)
+    # Missing input -> one plain sentence saying what to add.
+    r = go("check")
+    assert r.status_code == 400 and ".tex" in r.json()["detail"]
+    assert "paper" in go("review").json()["detail"]
+    # Idea from a topic -> idea loop; experiments from text -> experiment loop.
+    assert "/loops/" in go("idea", text="zero-knowledge proofs for AI oracles").json()["url"]
+    assert "/loops/" in go("experiments", text="Compare with a keyword baseline").json()["url"]
+    # Review with a .tex and pasted ChatGPT review -> review and fix loop.
+    tex = up("main.tex", "\\documentclass{article}\\begin{document}x\\end{document}")
+    assert "/loops/" in go("review", files=[tex], text="Reviewer: no baseline.").json()["url"]
+    # Code from pasted text -> recipe chat.
+    assert "?conv=" in go("code", text="A method that verifies VLM outputs on-chain.", options={"framework": "any"}).json()["url"]
+    assert go("check", files=[tex]).json()["url"].startswith("/quality?")
+
+
+def test_upload_zip_unpacks_safely():
+    import io, zipfile
+    p = client.post("/api/v1/projects", json={"title": "zip", "kind": "quick"}, headers=H).json()["id"]
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("paper/main.tex", "x"); z.writestr("../evil.tex", "x"); z.writestr("__MACOSX/a.tex", "x")
+        z.writestr("paper/run.exe", "x")
+    r = client.post(f"/api/v1/projects/{p}/files?folder=uploads&unzip=true", headers=H,
+                    files={"file": ("draft.zip", buf.getvalue(), "application/zip")}).json()
+    assert r["files"] == ["uploads/draft/paper/main.tex"]
