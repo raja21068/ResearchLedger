@@ -57,7 +57,10 @@ lesson. Path:
 
 | Date | Step | What needed the terminal or failed | Fixed? |
 |---|---|---|---|
-| | | | |
+| 2 Nov | start | Agent tasks run only while an app worker polls. The C5 search had been re-queued twice (silent for 15 minutes each time) before the trial started, so a third silence would have failed it. Here I acted as the worker from this console. | not fixed: needs a connected `/rl-worker` session, or the CLI executor |
+| 2 Nov | claiming | One claim was lost between two commands (the task was re-queued), and had to be claimed again. Cause not found. | open |
+| 2 Nov | C5 round 1 | Paper search, score and redesign all ran through the loop's own state machine and were accepted by the server's checks. The competitor list has 46 verified papers, below the 50 the plan asks for; the shortfall is stated in the attack. | n/a |
+| 2 Nov | memory use | The redesign read `memory/remembered.md` and applied the locality pilot's lessons (validate on a known answer; state a falsifier). This is one observation, made by the agent writing this log, so it counts as weak evidence for the memory criterion. | n/a |
 
 ## Stop rule
 
