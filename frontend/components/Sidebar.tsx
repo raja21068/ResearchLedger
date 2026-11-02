@@ -108,7 +108,7 @@ export function Sidebar() {
     if (!projectId) { setDocs([]); return; }
     api<{ path: string; kind: string }[]>(`/projects/${projectId}/files`)
       .then((fs) => setDocs(fs.filter((f) => ["pdf", "docx", "markdown"].includes(f.kind)
-        && !/^(_inputs|control|memory|director|loops)\//.test(f.path)).slice(0, 6)))
+        && !/^(_inputs|control|memory|director|loops|data|code|results)\//.test(f.path)).slice(0, 6)))
       .catch(() => setDocs([]));
   }, [projectId, search]);
   if (path.startsWith("/view/")) return null; // the full-tab document view is chrome-free
