@@ -124,8 +124,8 @@ def main():
         text = Path(a.text_file).read_text(encoding="utf-8") if a.text_file else a.text
         opts = dict(o.split("=", 1) for o in a.option if "=" in o)
         r = call("POST", f"/projects/{a.project}/steps/{a.step}/start", {"text": text, "files": a.files, "options": opts})
-        print(f"Started: {r['label']}
-Open: {WEB}{r['url']}")
+        print(f"Started: {r['label']}")
+        print(f"Open: {WEB}{r['url']}")
     elif a.cmd == "menu":
         print(call("GET", "/steps")["menu"])
     elif a.cmd == "status":
