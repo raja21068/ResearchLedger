@@ -546,6 +546,9 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     st["approved_at"] = now()
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)
+    if stage_id in {"review", "revise"}:
+        from . import memory_store  # verified reviewer findings and how they were resolved become memories
+        memory_store.safe(memory_store.ingest_reviews, store, project_id)
     autoadvance(store, project_id)
     return view(store, project_id)
 

@@ -29,8 +29,8 @@ STATUSES = ("proposed", "active", "needs_review", "superseded", "rejected")
 EVIDENCE_KINDS = ("file", "run", "loop", "doi", "arxiv", "url", "ledger", "note")
 REMEMBERED_PATH = "memory/remembered.md"
 PROPOSALS_PATH = "memory/proposals.json"
-LABELS = {"failure": "Failed or rejected directions", "decision": "Decisions", "experiment": "Experiment results",
-          "strategy": "Strategies that worked", "literature": "Literature notes"}
+LABELS = {"failure": "Failed or rejected directions (including open verified reviewer findings)", "decision": "Decisions", "experiment": "Experiment results",
+          "strategy": "Strategies that worked (including resolved verified reviewer findings)", "literature": "Literature notes"}
 _lock = threading.Lock()
 
 
@@ -270,6 +270,110 @@ def ingest_loops(store: Store, project_id: str) -> int:
                         f"{eid} {'supported' if ok else v['verdict'].replace('_', ' ')}: {q}"[:300], content, "system",
                         evidence=ev, tags=["experiment", "pre-registered", v["verdict"]], source_key=key)
                     added += 0 if before else 1
+    render(store, project_id)
+    return added
+
+
+def _norm_text(s: str) -> str:
+    return re.sub(r"\s+", " ", (s or "").lower()).strip()
+
+
+def _quote_in(quote: str, text: str) -> bool:
+    q = _norm_text(quote)
+    return bool(q) and (q in text or (len(q) > 60 and q[:60] in text))
+
+
+def _review_memory(store: Store, project_id: str, src: str, n: int, row: dict, closure: dict | None,
+                   manuscript: str, revised: str | None, files: list[str]) -> bool:
+    """One reviewer concern -> a memory, only if it is VERIFIED and its quote is really in the manuscript that was
+    reviewed. A concern that is resolved becomes a strategy (the fix that worked); one that is still open stays a
+    failure. A resolution counts as text-checked only when its new text is found in the revised manuscript.
+    Returns True if a memory was added or superseded."""
+    cid = row.get("id", "").upper() or "?"
+    if row.get("verification", "").upper() != "VERIFIED" or not _quote_in(row.get("quote", ""), manuscript):
+        return False  # an unverified comment stays a hypothesis, not a lesson
+    sev = (row.get("severity") or "?").lower()
+    resolved = bool(closure) and closure.get("status", "").lower() == "resolved"
+    base = f"review:{src}:{n}:{cid}"
+    key = f"{base}:{'resolved' if resolved else 'open'}"
+    if store.one("SELECT 1 FROM memory_items WHERE source_key=?", (key,)):
+        return False
+    concern = row.get("concern", "")
+    lines = [f"Verified reviewer finding ({sev}) in {row.get('location') or 'the manuscript'}: {concern}"]
+    if row.get("minimum_fix"):
+        lines.append(f"Minimum fix asked for: {row['minimum_fix']}")
+    ev = [{"kind": "file", "ref": f} for f in files]
+    ev.append({"kind": "note", "ref": f"reviewer perspective: {row.get('reviewer') or 'unknown'}",
+               "quote": row.get("quote", "")[:400]})
+    if resolved:
+        how = closure.get("evidence") or closure.get("new_text") or ""
+        text_checked = bool(revised) and _quote_in(closure.get("new_text", ""), revised or "")
+        lines.append(("How it was resolved: " + how[:600]) if how else "Marked resolved.")
+        lines.append("Resolution check: the new text was found in the revised manuscript." if text_checked
+                     else "Resolution check: reported by the agent; the new text was not checked against the revised manuscript.")
+        lesson = "Lesson: check for this before the manuscript is drafted."
+        lines.append(lesson)
+    else:
+        lines.append("Status: still open when last recorded.")
+    domain = "strategy" if resolved else "failure"
+    title = (f"Reviewer finding ({sev}, resolved): " if resolved else f"Reviewer finding ({sev}, open): ") + concern[:150]
+    old = store.one("SELECT id FROM memory_items WHERE source_key=?", (f"{base}:open",)) if resolved else None
+    m = add(store, project_id, domain, title, "\n".join(lines), "system", evidence=ev,
+            tags=["reviewer", sev, "verified"], source_key=key, supersedes=old and old["id"])
+    if old and m.get("supersedes") == old["id"]:
+        store.exec("UPDATE memory_items SET status='superseded', updated_at=? WHERE id=?", (now(), old["id"]))
+        _history(store, old["id"], "system", "superseded", {"by": m["id"], "reason": "the finding was resolved"})
+    return True
+
+
+def ingest_reviews(store: Store, project_id: str) -> int:
+    """Verified reviewer concerns from Paper Studio's review loop and from review-and-fix loops (idempotent)."""
+    from . import loops, review_loop
+    root = workspace.project_root(project_id)
+    added = 0
+
+    def text(rel: str | None) -> str | None:
+        p = root / rel if rel else None
+        return _norm_text(p.read_text(encoding="utf-8", errors="replace")) if p and p.is_file() else None
+
+    # Paper Studio: review/concern_matrix.csv (+ closure.csv) per round; round 1 reviews paper/main.tex.
+    for n in range(1, review_loop.MAX_ROUNDS + 1):
+        f = review_loop.round_files(n)
+        rows = review_loop._rows(root / f["matrix"])
+        if not rows:
+            break
+        reviewed = text("paper/main.tex" if n == 1 else review_loop.round_files(n - 1)["tex"])
+        if reviewed is None:
+            continue
+        closure = {r.get("id", "").upper(): r for r in review_loop._rows(root / f["closure"])}
+        revised = text(f["tex"])
+        for r in rows:
+            if _review_memory(store, project_id, "paper", n, r, closure.get(r.get("id", "").upper()), reviewed, revised,
+                              [f["matrix"], f["closure"], f["tex"]]):
+                added += 1
+    # Review-and-fix loops: loops/<id>/round_n/concerns.csv (+ closure.csv from the fix move).
+    for st in loops.all_states(project_id):
+        if st.get("type") != "review_fix" or "inputs" not in st:
+            continue
+        for n_s in sorted(st.get("rounds") or {}, key=int):
+            n = int(n_s)
+            cp = loops._rel(st, n, "concerns.csv")
+            rows = loops._rows(root / cp)
+            if not rows:
+                continue
+            try:
+                reviewed = text(loops._manuscript_for(st, n))
+            except (KeyError, TypeError):
+                reviewed = None
+            if reviewed is None:
+                continue
+            cl_rel = loops._rel(st, n, "closure.csv")
+            closure = {r.get("id", "").upper(): r for r in loops._rows(root / cl_rel)}
+            revised = text(loops._fixed_tex(st, n))
+            for r in rows:
+                if _review_memory(store, project_id, st["id"], n, r, closure.get(r.get("id", "").upper()), reviewed,
+                                  revised, [cp, cl_rel]):
+                    added += 1
     render(store, project_id)
     return added
 

@@ -1112,6 +1112,7 @@ def _backfill_memory():
     """Recorded loop outcomes become memories once (idempotent), so older projects get them too."""
     for p in store.all("SELECT id FROM projects"):
         memory_store.safe(memory_store.ingest_loops, store, p["id"])
+        memory_store.safe(memory_store.ingest_reviews, store, p["id"])
 
 
 # ---------------------------------------------------------------- experiment laboratory
@@ -1330,7 +1331,7 @@ def memory_correct(item_id: str, body: MemoryCorrectIn):
 def memory_refresh(project_id: str):
     """Re-read recorded loop outcomes into memory (normally automatic) and rewrite memory/remembered.md."""
     _project(project_id)
-    return {"added": memory_store.ingest_loops(store, project_id)}
+    return {"added": memory_store.ingest_loops(store, project_id) + memory_store.ingest_reviews(store, project_id)}
 
 
 @app.post("/api/v1/projects/{project_id}/files", status_code=201)

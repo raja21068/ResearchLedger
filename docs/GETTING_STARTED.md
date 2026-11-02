@@ -171,7 +171,10 @@ proof of correctness or publication readiness.
 - **Failures:** ideas that did not pass scoring, and pre-registered experiments that were not supported.
 - **Decisions, experiment results, strategies and literature notes.**
 
-Finished idea rounds and experiments are recorded automatically, with links to their files. Agents read the
+Finished idea rounds and experiments are recorded automatically, with links to their files. **Reviewer findings** are too: a concern from a review round becomes a
+memory only if it is marked VERIFIED and its quote is really in the manuscript that was reviewed. Unverified comments
+stay out. Once the concern is resolved, the memory is replaced by a *lesson* that records how it was fixed, and says
+whether the fix text was found in the revised manuscript or only reported by the agent. Agents read the
 active memories before every task (`memory/remembered.md`), so they do not repeat a failed direction. When an agent
 suggests something worth remembering, it appears in **Decisions** as *Remember this / Reject*. To fix a memory,
 click **Correct**: the old version is kept and marked as replaced. Your own free-form notes are under

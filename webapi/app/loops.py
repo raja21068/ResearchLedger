@@ -902,6 +902,7 @@ def _finish(store: Store, project_id: str, st: dict, reason: str) -> None:
     store.log_activity(project_id, "loop_finished", f"{st['id']} {reason}")
     from . import ledger_bridge, memory_store  # scores and verdicts become memories; verdicts become claims
     memory_store.safe(memory_store.ingest_loops, store, project_id)
+    memory_store.safe(memory_store.ingest_reviews, store, project_id)
     ledger_bridge.safe_sync(store, project_id)
 
 
@@ -1173,6 +1174,7 @@ def stop(store: Store, project_id: str, loop_id: str) -> dict:
             _save(project_id, st)
     from . import memory_store
     memory_store.safe(memory_store.ingest_loops, store, project_id)
+    memory_store.safe(memory_store.ingest_reviews, store, project_id)
     return view(store, project_id, loop_id)
 
 

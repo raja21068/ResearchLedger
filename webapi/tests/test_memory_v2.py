@@ -106,3 +106,44 @@ def test_bad_input_is_refused_in_plain_words():
     pid = _project()
     r = client.post(f"/api/v1/projects/{pid}/memory", headers=H, json={"domain": "rumour", "title": "x", "content": "y"})
     assert r.status_code == 400 and "domain must be one of" in r.text
+
+
+def _review_files(root):
+    (root / "paper").mkdir(exist_ok=True)
+    (root / "review").mkdir(exist_ok=True)
+    (root / "paper" / "main.tex").write_text(
+        "We compare against nothing. The model is best. All values are placeholders.", encoding="utf-8")
+    (root / "paper" / "main_revised.tex").write_text(
+        "We compare against baseline B1 with identical splits. This is a study protocol.", encoding="utf-8")
+    (root / "review" / "concern_matrix.csv").write_text(
+        "id,reviewer,severity,location,concern,quote,verification,minimum_fix,closure_criterion\n"
+        "MC1,Methodology,Major,Results,No baseline comparison is reported,We compare against nothing,VERIFIED,Add a justified baseline,Baseline present\n"
+        "MC2,Methodology,Major,Results,Claims are too strong,The model is best,UNVERIFIED,Narrow the claim,Narrowed\n"
+        "MC3,Statistics,Major,Abstract,Quote is not in the manuscript,this sentence does not exist anywhere,VERIFIED,Fix,Done\n"
+        "MC4,Statistics,Minor,Intro,Placeholders everywhere,All values are placeholders,VERIFIED,Fill them or say protocol,Stated\n",
+        encoding="utf-8")
+
+
+def test_only_verified_findings_with_real_quotes_become_memories_and_resolution_supersedes():
+    pid = _project()
+    root = workspace.project_root(pid)
+    _review_files(root)
+    assert memory_store.ingest_reviews(store, pid) == 2           # MC1 and MC4 only
+    assert memory_store.ingest_reviews(store, pid) == 0           # idempotent
+    open_items = memory_store.search(store, pid, domains=["failure"], statuses=["active"])
+    assert sorted(m["title"][:30] for m in open_items) == ["Reviewer finding (major, open)", "Reviewer finding (minor, open)"]
+    titles = " ".join(m["title"] for m in memory_store.search(store, pid, statuses=["active"]))
+    assert "Claims are too strong" not in titles and "does not exist" not in titles
+    # the finding is resolved later; the closure's text is (or is not) in the revised manuscript
+    (root / "review" / "closure.csv").write_text(
+        "id,status,evidence\nMC1,resolved,\"Added baseline B1 with identical splits (main_revised.tex).\"\n", encoding="utf-8")
+    assert memory_store.ingest_reviews(store, pid) == 1
+    mc1 = [m for m in memory_store.search(store, pid, statuses=["superseded"]) if "No baseline" in m["title"]]
+    assert len(mc1) == 1 and "open" in mc1[0]["title"]
+    resolved = [m for m in memory_store.search(store, pid, domains=["strategy"], statuses=["active"])][0]
+    d = client.get(f"/api/v1/memory/{resolved['id']}").json()
+    assert d["supersedes"] == mc1[0]["id"] and "Lesson:" in d["content"] and "reported by the agent" in d["content"]
+    assert any(e["kind"] == "file" and e["ref"] == "review/concern_matrix.csv" for e in d["evidence"])
+    text = (root / "memory" / "remembered.md").read_text(encoding="utf-8")
+    assert "Reviewer finding (major, resolved)" in text and "Reviewer finding (minor, open)" in text
+    assert "No baseline comparison is reported" in text and text.count("Reviewer finding (major") == 1
