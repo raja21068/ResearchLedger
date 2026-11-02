@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1179,6 +1179,19 @@ def loop_parent(project_id: str, body: ParentIn):
         st["parent"] = body.parent
         loops._save(project_id, st)
     return {"loop_id": loop_id, "parent": body.parent}
+
+
+# ---------------------------------------------------------------- manuscript trace
+@app.get("/api/v1/projects/{project_id}/manuscript/trace")
+def manuscript_trace_view(project_id: str, path: str):
+    """For a .tex manuscript: each reported number with its result file, run and ledger evidence, plus placeholders,
+    sources and unused results. Read-only; shows where numbers come from, not that they are correct."""
+    _project(project_id)
+    rel = _path(project_id, path).relative_to(workspace.project_root(project_id)).as_posix()
+    try:
+        return manuscript_trace.trace(store, project_id, rel)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
 
 
 # ---------------------------------------------------------------- mission control

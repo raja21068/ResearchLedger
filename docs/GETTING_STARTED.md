@@ -167,6 +167,17 @@ so you can check that a result reproduces. Each run's receipt is kept in `result
 **Trace** shows the full chain from claim to evidence to run. These checks support your judgment; they are not
 proof of correctness or publication readiness.
 
+**Evidence panel for manuscripts.** Open any `.tex` file and an **Evidence** panel appears beside it. It lists the
+numbers in the tables and abstract and says where each comes from:
+- **backed:** matches a measured result whose evidence you checked or verified;
+- **recorded:** matches a recorded run, still unreviewed;
+- **measured:** matches a results file with no recorded run;
+- **untraced:** matches no measured result. Planned values such as thresholds appear here and are fine; a number
+  that claims a finding is worth checking.
+
+It also lists placeholders (TBD, `[RESULT: …]`), results that were measured but never used, and how many sources and
+sections the paper has. It shows where numbers come from; it does not prove they are correct.
+
 **Memory.** The **Memory** page (left sidebar) lists what earlier work found, by kind:
 - **Failures:** ideas that did not pass scoring, and pre-registered experiments that were not supported.
 - **Decisions, experiment results, strategies and literature notes.**

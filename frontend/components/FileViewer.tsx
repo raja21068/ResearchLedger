@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api, fileUrl, post, ApiError } from "@/lib/api";
 import { FileCompare } from "./FileCompare";
 import { FileHistory } from "./FileHistory";
+import { ManuscriptPanel } from "./ManuscriptPanel";
 import { Markdown } from "./Markdown";
 import { btn2, ErrorBox } from "./ui";
 
@@ -41,6 +42,7 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
   const [showSource, setShowSource] = useState(false);
   const [bust, setBust] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  const [showEvidence, setShowEvidence] = useState(path.endsWith(".tex"));
   const [compareWith, setCompareWith] = useState<number | null>(null);
 
   useEffect(() => { setCompareWith(null); }, [path]);
@@ -102,6 +104,11 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
         )}
         <button className={btn2} onClick={() => setBust((b) => b + 1)} aria-label="Reload file">Reload</button>
         <button className={btn2} onClick={rename}>Rename</button>
+        {path.endsWith(".tex") && (
+          <button className={btn2} aria-pressed={showEvidence} onClick={() => setShowEvidence(!showEvidence)}>
+            {showEvidence ? "Hide evidence" : "Evidence"}
+          </button>
+        )}
         <button className={btn2} aria-pressed={showHistory} onClick={() => setShowHistory(!showHistory)}>
           {showHistory ? "Hide history" : "History"}
         </button>
@@ -150,6 +157,7 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
         {!preview && !error && kind !== "pdf" && kind !== "image" && <p className="rl-pulse p-5 text-sm text-faint">Loading…</p>}
         </>)}
       </div>
+      {showEvidence && path.endsWith(".tex") && <ManuscriptPanel projectId={projectId} path={path} refreshKey={bust + version} />}
       {showHistory && <FileHistory projectId={projectId} path={path} onRestored={() => { setCompareWith(null); setBust((b) => b + 1); }}
         onCompare={(v) => setCompareWith(v)} />}
       </div>
