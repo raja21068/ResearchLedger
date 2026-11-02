@@ -16,16 +16,30 @@ The user's input: $ARGUMENTS
 Run `RL status`. If it prints `API_DOWN`, tell the user in one line to start the website with
 `& D:\AutoResearch\ResearchLedger\start_web.ps1`, and stop.
 
-## 2. Understand the request — ask only what is missing
+## 2. The menu — ask only what is missing
 From the input, find: (a) the goal, (b) file or zip paths, (c) pasted text (a prompt, an idea, or a review from ChatGPT).
-If the goal is not clear, ask ONE question with AskUserQuestion, header "Job", options:
-- "Review and fix my paper" — strict review, fix plan, small exact edits, new PDF, repeated until clean (needs the .tex)
-- "Improve an idea" — search 50+ papers for competitors, score /100, redesign, repeated until it passes
-- "Run experiments" — locked plan, code, runs only after the user approves, results checked against the plan
-- "Check before submitting" — references, numbers, figures, placeholders, page count
-(the user can type anything else: e.g. write a paper, reference check, rebuttal, slides).
+If the input is empty or the goal is not clear, show the menu with AskUserQuestion, header "Start", question
+"What do you want to do?", exactly these options in this order:
+1. "1. Idea generation" — 5 candidate ideas, 50+ papers searched for competitors, scored /100, redesigned until it passes
+2. "2. Full paper" — from idea to a compiled LaTeX paper, stage by stage; you approve each stage
+3. "3. Code only" — a runnable, documented experiment repository from your idea, method or paper
+4. "4. Revise paper" — review and fix your paper until clean, or answer reviewer comments
+(the user can type anything else: run experiments, check before submitting, reference check, slides…)
+
+Then ask only what that choice still needs, in one AskUserQuestion call (up to 3 questions):
+- 1 Idea generation: the topic (free text) if not given; "Generate candidates" or "I'll paste my idea".
+  → `RL start <project> "<topic or idea>" --repeat idea` (paste the idea as a file first if given).
+- 2 Full paper: the idea or topic if not given (an accepted idea from `ideas/` in a paper also works); venue
+  (Journal · IEEE · Elsevier · Springer). → new paper (`RL new "<title>" --paper`), then
+  `RL start <project> "Write a full research paper about: <idea>. Target: <venue>."`
+- 3 Code only: the idea, method or paper file if not given; framework (PyTorch · TensorFlow · scikit-learn · any).
+  → `RL start <project> "Generate research code (<framework>) for: <description>" --files <uploaded paper or idea file>`
+  (the code is written, never run, until the user approves a run in an experiment loop).
+- 4 Revise paper: "My draft — review and fix it" (needs the .tex; a pasted ChatGPT review is used if given →
+  `--repeat review`) or "Reviewer comments from a journal" (needs the manuscript and the comments →
+  `RL start <project> "Revise the paper and write a response to the reviewers"`).
 Then ask "Where" only if the user has papers (`RL list`) and did not say: options "Just this once (quick job)" or the
-2–3 most relevant papers by title.
+2–3 most relevant papers by title. A full paper always goes into a paper, not a quick job.
 
 ## 3. Set it up
 - Quick job: `RL new "<short title>"`; new paper: `RL new "<title>" --paper`; else use the chosen paper id.
