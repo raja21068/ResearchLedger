@@ -12,7 +12,7 @@ import json
 import os
 from pathlib import Path
 
-from . import claude_runner, experiments, review_loop, workspace
+from . import claude_runner, experiments, exprun, review_loop, workspace
 from .config import REPO_ROOT
 from .db import Store, new_id, now
 
@@ -83,17 +83,21 @@ RESEARCH_ARTICLE = [
      "engines": ["skills/reproducible-implementation-spec/SKILL.md", f"{PC}/3_architecting.py",
                  f"{PC}/4_contracting.py", f"{PC}/5_engineering.py"],
      "reads": ["paper/idea.md", "paper/protocol.md", "paper/experimental_log.md"],
-     "outputs": ["code/README.md", "code/blueprint.md"],
+     "outputs": ["code/README.md", "code/blueprint.md", "code/jobs.json"],
      "task": ("Follow PaperCompiler's method (read the prompts inside the three PaperCompiler files as the recipe; "
               "do not run them — they need an OpenAI key): first write `code/blueprint.md` (architecture, files and "
               "their contracts), then the code under `code/`, `code/requirements.txt` and `code/README.md` explaining "
               "how to run it. Scripts must write each declared slot's measured value to `results/<slot_id>.json` as "
-              "{\"slot_id\":…, \"value\":…, \"unit\":…, \"seed\":…}. You cannot execute code here: never write results "
-              "files yourself and never claim the code ran.")},
+              "{\"slot_id\":…, \"value\":…, \"unit\":…, \"seed\":…}. Then write `code/jobs.json`, the exact commands the "
+              "server will run after the user approves: {\"jobs\": [{\"id\": \"E1\", \"command\": \"python "
+              "code/<script>.py [args]\", \"slots\": [<slot ids this command writes>], \"timeout_minutes\": <=30}]}; "
+              "each slot id must be declared in `paper/experimental_log.md`. You cannot execute code here: never write "
+              "results files yourself and never claim the code ran.")},
     {"id": "experiments", "title": "Run experiments", "purpose": "Execute the code and record measured results.",
      "engines": ["skills/reproducible-implementation-spec/SKILL.md", f"{PC}/5_engineering.py"],
      "reads": ["paper/protocol.md", "paper/experimental_log.md", "code/README.md", "code/blueprint.md"],
-     "outputs": ["results/run_log.md"],
+     "outputs": ["results/run_log.json"],
+     "server_run": True,  # no agent: the execution service runs code/jobs.json after the user's click
      "task": ("The user approved running `code/`. Install only what `code/requirements.txt` lists, run the scripts as "
               "`code/README.md` says (smoke-test on a small input first, then the full protocol), and fix real bugs in "
               "`code/`. Each script writes `results/<slot_id>.json` as {\"slot_id\":…, \"value\":…, \"unit\":…, "
@@ -408,11 +412,20 @@ def view(store: Store, project_id: str) -> dict | None:
             "autopilot": state.get("autopilot", True),
             "results": experiments.summary(root) if _has(state, "experiments") or state["type"] == "thesis_to_paper" else None,
             "collected": (state["stages"].get("experiments") or state["stages"].get("extract") or {}).get("collected"),
+            "job_plan": _job_plan_view(root) if _has(state, "experiments") else None,
             "loop": _loop_view(store, state, root) if _has(state, "revise") and state["type"] != "revision_rebuttal" else None,
             "inputs": PAPER_TYPES[state["type"]].get("inputs"),
             "uploads": [p.relative_to(root).as_posix() for p in sorted((root / "uploads").glob("*"))
                         if p.is_file()] if (root / "uploads").is_dir() else [],
             "coverage": _coverage(root) if state["type"] == "revision_rebuttal" else None}
+
+
+def _job_plan_view(root: Path) -> dict:
+    """The commands the Run experiments stage will execute, shown to the user before they approve."""
+    jobs, problems = job_plan(root)
+    return {"jobs": [{"id": j["id"], "command": " ".join(j["argv"]), "slots": j["slots"],
+                      "timeout_minutes": j["timeout_s"] // 60} for j in jobs],
+            "problems": problems, "runner": exprun.RUNNER, "python": exprun.python_exe()}
 
 
 def _loop_view(store: Store, state: dict, root: Path) -> dict:
@@ -466,12 +479,22 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
     if v[stage_id]["status"] == "running":
         raise ValueError("this stage is already running")
     stage = next(s for s in _stages(state) if s["id"] == stage_id)
-    prompt = _prompt(state, stage, workspace.project_root(project_id), notes, feedback)
-    rid, ts = new_id("run"), now()
     cid = state["conversation_id"]
-    store.exec("INSERT INTO runs(id,project_id,conversation_id,kind,prompt,status,provider,created_at) "
-               "VALUES (?,?,?,?,?,?,?,?)", (rid, project_id, cid, f"paper:{stage_id}", prompt, "queued",
-                                           "claude_code_cli", ts))
+    root = workspace.project_root(project_id)
+    if stage.get("server_run"):
+        jobs, problems = job_plan(root)
+        if problems:
+            raise ValueError("The job list from the Code stage has problems; ask the Code stage to fix them: "
+                             + "; ".join(problems[:5]))
+        rid = exprun.submit(store, project_id, cid, f"paper:{stage_id}", root, jobs, root / "results" / "logs",
+                            root / "results" / "run_log.json")
+        ts = now()
+    else:
+        prompt = _prompt(state, stage, root, notes, feedback)
+        rid, ts = new_id("run"), now()
+        store.exec("INSERT INTO runs(id,project_id,conversation_id,kind,prompt,status,provider,created_at) "
+                   "VALUES (?,?,?,?,?,?,?,?)", (rid, project_id, cid, f"paper:{stage_id}", prompt, "queued",
+                                               "claude_code_cli", ts))
     store.exec("UPDATE conversations SET updated_at=? WHERE id=?", (ts, cid))
     state["stages"][stage_id] = {"run_id": rid, "feedback": feedback, "started_at": ts}
     # Re-running a stage re-opens everything after it.
@@ -480,8 +503,34 @@ def run_stage(store: Store, project_id: str, stage_id: str, notes: str = "", fee
         state["stages"].setdefault(later, {}).pop("approved_at", None)
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_started", f"{stage_id} {rid}")
-    claude_runner.start_run(store, rid)
+    if not stage.get("server_run"):
+        claude_runner.start_run(store, rid)
     return view(store, project_id)
+
+
+def collect_results(store: Store, project_id: str, stage_id: str, run_id: str | None) -> dict:
+    """Enter measured values into paper/experimental_log.md. For Run experiments, only slots the recorded server run
+    measured (results/run_log.json of that run) count; a results file written any other way is not entered."""
+    root = workspace.project_root(project_id)
+    run = store.one("SELECT created_at FROM runs WHERE id=?", (run_id,)) if run_id else None
+    measured = None
+    if stage_id == "experiments":
+        log = root / "results" / "run_log.json"
+        try:
+            same_run = run_id is not None and json.loads(log.read_text(encoding="utf-8")).get("run_id") == run_id
+        except (OSError, ValueError):
+            same_run = False
+        measured = exprun.verified_slots(log) if same_run else set()
+    return experiments.collect(root, run_id, run and run["created_at"], measured)
+
+
+def job_plan(root: Path) -> tuple[list[dict], list[str]]:
+    """What the Run experiments stage will execute: installing code/requirements.txt (if any), then code/jobs.json."""
+    log = root / experiments.LOG
+    declared = {s["slot_id"] for s in experiments.parse_slots(log.read_text(encoding="utf-8"))} if log.is_file() else None
+    jobs, problems = exprun.plan_from_file(root, declared)
+    install = exprun.requirements_job(root)
+    return ([install] if install else []) + jobs, problems
 
 
 def approve(store: Store, project_id: str, stage_id: str) -> dict:
@@ -493,9 +542,7 @@ def approve(store: Store, project_id: str, stage_id: str) -> dict:
     state = load(project_id)
     st = state["stages"].setdefault(stage_id, {})
     if stage_id in {"experiments", "extract"}:  # measured values enter the log only now, from results/*.json
-        run = store.one("SELECT created_at FROM runs WHERE id=?", (st["run_id"],)) if st.get("run_id") else None
-        st["collected"] = experiments.collect(workspace.project_root(project_id), st.get("run_id"),
-                                              run and run["created_at"])
+        st["collected"] = collect_results(store, project_id, stage_id, st.get("run_id"))
     st["approved_at"] = now()
     _save(project_id, state)
     store.log_activity(project_id, "paper_stage_approved", stage_id)

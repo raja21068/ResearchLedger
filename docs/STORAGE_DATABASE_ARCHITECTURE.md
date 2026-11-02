@@ -179,6 +179,7 @@ There are three ways experiment code runs today, and they do not share one bound
 | Factory S4 (`factory/`) | Docker | CLI workflow | run manifests in `researchledger/` |
 | Experiment loop (`webapi/app/exprun.py`) | host Python, `subprocess.Popen` | user click per run | `run_log.json`: script hash, exit code, fresh-results check |
 | Paper Studio "Run experiments" stage | the agent itself runs `python` (CLI mode grants `Bash(python:*)` and `pip install`; in bridge mode the Claude app worker runs it) | stage approval only, after the fact | `collect()` with the run-start freshness check (Phase 0) |
+| **now (Phase 6):** Paper Studio "Run experiments" | the execution service runs `code/jobs.json` on the host | user approves the listed commands before they run | `run_log.json`; only slots measured by that run are entered |
 
 A second review said Paper Studio "cannot run Python because its tools are LaTeX-only". That is not accurate:
 `claude_runner.EXTRA_TOOLS_BY_KIND` grants Python and pip to `paper:experiments`. The real problem is the one in the
@@ -263,7 +264,7 @@ These are adopted from the review, and the phases above implement them:
 | 3 | per-run staging, base-version tracking, conflict detection, merge UI, leases | two parallel runs on one project never lose a change (test) |
 | 4 (mostly ✅) | automatic verified database backups (at start-up if older than a day, then daily, last 14 kept; `webapi/app/backup.py`), Back up now, and a read-only integrity check that re-hashes saved versions (Settings → Backups and safety check). **Left:** project export/import | a damaged stored version is detected (tested) |
 | 5 | reuse the `researchledger` package's atomic writes, locks and hash-chained run manifests; link files to C/E/R claims and evidence | one provenance implementation, used by both the CLI and the web app |
-| 6 | one execution service for Factory, Paper Studio and loops (§8); the `tasks` table with checkpoints and recovery (§9) | Paper Studio can no longer write `results/` outside a recorded job |
+| 6 (execution ✅) | **done:** one execution service (`exprun.py`) for the experiment loop and Paper Studio: Paper Studio's Run experiments stage no longer starts an agent; it runs `code/jobs.json` (checked: python scripts under `code/`, declared slots, ≤30 min) after the user approves the commands on screen, installs `code/requirements.txt` as a required first job, and only slots that run measured enter the paper; agents get no Python permission. **Left:** Factory S4 (CLI, Docker) still has its own runner; the Docker/host choice (§8) waits for the user; the `tasks` table with checkpoints (§9) | a results file not written by the recorded run is never entered (tested) |
 | 7 | typed memory items behind `research_memory.md` (§9); cross-project search with FTS5 | a superseded decision is never shown as current |
 
 Phase 0 also corrected the agent registry: the Research Director was listed as "planned" although

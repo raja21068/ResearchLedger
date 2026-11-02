@@ -130,9 +130,7 @@ def test_experiments_stage_follows_code_and_collects_only_valid_results():
     assert experiments.collect(root, "run_x")["measured"] == 1
 
 
-def test_approving_experiments_collects_results(bridge_mode):
-    while client.post("/api/v1/bridge/next", headers=H).status_code == 200:
-        pass
+def _ready_for_experiments():
     pid, _ = _paper()
     root = _ws(pid)
     st = json.loads((root / "paper" / "studio.json").read_text())
@@ -140,25 +138,59 @@ def test_approving_experiments_collects_results(bridge_mode):
         st["stages"][sid] = {"approved_at": "2026-01-01T00:00:00+00:00"}
     (root / "paper" / "studio.json").write_text(json.dumps(st))
     (root / "paper" / "experimental_log.md").write_text(LOG, encoding="utf-8")
-    client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/run", json={}, headers=H)
-    task = client.post("/api/v1/bridge/next", headers=H).json()
-    assert "results/run_log.md" in task["task"] and "Do NOT edit" in task["task"]
-    (root / "results").mkdir(exist_ok=True)
-    (root / "results" / "acc_main.json").write_text(json.dumps({"slot_id": "acc_main", "value": 7}))
-    _finish(task, ["results/run_log.md"])
+    (root / "code").mkdir(exist_ok=True)
+    return pid, root
+
+
+def test_experiments_stage_runs_the_job_list_on_the_server_and_enters_only_measured_results():
+    from webapi.tests.test_api import wait
+    pid, root = _ready_for_experiments()
+    (root / "code" / "exp.py").write_text(
+        "import json, pathlib\npathlib.Path('results').mkdir(exist_ok=True)\n"
+        "pathlib.Path('results/acc_main.json').write_text(json.dumps({'slot_id': 'acc_main', 'value': 7}))\n",
+        encoding="utf-8")
+    (root / "code" / "jobs.json").write_text(json.dumps(
+        {"jobs": [{"id": "E1", "command": "python code/exp.py", "slots": ["acc_main"], "timeout_minutes": 1}]}))
+    (root / "results").mkdir(exist_ok=True)  # a number typed in by hand: no recorded run wrote it
+    (root / "results" / "acc_base.json").write_text(json.dumps({"slot_id": "acc_base", "value": 99}))
+    plan = client.get(f"/api/v1/projects/{pid}/paper").json()["job_plan"]
+    assert plan["problems"] == [] and [j["command"] for j in plan["jobs"]] == ["python code/exp.py"]
+    v = client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/run", json={}, headers=H).json()
+    rid = next(s for s in v["stages"] if s["id"] == "experiments")["run_id"]
+    run = client.get(f"/api/v1/runs/{rid}").json()
+    assert run["provider"] == "server_exec"  # the execution service ran it, not an agent
+    assert wait(rid)["status"] == "succeeded"
+    log = json.loads((root / "results" / "run_log.json").read_text(encoding="utf-8"))
+    assert log["run_id"] == rid and log["runner"] == "host" and log["jobs"][0]["exit_code"] == 0
     v = client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/approve", headers=H).json()
-    assert v["collected"]["measured"] == 1 and v["results"]["measured"] == 1
-    assert "| 7 |" in (root / "paper" / "experimental_log.md").read_text(encoding="utf-8")
-    assert client.post(f"/api/v1/projects/{pid}/paper/collect-results", headers=H).json()["measured"] == 1
+    assert v["collected"]["measured"] == 1
+    assert any("acc_base.json" in i and "not measured by a recorded run" in i for i in v["collected"]["issues"])
+    text = (root / "paper" / "experimental_log.md").read_text(encoding="utf-8")
+    assert "| 7 |" in text and "| 99 |" not in text
+    prov = json.loads((root / "results" / "provenance.json").read_text(encoding="utf-8"))
+    assert prov["acc_main"]["run_id"] == rid and "acc_base" not in prov
+    again = client.post(f"/api/v1/projects/{pid}/paper/collect-results", headers=H).json()
+    assert again["measured"] == 1
 
 
-def test_experiments_run_gets_python_tool_only_for_that_kind():
+def test_a_bad_job_list_is_refused_in_plain_words():
+    pid, root = _ready_for_experiments()
+    (root / "code" / "jobs.json").write_text(json.dumps({"jobs": [{"id": "E1", "command": "rm -rf /", "slots": ["acc_main"]}]}))
+    r = client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/run", json={}, headers=H)
+    assert r.status_code == 400 and "python <script.py>" in r.text
+    (root / "code" / "jobs.json").write_text(json.dumps(
+        {"jobs": [{"id": "E1", "command": "python code/missing.py", "slots": ["not_declared"]}]}))
+    r = client.post(f"/api/v1/projects/{pid}/paper/stages/experiments/run", json={}, headers=H)
+    assert r.status_code == 400 and "does not exist" in r.text and "not declared" in r.text
+
+
+def test_agents_never_get_permission_to_run_experiment_code():
     from webapi.app import claude_runner
     from webapi.app.config import settings
     if not settings.claude_cmd:
         pytest.skip("claude not installed")
-    assert "Bash(python:*)" in claude_runner.build_command(None, None, kind="paper:experiments")
-    assert "Bash(python:*)" not in claude_runner.build_command(None, None, kind="paper:code")
+    for kind in ("paper:experiments", "paper:code", "claude_code"):
+        assert "Bash(python:*)" not in claude_runner.build_command(None, None, kind=kind)
 
 
 # ---------------------------------------------------------------- review <-> revise loop

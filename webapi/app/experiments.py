@@ -65,11 +65,14 @@ def _epoch(iso: str | None) -> float | None:
         return None
 
 
-def collect(root: Path, run_id: str | None = None, since: str | None = None) -> dict:
+def collect(root: Path, run_id: str | None = None, since: str | None = None,
+            measured_by_run: set[str] | None = None) -> dict:
     """Fill the log from results/*.json. Returns {slots, measured, pending, issues}.
 
     `since` (ISO time the run was created): a results file last written before it was not produced by this run, so
-    it is never attributed to `run_id`; an unchanged file keeps the provenance it already had."""
+    it is never attributed to `run_id`; an unchanged file keeps the provenance it already had.
+    `measured_by_run` (slots a recorded server run measured, from its run_log.json): when given, any other results
+    file is NOT entered into the log, unless it is unchanged from an earlier recorded run."""
     log = root / LOG
     if not log.is_file():
         return {"slots": 0, "measured": 0, "pending": 0, "issues": [f"{LOG} is missing"]}
@@ -99,6 +102,12 @@ def collect(root: Path, run_id: str | None = None, since: str | None = None) -> 
         if s["slot_id"] not in found:
             continue
         p, data = found[s["slot_id"]]
+        if measured_by_run is not None and s["slot_id"] not in measured_by_run:
+            old = prov.get(s["slot_id"])
+            if not (old and old.get("run_id") and old.get("sha256") == hashlib.sha256(p.read_bytes()).hexdigest()):
+                issues.append(f"results/{p.name}: not measured by a recorded run, so it was not entered")
+                del found[s["slot_id"]]
+                continue
         value = data["value"]
         cells = _cells(lines[s["line"]])
         cells[5] = str(value)

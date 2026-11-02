@@ -80,7 +80,8 @@ DIRECTOR_SYSTEM = ""  # filled in by director.py at import, to avoid a circular 
 
 
 # Stages that run the project's own code get a little more than the LaTeX toolchain.
-EXTRA_TOOLS_BY_KIND = {"paper:experiments": ["Bash(python:*)", "Bash(pip install:*)"]}
+# Agents never run experiment code: the execution service (exprun.py) does, after the user approves.
+EXTRA_TOOLS_BY_KIND: dict[str, list[str]] = {}
 
 
 def build_command(resume_session: str | None, model: str | None, extra_system: str | None = None,

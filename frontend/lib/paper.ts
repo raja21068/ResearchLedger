@@ -11,6 +11,8 @@ export interface PaperView {
   conversation_id: string; stages: PaperStage[]; autopilot?: boolean;
   results?: { slots: number; measured: number; pending: number } | null;
   collected?: { slots: number; measured: number; pending: number; issues: string[] } | null;
+  job_plan?: { jobs: { id: string; command: string; slots: string[]; timeout_minutes: number }[];
+    problems: string[]; runner: string; python: string } | null;
   loop?: LoopView | null;
   inputs?: string | null; uploads?: string[];
   coverage?: { comments: number; answered: number; resolved: number; missing: string[] } | null;

@@ -239,7 +239,42 @@ export default function PaperStudio({ params }: { params: Promise<{ id: string }
 
               {stage.status === "locked" && <p className="mt-4 text-sm text-faint">Approve the previous stage to unlock this one.</p>}
 
-              {["ready", "failed", "incomplete"].includes(stage.status) && (
+              {stage.id === "experiments" && paper.job_plan && ["ready", "failed", "incomplete"].includes(stage.status) && (
+                <div className="mt-5 space-y-2 text-sm">
+                  <b>What will run on this computer</b>
+                  <p className="text-muted">
+                    The server runs exactly these commands with <span className="font-mono text-xs">{paper.job_plan.python}</span>,
+                    with no sandbox, and records each script&apos;s fingerprint, exit code and log. Only results these runs
+                    write are entered into the paper.
+                  </p>
+                  {paper.job_plan.jobs.length > 0 && (
+                    <ol className="space-y-1">
+                      {paper.job_plan.jobs.map((j) => (
+                        <li key={j.id} className="rounded-lg bg-[#f6f5f1] px-3 py-2">
+                          <span className="font-mono text-xs">{j.command}</span>
+                          <div className="text-xs text-faint">
+                            {j.id === "install" ? "installs the listed packages first (needs internet)" : `writes ${j.slots.join(", ") || "no result slots"}`}
+                            {" "}· stops after {j.timeout_minutes} min
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                  {paper.job_plan.problems.length > 0 && (
+                    <div className="rounded-lg border border-[#f0c4c4] bg-[#fdf1f1] px-3 py-2">
+                      <b>The job list from the Code stage needs fixing first:</b>
+                      <ul className="mt-1 list-disc pl-5">{paper.job_plan.problems.map((p) => <li key={p}>{p}</li>)}</ul>
+                      <p className="mt-1 text-faint">Open the Code stage and use “Ask for changes”, quoting these problems.</p>
+                    </div>
+                  )}
+                  <button className={btn} disabled={busy || paper.job_plan.problems.length > 0 || paper.job_plan.jobs.length === 0}
+                    onClick={() => act(`stages/${stage.id}/run`, {})}>
+                    {stage.status === "ready" ? "Approve and run on this computer" : "Run again on this computer"}
+                  </button>
+                </div>
+              )}
+
+              {stage.id !== "experiments" && ["ready", "failed", "incomplete"].includes(stage.status) && (
                 <div className="mt-5 space-y-2">
                   <label className="block text-sm font-medium" htmlFor="notes">Notes for the agent (optional)</label>
                   <textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)}

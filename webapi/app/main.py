@@ -569,9 +569,8 @@ def collect_paper_results(project_id: str):
     state = paper_studio.load(project_id)
     if not state:
         raise HTTPException(400, "this project has no paper yet")
-    run_id = state["stages"].get("experiments", {}).get("run_id")
-    run = store.one("SELECT created_at FROM runs WHERE id=?", (run_id,)) if run_id else None
-    return experiments.collect(workspace.project_root(project_id), run_id, run and run["created_at"])
+    stage = "experiments" if "experiments" in state["stages"] else "extract"
+    return paper_studio.collect_results(store, project_id, stage, state["stages"].get(stage, {}).get("run_id"))
 
 
 @app.post("/api/v1/projects/{project_id}/paper/review-rounds", status_code=201)
