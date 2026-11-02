@@ -138,11 +138,31 @@ def _add_ledger_links(c: sqlite3.Connection) -> None:
 
 # Ordered, append-only. Each step must be safe on a database that already has its effect (older databases
 # were migrated ad hoc before this table existed). Never edit or reorder a released step; add a new one.
+def _add_literature(c: sqlite3.Connection) -> None:
+    # Literature library (literature.py): one row per paper per project; four separate verification levels.
+    c.executescript("""
+CREATE TABLE IF NOT EXISTS library_papers (
+  id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id),
+  doi TEXT, arxiv_id TEXT, other_id TEXT, title TEXT NOT NULL, title_key TEXT NOT NULL,
+  authors TEXT NOT NULL DEFAULT '[]', year INTEGER, venue TEXT, url TEXT, abstract TEXT,
+  sources TEXT NOT NULL DEFAULT '[]', retrieved_at TEXT NOT NULL,
+  exists_level TEXT NOT NULL DEFAULT 'unchecked', metadata_level TEXT NOT NULL DEFAULT 'unchecked',
+  retrievable_level TEXT NOT NULL DEFAULT 'unchecked', checked_at TEXT, check_note TEXT,
+  supports_level TEXT NOT NULL DEFAULT 'unreviewed', supports_note TEXT, supports_at TEXT,
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS library_project ON library_papers(project_id);
+CREATE INDEX IF NOT EXISTS library_doi ON library_papers(project_id, doi);
+CREATE INDEX IF NOT EXISTS library_arxiv ON library_papers(project_id, arxiv_id);
+CREATE INDEX IF NOT EXISTS library_title ON library_papers(project_id, title_key);
+""")
+
+
 MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes),
               (3, "file versions", _add_file_versions),
               (4, "backups table, artifacts.project_id foreign key", _backups_and_artifact_fk),
               (5, "research memory v2", _add_memory_store),
-              (6, "evidence ledger links", _add_ledger_links)]
+              (6, "evidence ledger links", _add_ledger_links),
+              (7, "literature library", _add_literature)]
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
 

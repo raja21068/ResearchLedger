@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (agent_receipts, review_packet, manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (literature, agent_receipts, review_packet, manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -645,6 +645,102 @@ def check_paper_references(project_id: str):
         return refcheck.check_file(workspace.project_root(project_id), refcheck.fetcher())
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+
+
+class PaperIn(BaseModel):
+    title: str
+    authors: list[str] | str = []
+    year: int | None = None
+    doi: str | None = None
+    arxiv_id: str | None = None
+    venue: str | None = None
+    url: str | None = None
+
+
+class LibrarySearchIn(BaseModel):
+    source: str = "openalex"
+    query: str
+    limit: int = 10
+
+
+class LibraryImportIn(BaseModel):
+    path: str | None = None            # a competitors.csv or refs.bib in the workspace
+    papers: list[PaperIn] = []         # hits chosen from a search
+    source: str = "search"
+
+
+class SupportIn(BaseModel):
+    level: str
+    note: str = ""
+
+
+def _lib(fn, *args):
+    try:
+        out = fn(*args)
+    except literature.LibraryError as exc:
+        raise HTTPException(400, str(exc))
+    except (OSError, workspace.PathError) as exc:
+        raise HTTPException(400, str(exc))
+    return out
+
+
+@app.get("/api/v1/projects/{project_id}/library")
+def library_list(project_id: str):
+    _project(project_id)
+    return {"papers": literature.listing(store, project_id), "file": literature.LIBRARY_MD}
+
+
+@app.post("/api/v1/projects/{project_id}/library", status_code=201)
+def library_add(project_id: str, body: PaperIn):
+    _project(project_id)
+    paper, created = _lib(literature.add, store, project_id, body.model_dump(), "manual")
+    literature.render(store, project_id)
+    return {**paper, "created": created}
+
+
+@app.post("/api/v1/projects/{project_id}/library/search")
+def library_search(project_id: str, body: LibrarySearchIn):
+    """Search OpenAlex, arXiv or Crossref. Results are NOT saved; each says whether it is already in the library."""
+    _project(project_id)
+    try:
+        hits = literature.search(body.source, body.query, refcheck.fetcher(), body.limit)
+    except literature.LibraryError as exc:
+        raise HTTPException(400, str(exc))
+    except Exception as exc:  # noqa: BLE001 — network down or the service refused
+        raise HTTPException(502, f"{body.source} could not be reached ({type(exc).__name__})")
+    return {"source": body.source, "hits": literature.mark_known(store, project_id, hits)}
+
+
+@app.post("/api/v1/projects/{project_id}/library/import")
+def library_import(project_id: str, body: LibraryImportIn):
+    _project(project_id)
+    if body.path:
+        res = _lib(literature.import_file, store, project_id, body.path)
+    else:
+        created = merged = 0
+        for p in body.papers:
+            _, new = _lib(literature.add, store, project_id, p.model_dump(), body.source if body.source in {"openalex", "arxiv", "crossref"} else "search")
+            created, merged = created + new, merged + (not new)
+        res = {"created": created, "merged": merged, "skipped": 0}
+    literature.render(store, project_id)
+    return res
+
+
+@app.post("/api/v1/projects/{project_id}/library/{paper_id}/verify")
+def library_verify(project_id: str, paper_id: str):
+    _project(project_id)
+    paper = _lib(literature.verify, store, project_id, paper_id, refcheck.fetcher())
+    literature.render(store, project_id)
+    return paper
+
+
+@app.post("/api/v1/projects/{project_id}/library/{paper_id}/supports")
+def library_supports(project_id: str, paper_id: str, body: SupportIn):
+    """Human-only: record that you read the paper and whether it supports the statement it is cited for."""
+    _project(project_id)
+    paper = _lib(literature.set_supports, store, project_id, paper_id, body.level, body.note)
+    literature.render(store, project_id)
+    return paper
 
 
 @app.post("/api/v1/projects/{project_id}/paper/choose-idea/{idea_id}")

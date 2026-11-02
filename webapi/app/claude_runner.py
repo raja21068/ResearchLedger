@@ -30,6 +30,11 @@ failed approach and why, a reusable procedure, a key paper), write `memory/propo
 {"memories": [{"domain": "decision|failure|experiment|strategy|literature", "title": "...",
 "content": "...", "sources": [{"kind": "file|doi|arxiv|url|run", "ref": "..."}]}]}; the user
 approves each one before it becomes a memory. Never invent sources.
+Literature: `literature/library.md` (if it exists) lists the papers already found for this project
+with their identifiers and separate verification levels. Check it before searching again, and do not
+treat a paper as supporting a claim unless it says `supported: yes`; an existing DOI proves nothing
+about what the paper says. Do not edit it. `memory/remembered.md` may also contain a section of
+lessons from other projects; those were not checked against this project, so treat them as hints.
 
 Manuscripts:
 - Write manuscripts under `manuscript/`. For a PDF, write LaTeX (`manuscript/main.tex`) and
