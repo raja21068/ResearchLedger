@@ -84,3 +84,13 @@ def test_upload_zip_unpacks_safely():
     r = client.post(f"/api/v1/projects/{p}/files?folder=uploads&unzip=true", headers=H,
                     files={"file": ("draft.zip", buf.getvalue(), "application/zip")}).json()
     assert r["files"] == ["uploads/draft/paper/main.tex"]
+
+
+def test_many_simultaneous_dismissals_are_all_kept():
+    import threading
+    from webapi.app import inbox
+    keys = [f"concurrent-test-{i}" for i in range(12)]
+    threads = [threading.Thread(target=inbox.dismiss, args=(k,)) for k in keys]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert set(keys) <= set(inbox.dismissed())

@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from . import director, loops, paper_studio
@@ -20,29 +22,41 @@ def _dismissed_file():
     return settings.data_dir / "inbox_dismissed.json"
 
 
+_dismiss_lock = threading.Lock()
+
+
 def dismissed() -> dict:
-    try:
-        return json.loads(_dismissed_file().read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return {}
+    f = _dismissed_file()
+    for attempt in range(6):
+        try:
+            return json.loads(f.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return {}
+        except PermissionError:  # Windows: the file is being replaced right now; a lock is not "empty"
+            time.sleep(0.03 * (attempt + 1))
+        except (OSError, ValueError):
+            return {}
+    return {}
 
 
 def dismiss(key: str) -> None:
     """Hide one decision. Its key includes its state, so it comes back if anything about it changes."""
-    d = dismissed()
-    d[key] = now()
-    f = _dismissed_file()
-    f.parent.mkdir(parents=True, exist_ok=True)
-    tmp = f.with_suffix(".tmp")
-    tmp.write_text(json.dumps(d, indent=2), encoding="utf-8")
-    for attempt in range(5):  # Windows: a reader holding the file briefly makes replace fail; try again
-        try:
-            os.replace(tmp, f)
-            return
-        except PermissionError:
-            if attempt == 4:
-                raise
-            time.sleep(0.05 * (attempt + 1))
+    with _dismiss_lock:  # one writer at a time, so concurrent dismissals neither collide nor lose each other
+        d = dismissed()
+        d[key] = now()
+        f = _dismissed_file()
+        f.parent.mkdir(parents=True, exist_ok=True)
+        tmp = f.with_name(f"{f.name}.{uuid.uuid4().hex[:8]}.tmp")
+        tmp.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        for attempt in range(6):  # Windows: a reader holding the file briefly makes replace fail; try again
+            try:
+                os.replace(tmp, f)
+                return
+            except PermissionError:
+                if attempt == 5:
+                    tmp.unlink(missing_ok=True)
+                    raise
+                time.sleep(0.05 * (attempt + 1))
 
 
 def _key(item: dict) -> str:
