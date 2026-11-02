@@ -240,3 +240,6 @@ class Store:
     def update_run(self, run_id: str, **fields) -> None:
         cols = ", ".join(f"{k}=?" for k in fields)
         self.exec(f"UPDATE runs SET {cols} WHERE id=?", (*fields.values(), run_id))
+        if fields.get("status") in {"succeeded", "failed", "cancelled"}:
+            from . import agent_receipts  # every finished agent task leaves a server-written receipt
+            agent_receipts.safe_write(self, run_id)

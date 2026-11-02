@@ -14,7 +14,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (review_packet, manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (agent_receipts, review_packet, manuscript_trace, mission, ledger_bridge, lab, memory_store, backup, versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -1134,6 +1134,22 @@ def lab_tree(project_id: str):
 def lab_run(project_id: str, run_id: str):
     _project(project_id)
     return _lab(lab.receipt, project_id, run_id)
+
+
+@app.get("/api/v1/projects/{project_id}/agent-receipts")
+def agent_receipt_list(project_id: str):
+    """Server-written receipts of finished agent tasks (who did what, which files, how it ended)."""
+    _project(project_id)
+    return {"receipts": agent_receipts.listing(store, project_id)}
+
+
+@app.get("/api/v1/projects/{project_id}/agent-receipts/{run_id}")
+def agent_receipt(project_id: str, run_id: str):
+    _project(project_id)
+    rec = agent_receipts.read(project_id, run_id) if re.fullmatch(r"run_[A-Za-z0-9]+", run_id) else None
+    if not rec:
+        raise HTTPException(404, "no receipt for this task")
+    return {**rec, "intact": agent_receipts.verify(rec)}
 
 
 @app.get("/api/v1/projects/{project_id}/lab/compare")

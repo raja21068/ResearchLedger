@@ -168,6 +168,26 @@ def search(store: Store, project_id: str | None = None, q: str = "", domains: li
     return rows
 
 
+CROSS_DOMAINS = ["failure", "strategy", "experiment", "decision"]   # lessons; literature stays per project
+
+
+def cross_project(store: Store, project_id: str, limit: int = 6) -> list[dict]:
+    """Active lessons from OTHER projects that share words with this project's title or topic. They are only hints:
+    nothing here was checked against this project's data, and the section that shows them says so."""
+    me = store.one("SELECT title FROM projects WHERE id=?", (project_id,)) or {}
+    text = me.get("title") or ""
+    try:
+        from . import paper_studio
+        text += " " + str((paper_studio.load(project_id) or {}).get("topic") or "")
+    except Exception:  # noqa: BLE001 — the topic is only a hint for matching
+        pass
+    if not re.findall(r"\w{4,}", text):
+        return []
+    rows = search(store, None, q=text, domains=CROSS_DOMAINS, statuses=["active"], limit=60)
+    live = {p["id"] for p in store.all("SELECT id FROM projects WHERE status='active'")}
+    return [r for r in rows if r["project_id"] and r["project_id"] != project_id and r["project_id"] in live][:limit]
+
+
 def render(store: Store, project_id: str) -> str:
     """Write memory/remembered.md: the active memories agents read before every task (newest first per domain)."""
     rows = search(store, project_id, statuses=["active"], limit=400)
@@ -187,6 +207,18 @@ def render(store: Store, project_id: str) -> str:
             scope = " (all projects)" if r["project_id"] is None else ""
             body = r["content"] if len(r["content"]) <= 700 else r["content"][:700] + " …"
             lines += [f"- **{r['title']}**{scope} — {body}", f"  - Sources: {src} · memory id `{r['id']}`"]
+        lines.append("")
+    others = cross_project(store, project_id)
+    if others:
+        lines += ["## Lessons from other projects (not checked for this project)", "",
+                  "Hints only. They come from different data and may not apply here; verify before using one, and",
+                  "never cite one as evidence for this project's claims.", ""]
+        for r in others:
+            ev = store.all("SELECT kind, ref FROM memory_evidence WHERE item_id=? ORDER BY id LIMIT 3", (r["id"],))
+            src = "; ".join(f"{e['kind']}: {e['ref']}" for e in ev) or "no source recorded"
+            body = r["content"] if len(r["content"]) <= 400 else r["content"][:400] + " …"
+            lines += [f"- **{r['title']}** — from project “{r['project']}” ({LABELS[r['domain']]}) — {body}",
+                      f"  - Sources there: {src} · memory id `{r['id']}`"]
         lines.append("")
     if len(lines) <= 6:
         lines.append("Nothing recorded yet.")
