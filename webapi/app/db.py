@@ -60,9 +60,30 @@ CREATE INDEX IF NOT EXISTS activity_project ON activity(project_id, id);
 """)
 
 
+def _add_file_versions(c: sqlite3.Connection) -> None:
+    # Content lives in objects/sha256/ (see versions.py); these tables record which path had which content.
+    c.executescript("""
+CREATE TABLE IF NOT EXISTS blobs (
+  sha256 TEXT PRIMARY KEY, size INTEGER NOT NULL, created_at TEXT NOT NULL, verified_at TEXT);
+CREATE TABLE IF NOT EXISTS files (
+  id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), path TEXT NOT NULL,
+  current_version INTEGER, deleted_at TEXT, mtime REAL, size INTEGER, UNIQUE(project_id, path));
+CREATE TABLE IF NOT EXISTS file_versions (
+  file_id TEXT NOT NULL REFERENCES files(id), version INTEGER NOT NULL,
+  sha256 TEXT NOT NULL REFERENCES blobs(sha256), size INTEGER NOT NULL, author_kind TEXT NOT NULL,
+  run_id TEXT REFERENCES runs(id), note TEXT, created_at TEXT NOT NULL, PRIMARY KEY(file_id, version));
+CREATE INDEX IF NOT EXISTS file_versions_run ON file_versions(run_id);
+CREATE TABLE IF NOT EXISTS audit_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, project_id TEXT, ts TEXT NOT NULL, actor TEXT NOT NULL,
+  action TEXT NOT NULL, detail TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS audit_events_project ON audit_events(project_id, id);
+""")
+
+
 # Ordered, append-only. Each step must be safe on a database that already has its effect (older databases
 # were migrated ad hoc before this table existed). Never edit or reorder a released step; add a new one.
-MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes)]
+MIGRATIONS = [(1, "projects.kind", _add_project_kind), (2, "query indexes", _add_indexes),
+              (3, "file versions", _add_file_versions)]
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
 

@@ -42,6 +42,12 @@ export function fileUrl(projectId: string, path: string, download = false) {
   return `${API_URL}/api/v1/projects/${projectId}/files/raw?${q}`;
 }
 
+export function versionUrl(projectId: string, path: string, version: number, download = false) {
+  const q = new URLSearchParams({ path, version: String(version) });
+  if (download) q.set("download", "true");
+  return `${API_URL}/api/v1/projects/${projectId}/files/version?${q}`;
+}
+
 export function eventsUrl(runId: string, after: number) {
   return `${API_URL}/api/v1/runs/${runId}/events?after=${after}`;
 }

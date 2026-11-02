@@ -19,7 +19,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import claude_runner, memory, workspace
+from . import claude_runner, memory, versions, workspace
 from .config import REPO_ROOT, settings
 from .db import Store, TERMINAL_STATES, new_id, now
 
@@ -545,6 +545,7 @@ def _execute_cli(store: Store, run_id: str, steps: list) -> None:
     run = store.one("SELECT * FROM runs WHERE id=?", (run_id,))
     project_id = run["project_id"]
     ws = workspace.project_root(project_id)
+    versions.safe_sync(store, project_id, "external")
     before = workspace.snapshot(project_id)
     started = time.monotonic()
     store.update_run(run_id, status="running", started_at=now())

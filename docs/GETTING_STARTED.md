@@ -128,6 +128,11 @@ overview page (click it in the sidebar): where it stands, what needs you, its lo
 Every job has its own folder: `webapi_data\projects\<id>\workspace\` inside ResearchLedger. Uploads go to
 `uploads\`, results to `results\`, loops to `loops\`. The website's **Open / Download** buttons point there.
 
+**Nothing gets overwritten for good.** Every time you upload a file, or an agent or an experiment changes it, the old
+content is kept. Open the file and click **History** to see each version (who changed it, and when), view an old one,
+or **Restore** it. Restoring adds a new version, so you can always undo it. The saved copies are in
+`webapi_data\objects\`; don't edit that folder by hand.
+
 ---
 
 ## 8. Your own prompts and the offline skills pack (optional)

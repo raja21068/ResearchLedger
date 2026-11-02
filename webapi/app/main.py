@@ -5,7 +5,6 @@ import asyncio
 import json
 import os
 import mimetypes
-import shutil
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
@@ -14,7 +13,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import (autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
+from . import (versions, autopilot, inbox, steps, loops, prefs, quality, bridge, claude_runner, director, document_tools, experiments, memory, paper_studio, recipes, refcheck, registry, skills_catalog,
                workflows, workspace)
 from .config import settings
 from .db import Store, TERMINAL_STATES, new_id, now
@@ -988,6 +987,57 @@ def preview_file(project_id: str, path: str):
     return info
 
 
+@app.get("/api/v1/projects/{project_id}/files/history")
+def file_history(project_id: str, path: str):
+    """Every saved version of a file, newest first (who wrote it, when, which run)."""
+    _project(project_id)
+    rel = _path(project_id, path).relative_to(workspace.project_root(project_id)).as_posix()
+    versions.safe_sync(store, project_id, "external")  # edits made on disk since the last run show up too
+    return versions.history(store, project_id, rel)
+
+
+@app.get("/api/v1/projects/{project_id}/files/version")
+def file_version(project_id: str, path: str, version: int, download: bool = False):
+    """The content of one saved version (read-only), served like /files/raw."""
+    _project(project_id)
+    rel = _path(project_id, path).relative_to(workspace.project_root(project_id)).as_posix()
+    try:
+        obj = versions.version_object(store, project_id, rel, version)
+    except versions.VersionError as exc:
+        raise HTTPException(404, str(exc))
+    name = Path(rel).name
+    media = mimetypes.guess_type(name)[0] or "application/octet-stream"
+    if media in {"text/html", "image/svg+xml"} and not download:
+        media = "text/plain"
+    headers = {"X-Content-Type-Options": "nosniff"}
+    if media != "application/pdf":
+        headers["Content-Security-Policy"] = "sandbox"
+    return FileResponse(obj, media_type=media, filename=f"v{version}_{name}",
+                        content_disposition_type="attachment" if download else "inline", headers=headers)
+
+
+class RestoreIn(BaseModel):
+    path: str
+    version: int
+
+
+@app.post("/api/v1/projects/{project_id}/files/restore")
+def file_restore(project_id: str, body: RestoreIn):
+    """Make an earlier version current again. It is added as a new version; later versions are kept."""
+    _project(project_id)
+    rel = _path(project_id, body.path).relative_to(workspace.project_root(project_id)).as_posix()
+    busy = store.one("SELECT id FROM runs WHERE project_id=? AND status='running' AND provider='claude_code_cli'",
+                     (project_id,))
+    if busy:
+        raise HTTPException(409, "An agent is working in this project right now. Restore when it has finished.")
+    try:
+        new = versions.restore(store, project_id, rel, body.version)
+    except versions.VersionError as exc:
+        raise HTTPException(404, str(exc))
+    store.log_activity(project_id, "file_restored", f"{rel} v{body.version}")
+    return {"path": rel, "restored": body.version, "current_version": new}
+
+
 @app.post("/api/v1/projects/{project_id}/files", status_code=201)
 async def upload(project_id: str, file: UploadFile = File(...), folder: str = "uploads", unzip: bool = False):
     _project(project_id)
@@ -1006,22 +1056,23 @@ async def upload(project_id: str, file: UploadFile = File(...), folder: str = "u
                 out.close(); tmp.unlink(missing_ok=True)
                 raise HTTPException(413, "file too large")
             out.write(chunk)
-    if dest.exists():  # keep earlier versions instead of overwriting silently
-        n = 1
-        while (v := dest.with_name(f"{dest.stem}.v{n}{dest.suffix}")).exists():
-            n += 1
-        shutil.move(dest, v)
-    tmp.replace(dest)
     root = workspace.project_root(project_id)
     rel = dest.relative_to(root).as_posix()
+    if dest.exists():  # the earlier content is kept as a version (see the file's History), not overwritten
+        versions.record(store, project_id, rel, "external", note="saved automatically before an upload replaced it")
+    tmp.replace(dest)
+    version = versions.record(store, project_id, rel, "user", note="uploaded")
     store.log_activity(project_id, "file_uploaded", rel)
     if unzip and ext == ".zip":  # the paper's folder as a zip: unpack next to it, return every file
         try:
             files = workspace.unzip_into(dest, dest.with_suffix(""))
         except workspace.PathError as exc:
             raise HTTPException(400, str(exc))
-        return {"path": rel, "size": size, "files": [f.relative_to(root).as_posix() for f in files]}
-    return {"path": rel, "size": size}
+        for f in files:
+            versions.record(store, project_id, f.relative_to(root).as_posix(), "user", note=f"unpacked from {name}")
+        return {"path": rel, "size": size, "version": version,
+                "files": [f.relative_to(root).as_posix() for f in files]}
+    return {"path": rel, "size": size, "version": version}
 
 
 @app.post("/api/v1/projects/{project_id}/export")

@@ -19,7 +19,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import experiments
+from . import experiments, versions
 from .db import Store, now
 
 PROVIDER = "server_exec"
@@ -54,6 +54,8 @@ def _sha(path: Path) -> str | None:
 def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: Path, out_json: Path) -> None:
     """Run each job in order and write run_log.json. jobs: [{id, argv, slots, timeout_s}]."""
     store.update_run(run_id, status="running", started_at=now())
+    project_id = store.one("SELECT project_id FROM runs WHERE id=?", (run_id,))["project_id"]
+    versions.safe_sync(store, project_id, "external")
     store.add_event(run_id, "status", {"text": f"Running {len(jobs)} experiment(s) on the server"})
     log_dir.mkdir(parents=True, exist_ok=True)
     results = []
@@ -109,6 +111,7 @@ def run_jobs(store: Store, run_id: str, root: Path, jobs: list[dict], log_dir: P
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps({"python": python_exe(), "finished_at": now(), "jobs": results}, indent=2),
                         encoding="utf-8")
+    versions.safe_sync(store, project_id, "server_exec", run_id)
     if run_id in _cancelled:
         _cancelled.discard(run_id)
         return  # cancel() already marked the run

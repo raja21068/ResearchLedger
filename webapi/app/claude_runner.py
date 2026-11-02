@@ -16,7 +16,7 @@ import time
 
 from .config import settings
 from .db import Store, TERMINAL_STATES, now
-from . import memory, prefs, workspace
+from . import memory, prefs, versions, workspace
 
 SYSTEM_PROMPT = """You are the research agent inside the ResearchLedger web workspace.
 Your working directory is this project's workspace; keep every file you create inside it.
@@ -197,6 +197,7 @@ def _execute_locked(store: Store, run_id: str) -> None:
     conv = store.one("SELECT * FROM conversations WHERE id=?", (run["conversation_id"],))
     project_id = run["project_id"]
     cwd = workspace.project_root(project_id)
+    versions.safe_sync(store, project_id, "external")  # save edits made outside a tracked run before the agent starts
     before = workspace.snapshot(project_id)
     started = time.monotonic()
     store.update_run(run_id, status="running", started_at=now())
@@ -276,6 +277,7 @@ def _record_artifacts(store: Store, run_id: str, project_id: str, before: dict) 
     """Hash every file the run created or changed, record deletions; return the non-build files that still exist."""
     root = workspace.project_root(project_id)
     changes = workspace.diff_snapshot(project_id, before)
+    versions.safe_sync(store, project_id, "agent", run_id)
     for rel, change in changes:
         p = root / rel
         if change != "deleted" and not p.is_file():

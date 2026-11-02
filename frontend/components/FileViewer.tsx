@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, fileUrl, post, ApiError } from "@/lib/api";
+import { FileHistory } from "./FileHistory";
 import { Markdown } from "./Markdown";
 import { btn2, ErrorBox } from "./ui";
 
@@ -37,6 +38,7 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
   const [notice, setNotice] = useState<string | null>(null);
   const [showSource, setShowSource] = useState(false);
   const [bust, setBust] = useState(0);
+  const [showHistory, setShowHistory] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -82,6 +84,9 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
           </>
         )}
         <button className={btn2} onClick={() => setBust((b) => b + 1)} aria-label="Reload file">Reload</button>
+        <button className={btn2} aria-pressed={showHistory} onClick={() => setShowHistory(!showHistory)}>
+          {showHistory ? "Hide history" : "History"}
+        </button>
         {!fullPage && (
           <a className={btn2} href={`/view/${projectId}?path=${encodeURIComponent(path)}`} target="_blank"
             rel="noreferrer">Open in new tab ↗</a>
@@ -91,6 +96,7 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
       {notice && <div className="border-b border-[#f0d2ac] bg-[#fff8ef] px-3 py-2 text-sm text-[#7a3a06]">{notice}</div>}
       {error ? <div className="whitespace-pre-wrap p-3"><ErrorBox error={error} /></div> : null}
 
+      <div className="flex min-h-0 flex-1">
       <div className="min-h-0 flex-1 overflow-auto bg-[#e9ecef]">
         {kind === "pdf" && <iframe title={name} src={raw} className="h-full min-h-[480px] w-full border-0 bg-white" />}
         {kind === "image" && (
@@ -120,6 +126,8 @@ export function FileViewer({ projectId, path, version = 0, fullPage = false, onE
             : <p className="p-5 text-sm text-muted">{preview.warnings?.join(" ") ?? "No text preview for this file type. Use Download."}</p>
         )}
         {!preview && !error && kind !== "pdf" && kind !== "image" && <p className="rl-pulse p-5 text-sm text-faint">Loading…</p>}
+      </div>
+      {showHistory && <FileHistory projectId={projectId} path={path} onRestored={() => setBust((b) => b + 1)} />}
       </div>
     </div>
   );

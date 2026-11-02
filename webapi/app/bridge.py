@@ -19,7 +19,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from . import memory, workspace
+from . import memory, versions, workspace
 from .config import settings
 from .db import Store, TERMINAL_STATES, now
 
@@ -136,6 +136,7 @@ def claim(store: Store) -> dict | None:
         token = secrets.token_hex(8)
         _claims[run["id"]] = {"token": token, "at": time.time()}
     store.add_event(run["id"], "status", {"text": "Claude app worker started the task"})
+    versions.safe_sync(store, run["project_id"], "external")  # baseline: the agent's edits become their own versions
     from .claude_runner import SYSTEM_PROMPT
     from . import director  # noqa: F401  (fills DIRECTOR_SYSTEM)
     from .claude_runner import DIRECTOR_SYSTEM
@@ -206,6 +207,7 @@ def complete(store: Store, run_id: str, summary: str, failed: bool = False, clai
                                               p.stat().st_size, "written", now()))
         if not workspace.is_build_output(rel) and rel != memory.MEMORY_PATH:
             produced.append(rel)
+    versions.safe_sync(store, run["project_id"], "agent", run_id)
     if summary.strip():
         store.add_event(run_id, "assistant_text", {"text": summary[:20000]})
     if produced:

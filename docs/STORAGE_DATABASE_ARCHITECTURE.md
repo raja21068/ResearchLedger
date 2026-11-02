@@ -1,6 +1,6 @@
 # Storage and database architecture
 
-Status: specification. Phase 0 is done; Phases 1–5 are planned. This document is the contract the storage work is
+Status: Phase 0 is done; Phase 1 is mostly done (file versions, see below); the rest is planned. This document is the contract the storage work is
 built against. It covers the schema, layout, APIs, concurrency, versioning, backup and migration.
 
 ## 1. Where we are (checked against the code, November 2026)
@@ -204,6 +204,19 @@ Reason: the target user runs on a Windows laptop where Docker Desktop is often a
 push them to run scripts by hand, with no provenance at all. **This is the user's decision.** Until it is made, the
 current approval gate stays.
 
+### Versions as built (Phase 1)
+
+- **What is versioned:** every workspace file up to 64 MB, except LaTeX build files. Larger files are listed but not
+  copied, which is the known gap for big datasets.
+- **Disk use:** the first time a project is synced, every file is copied once into `objects/`. After that, only new
+  content is stored, and identical contents are shared.
+- **Attribution:**
+  - before a run, changes made outside any run are saved as `external`;
+  - after it, changes are saved as `agent` or `server_exec` with the run id;
+  - only one agent task runs per project (Phase 0), so a change in that window belongs to that run. Edits made by
+    hand during a run are the one exception: they are attributed to the run too.
+- **Deletions:** a deleted file is marked `deleted_at`, its content stays, and Restore brings it back.
+
 ## 9. Workflow state and memory
 
 **Workflow state today:**
@@ -245,8 +258,8 @@ These are adopted from the review, and the phases above implement them:
 | Phase | Content | Done when |
 |---|---|---|
 | 0 ✅ | provenance freshness in `collect()`; hash-based snapshots with deletions; WAL, indexes, `schema_migrations`; one agent task per project; CI fixes + webapi/frontend CI jobs; honest agent registry | 105 webapi tests pass, including the 6 in `test_storage.py` |
-| 1 | object store + `blobs/files/file_versions`; atomic upload path; ZIP import into versions with rollback; FK rebuild for `artifacts`; DB moved to `database/` | every write path creates versions; a crash-injection test leaves no partial state |
-| 2 | history, compare, restore, rename/move, trash in the API and file panel; dataset records | restore never loses later versions (tests) |
+| 1 (mostly ✅) | **done:** object store + `blobs/files/file_versions/audit_events` (migration 3, `webapi/app/versions.py`); versions captured before and after every agent run (CLI and bridge), server experiment run and upload; re-uploads become versions instead of `.v1` copies; ZIP contents versioned. **Left:** ZIP import rollback, journal and crash-injection test, FK rebuild for `artifacts`, DB moved to `database/` | every write path creates versions (7 tests in `test_versions.py`) |
+| 2 (started) | **done:** history, view and restore in the API and a History panel in the file viewer; a restore refuses to run while an agent works in the project and saves unsaved edits first. **Left:** side-by-side compare, rename/move, a trash view of deleted files, dataset records | restore never loses later versions (tested) |
 | 3 | per-run staging, base-version tracking, conflict detection, merge UI, leases | two parallel runs on one project never lose a change (test) |
 | 4 | automatic verified backups, project export/import, startup journal recovery, integrity audit | restore from backup reproduces every hash |
 | 5 | reuse the `researchledger` package's atomic writes, locks and hash-chained run manifests; link files to C/E/R claims and evidence | one provenance implementation, used by both the CLI and the web app |
