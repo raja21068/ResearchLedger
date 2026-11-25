@@ -98,6 +98,57 @@ def parse_support_sets(value) -> list[list[str]]:
     return [split_ids(group) for group in text.split(";") if split_ids(group)]
 
 
+def support_fields_from_relations(relations) -> dict:
+    """Write one claim's registered support relations as claim frontmatter.
+
+    ``relations`` are ``(evidence_id, claim_id, kind, group)`` tuples with kind
+    ``supports`` (singleton sufficient path), ``member`` (conjunct of sufficient
+    set ``group``) or ``requires`` (premise conjoined with every path).
+
+    ``recompute_claim_status`` treats an entry of ``claim.evidence`` as a
+    singleton path only when it appears in no ``support_sets`` group. If an
+    evidence record is both a singleton path and a group member for the same
+    claim, writing the singleton only to ``evidence`` silently drops that
+    alternative. So once a claim has any group, every sufficient path,
+    singletons included, is written explicitly to ``support_sets``; ``evidence``
+    then lists every cited record.
+    """
+    singles: list[str] = []
+    groups: dict[str, list[str]] = {}
+    required: list[str] = []
+    for eid, _cid, kind, group in relations:
+        if kind == "supports":
+            if eid not in singles:
+                singles.append(eid)
+        elif kind == "member":
+            members = groups.setdefault(str(group), [])
+            if eid not in members:
+                members.append(eid)
+        elif kind == "requires":
+            if eid not in required:
+                required.append(eid)
+        else:
+            raise ValueError(f"unknown support relation kind: {kind!r}")
+    if not groups:
+        return {
+            "evidence": singles,
+            "support_sets": [],
+            "required_evidence": ",".join(required) or None,
+        }
+    support_sets = [[eid] for eid in singles]
+    support_sets.extend(sorted(m) for _, m in sorted(groups.items()))
+    cited: list[str] = []
+    for group_ids in support_sets:
+        for eid in group_ids:
+            if eid not in cited:
+                cited.append(eid)
+    return {
+        "evidence": cited,
+        "support_sets": support_sets,
+        "required_evidence": ",".join(required) or None,
+    }
+
+
 @dataclass
 class Evidence:
     id: str
