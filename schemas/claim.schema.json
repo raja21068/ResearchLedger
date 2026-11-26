@@ -39,14 +39,14 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^E[0-9]{3}$"
+        "pattern": "^E[0-9]{3,}$"
       }
     },
     "contradicts": {
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^E[0-9]{3}$"
+        "pattern": "^E[0-9]{3,}$"
       }
     },
     "required_evidence": {
@@ -59,7 +59,7 @@
           "uniqueItems": true,
           "items": {
             "type": "string",
-            "pattern": "^E[0-9]{3}$"
+            "pattern": "^E[0-9]{3,}$"
           }
         }
       ],
@@ -85,7 +85,7 @@
         "uniqueItems": true,
         "items": {
           "type": "string",
-          "pattern": "^E[0-9]{3}$"
+          "pattern": "^E[0-9]{3,}$"
         }
       }
     }

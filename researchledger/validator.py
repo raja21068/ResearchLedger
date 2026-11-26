@@ -30,9 +30,9 @@ from .schema_validation import validate_instance
 from .workspace import Workspace
 
 ID_PATTERNS = {
-    "evidence": re.compile(r"^E\d{3}$"),
-    "claim": re.compile(r"^C\d{3}$"),
-    "decision": re.compile(r"^D\d{3}$"),
+    "evidence": re.compile(r"^E\d{3,}$"),
+    "claim": re.compile(r"^C\d{3,}$"),
+    "decision": re.compile(r"^D\d{3,}$"),
     "run": re.compile(r"^R\d{4}$"),
 }
 

@@ -98,12 +98,12 @@
       "processes": [
         {
           "returncode": 0,
-          "stdout": "{\n  \"txid\": \"REV20260923T081020-2f89755a\",\n  \"status\": \"committed\",\n  \"reason\": \"concurrent-1\",\n  \"evidence_changes\": [\n    {\n      \"entity_id\": \"E001\",\n      \"before\": \"verified\",\n      \"after\": \"superseded\"\n    }\n  ],\n  \"claim_changes\": [\n    {\n      \"entity_id\": \"C001\",\n      \"before\": \"supported\",\n      \"after\": \"hypothesis\"\n    }\n  ],\n  \"files\": [\n    \"research/claims/C001.md\",\n    \"research/evidence/E001.md\"\n  ],\n  \"recovered_before_apply\": []\n}\n",
+          "stdout": "{\n  \"txid\": \"REV20261125T132924-2b60925f\",\n  \"status\": \"committed\",\n  \"reason\": \"concurrent-1\",\n  \"evidence_changes\": [\n    {\n      \"entity_id\": \"E001\",\n      \"before\": \"verified\",\n      \"after\": \"superseded\"\n    }\n  ],\n  \"claim_changes\": [\n    {\n      \"entity_id\": \"C001\",\n      \"before\": \"supported\",\n      \"after\": \"hypothesis\"\n    }\n  ],\n  \"files\": [\n    \"research/claims/C001.md\",\n    \"research/evidence/E001.md\"\n  ],\n  \"recovered_before_apply\": []\n}\n",
           "stderr_nonempty": false
         },
         {
           "returncode": 0,
-          "stdout": "{\n  \"txid\": \"REV20260923T081020-68e0a302\",\n  \"status\": \"committed\",\n  \"reason\": \"concurrent-2\",\n  \"evidence_changes\": [\n    {\n      \"entity_id\": \"E002\",\n      \"before\": \"verified\",\n      \"after\": \"superseded\"\n    }\n  ],\n  \"claim_changes\": [\n    {\n      \"entity_id\": \"C002\",\n      \"before\": \"supported\",\n      \"after\": \"hypothesis\"\n    }\n  ],\n  \"files\": [\n    \"research/claims/C002.md\",\n    \"research/evidence/E002.md\"\n  ],\n  \"recovered_before_apply\": []\n}\n",
+          "stdout": "{\n  \"txid\": \"REV20261125T132924-5e15796c\",\n  \"status\": \"committed\",\n  \"reason\": \"concurrent-2\",\n  \"evidence_changes\": [\n    {\n      \"entity_id\": \"E002\",\n      \"before\": \"verified\",\n      \"after\": \"superseded\"\n    }\n  ],\n  \"claim_changes\": [\n    {\n      \"entity_id\": \"C002\",\n      \"before\": \"supported\",\n      \"after\": \"hypothesis\"\n    }\n  ],\n  \"files\": [\n    \"research/claims/C002.md\",\n    \"research/evidence/E002.md\"\n  ],\n  \"recovered_before_apply\": []\n}\n",
           "stderr_nonempty": false
         }
       ],

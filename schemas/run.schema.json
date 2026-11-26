@@ -29,7 +29,7 @@
     "targets": {
       "type": "object",
       "properties": {
-        "claims": { "type": "array", "items": { "type": "string", "pattern": "^C[0-9]{3}$" } },
+        "claims": { "type": "array", "items": { "type": "string", "pattern": "^C[0-9]{3,}$" } },
         "plan": { "type": ["string", "null"] }
       }
     },

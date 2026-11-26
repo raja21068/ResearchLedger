@@ -1,0 +1,3 @@
+# Hash-checked fixtures: never translate line endings (a CRLF checkout breaks
+# the artifact sha256 recorded in run manifests).
+examples/** -text

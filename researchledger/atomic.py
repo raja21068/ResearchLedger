@@ -34,6 +34,22 @@ def atomic_write_text(path: Path, content: str, *, encoding: str = "utf-8") -> N
             tmp_path.unlink(missing_ok=True)
 
 
+def atomic_write_bytes(path: Path, content: bytes) -> None:
+    """Byte-exact variant of `atomic_write_text` (no newline translation)."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.tmp-{os.getpid()}-{uuid.uuid4().hex[:8]}")
+    try:
+        with open(tmp_path, "wb") as f:
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
+
+
 def atomic_write_json(path: Path, data, *, indent: int = 2) -> None:
     atomic_write_text(Path(path), json.dumps(data, indent=indent) + "\n")
 

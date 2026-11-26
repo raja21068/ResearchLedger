@@ -1,0 +1,171 @@
+{
+  "machine": "Windows-10-10.0.26300-SP0",
+  "python": "3.10.11",
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "results": [
+    {
+      "triples": 1000,
+      "records": 3000,
+      "repeats": 3,
+      "build_s": 4.166697099994053,
+      "workspace_bytes": 494750,
+      "median": {
+        "plan_s": 2.681198200007202,
+        "validate_s": 4.015817899999092,
+        "apply_s": 12.880618299997877,
+        "files_written": 2,
+        "bytes_written": 331,
+        "claim_changes": 1
+      },
+      "runs": [
+        {
+          "plan_s": 2.619308799999999,
+          "validate_s": 3.7492522000102326,
+          "apply_s": 12.880618299997877,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 2.681198200007202,
+          "validate_s": 4.147000199998729,
+          "apply_s": 13.089130000007572,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 2.803017099999124,
+          "validate_s": 4.015817899999092,
+          "apply_s": 12.798141599996598,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        }
+      ]
+    },
+    {
+      "triples": 3000,
+      "records": 9000,
+      "repeats": 3,
+      "build_s": 12.375736300004064,
+      "workspace_bytes": 1484250,
+      "median": {
+        "plan_s": 8.573761200008448,
+        "validate_s": 12.106557600011001,
+        "apply_s": 40.33743080000568,
+        "files_written": 2,
+        "bytes_written": 331,
+        "claim_changes": 1
+      },
+      "runs": [
+        {
+          "plan_s": 7.966015300000436,
+          "validate_s": 11.900904399997671,
+          "apply_s": 40.19760700000916,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 8.573761200008448,
+          "validate_s": 12.106557600011001,
+          "apply_s": 40.56078200000047,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 8.667424100000062,
+          "validate_s": 13.24361950000457,
+          "apply_s": 40.33743080000568,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        }
+      ]
+    },
+    {
+      "triples": 10000,
+      "records": 30000,
+      "repeats": 3,
+      "build_s": 43.527493800007505,
+      "workspace_bytes": 4947500,
+      "median": {
+        "plan_s": 24.116397000005236,
+        "validate_s": 35.37141619999602,
+        "apply_s": 119.26255810000293,
+        "files_written": 2,
+        "bytes_written": 331,
+        "claim_changes": 1
+      },
+      "runs": [
+        {
+          "plan_s": 24.356643499995698,
+          "validate_s": 35.37141619999602,
+          "apply_s": 118.78709220000019,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 23.713274399997317,
+          "validate_s": 35.466024800000014,
+          "apply_s": 120.52957120000792,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 24.116397000005236,
+          "validate_s": 34.805624899992836,
+          "apply_s": 119.26255810000293,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        }
+      ]
+    },
+    {
+      "triples": 30000,
+      "records": 90000,
+      "repeats": 3,
+      "build_s": 108.56064539999352,
+      "workspace_bytes": 14842500,
+      "median": {
+        "plan_s": 41.33088399999542,
+        "validate_s": 59.214809900004184,
+        "apply_s": 199.42332159999933,
+        "files_written": 2,
+        "bytes_written": 331,
+        "claim_changes": 1
+      },
+      "runs": [
+        {
+          "plan_s": 42.68943020000006,
+          "validate_s": 62.85885669999698,
+          "apply_s": 203.56804169999668,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 41.33088399999542,
+          "validate_s": 58.22463810000045,
+          "apply_s": 199.42332159999933,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        },
+        {
+          "plan_s": 39.51834850000159,
+          "validate_s": 59.214809900004184,
+          "apply_s": 196.48622510000132,
+          "files_written": 2,
+          "bytes_written": 331,
+          "claim_changes": 1
+        }
+      ]
+    }
+  ]
+}

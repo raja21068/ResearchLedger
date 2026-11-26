@@ -69,3 +69,33 @@ def test_recover_incomplete_revision_restores_preimage(tmp_path):
     assert recovered == ["REV-test"]
     assert target.read_text() == before
     assert json.loads((tx/"manifest.json").read_text())["phase"] == "rolled_back"
+
+
+def test_rollback_restores_crlf_preimage_byte_exact(tmp_path):
+    # Pre-images must be restored byte for byte; text-mode copying would
+    # rewrite CRLF line endings and break the pre-image hash check.
+    ws=init_workspace(tmp_path)
+    _ev(ws,"E001",supports=["C001"]); _cl(ws,"C001",evidence=["E001"])
+    paths=[ws.evidence_dir/"E001.md", ws.claims_dir/"C001.md"]
+    for p in paths:
+        p.write_bytes(p.read_bytes().replace(b"\r\n",b"\n").replace(b"\n",b"\r\n"))
+    before={p: p.read_bytes() for p in paths}
+    import researchledger.revision as rev
+    real=rev.atomic_write_text
+    calls={"n":0}
+    def failing(path, content, **kw):
+        calls["n"]+=1
+        if calls["n"]==2:
+            raise OSError("injected")
+        return real(path, content, **kw)
+    rev.atomic_write_text=failing
+    try:
+        try:
+            apply_evidence_revision(ws,{"E001":"superseded"})
+        except OSError:
+            pass
+        else:
+            raise AssertionError("expected injected failure")
+    finally:
+        rev.atomic_write_text=real
+    assert {p: p.read_bytes() for p in paths} == before

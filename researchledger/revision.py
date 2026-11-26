@@ -23,7 +23,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from .atomic import atomic_write_json, atomic_write_text
+from .atomic import atomic_write_bytes, atomic_write_json, atomic_write_text
 from .hashing import sha256_file
 from .models import EVIDENCE_STATUSES, load_claims, load_evidence, recompute_claim_status
 from .validator import validate
@@ -114,7 +114,9 @@ def _restore_transaction(ws: Workspace, tx_dir: Path, manifest: dict) -> None:
         backup = tx_dir / "before" / rel
         target = ws.root / rel
         if backup.exists():
-            atomic_write_text(target, backup.read_text(encoding="utf-8"))
+            # Byte-exact: text-mode read/write would translate CRLF on Windows
+            # and the restored file would no longer match its pre-image hash.
+            atomic_write_bytes(target, backup.read_bytes())
     manifest["phase"] = "rolled_back"
     manifest["rolled_back_at"] = time.time()
     _write_manifest(tx_dir, manifest)
@@ -184,7 +186,7 @@ def apply_evidence_revision(ws: Workspace, updates: dict[str, str], *, reason: s
             src = ws.root / rel
             backup = tx_dir / "before" / rel
             backup.parent.mkdir(parents=True, exist_ok=True)
-            backup.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+            backup.write_bytes(src.read_bytes())
 
         manifest = {
             "schema": "researchledger-revision-1",

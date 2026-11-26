@@ -11,7 +11,7 @@
     "name": { "type": "string", "minLength": 1 },
     "type": { "const": "research-decision" },
     "status": { "type": "string", "description": "Free string; conventionally decided | revisiting | reversed." },
-    "evidence": { "type": "array", "items": { "type": "string", "pattern": "^E[0-9]{3}$" } },
+    "evidence": { "type": "array", "items": { "type": "string", "pattern": "^E[0-9]{3,}$" } },
     "created_at": { "type": "string", "format": "date-time" },
     "updated_at": { "type": "string", "format": "date-time" }
   }
