@@ -1,0 +1,560 @@
+{
+  "n": 300,
+  "seed": 62,
+  "events_per_trajectory": 3,
+  "graphs": {
+    "gold": {
+      "tallies": {
+        "events": 900,
+        "nonempty": 530,
+        "jtms": 900,
+        "atms": 900,
+        "rl_naive": 900,
+        "rl_explicit": 900,
+        "reach:other": 666,
+        "flat": 416,
+        "flat:other": 484,
+        "reach": 234
+      },
+      "divergences": []
+    },
+    "drop20": {
+      "tallies": {
+        "events": 900,
+        "nonempty": 491,
+        "jtms": 900,
+        "atms": 900,
+        "rl_naive": 900,
+        "rl_explicit": 900,
+        "reach:other": 562,
+        "flat": 464,
+        "flat:other": 436,
+        "reach": 338
+      },
+      "divergences": []
+    },
+    "flatten": {
+      "tallies": {
+        "events": 900,
+        "nonempty": 324,
+        "jtms": 900,
+        "atms": 900,
+        "rl_naive": 900,
+        "rl_explicit": 900,
+        "reach:other": 655,
+        "flat": 680,
+        "reach": 245,
+        "flat:other": 220
+      },
+      "divergences": []
+    },
+    "spurious30": {
+      "tallies": {
+        "events": 900,
+        "nonempty": 422,
+        "jtms": 900,
+        "atms": 900,
+        "rl_naive": 849,
+        "rl_explicit": 900,
+        "reach:other": 657,
+        "flat": 522,
+        "flat:other": 339,
+        "flat:pair_collision": 39,
+        "reach": 192,
+        "rl_naive:pair_collision": 51,
+        "reach:pair_collision": 51
+      },
+      "divergences": [
+        {
+          "impl": "rl_naive",
+          "tid": 8,
+          "event": 0,
+          "claims": [
+            "C00801"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 8,
+          "event": 1,
+          "claims": [
+            "C00801"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 9,
+          "event": 1,
+          "claims": [
+            "C00903"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 9,
+          "event": 2,
+          "claims": [
+            "C00903"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 14,
+          "event": 1,
+          "claims": [
+            "C01401"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 18,
+          "event": 0,
+          "claims": [
+            "C01803"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 18,
+          "event": 2,
+          "claims": [
+            "C01802"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 22,
+          "event": 0,
+          "claims": [
+            "C02206"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 22,
+          "event": 1,
+          "claims": [
+            "C02206"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 28,
+          "event": 1,
+          "claims": [
+            "C02806"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 28,
+          "event": 2,
+          "claims": [
+            "C02802"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 33,
+          "event": 2,
+          "claims": [
+            "C03301"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 38,
+          "event": 1,
+          "claims": [
+            "C03802"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 65,
+          "event": 1,
+          "claims": [
+            "C06505"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 66,
+          "event": 2,
+          "claims": [
+            "C06601"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 77,
+          "event": 1,
+          "claims": [
+            "C07705"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 82,
+          "event": 2,
+          "claims": [
+            "C08203"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 87,
+          "event": 2,
+          "claims": [
+            "C08706"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 92,
+          "event": 2,
+          "claims": [
+            "C09203"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 97,
+          "event": 2,
+          "claims": [
+            "C09706"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 101,
+          "event": 1,
+          "claims": [
+            "C10102"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 111,
+          "event": 2,
+          "claims": [
+            "C11105"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 112,
+          "event": 1,
+          "claims": [
+            "C11201"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 128,
+          "event": 0,
+          "claims": [
+            "C12800"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 128,
+          "event": 1,
+          "claims": [
+            "C12800"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 131,
+          "event": 2,
+          "claims": [
+            "C13106"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 132,
+          "event": 2,
+          "claims": [
+            "C13202"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 146,
+          "event": 0,
+          "claims": [
+            "C14600"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 146,
+          "event": 2,
+          "claims": [
+            "C14600"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 148,
+          "event": 1,
+          "claims": [
+            "C14803"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 157,
+          "event": 2,
+          "claims": [
+            "C15702"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 170,
+          "event": 2,
+          "claims": [
+            "C17003"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 174,
+          "event": 1,
+          "claims": [
+            "C17403"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 174,
+          "event": 2,
+          "claims": [
+            "C17403"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 176,
+          "event": 1,
+          "claims": [
+            "C17601"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 188,
+          "event": 1,
+          "claims": [
+            "C18804"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 188,
+          "event": 2,
+          "claims": [
+            "C18804"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 192,
+          "event": 1,
+          "claims": [
+            "C19203"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 192,
+          "event": 2,
+          "claims": [
+            "C19203"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 197,
+          "event": 1,
+          "claims": [
+            "C19703"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 219,
+          "event": 1,
+          "claims": [
+            "C21902"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 220,
+          "event": 1,
+          "claims": [
+            "C22006"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 227,
+          "event": 0,
+          "claims": [
+            "C22702"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 259,
+          "event": 1,
+          "claims": [
+            "C25904"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 262,
+          "event": 0,
+          "claims": [
+            "C26200"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 265,
+          "event": 0,
+          "claims": [
+            "C26504"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 265,
+          "event": 1,
+          "claims": [
+            "C26504"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 270,
+          "event": 2,
+          "claims": [
+            "C27007"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 272,
+          "event": 2,
+          "claims": [
+            "C27200"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 290,
+          "event": 1,
+          "claims": [
+            "C29006"
+          ],
+          "cause": "pair_collision"
+        },
+        {
+          "impl": "rl_naive",
+          "tid": 290,
+          "event": 2,
+          "claims": [
+            "C29002"
+          ],
+          "cause": "pair_collision"
+        }
+      ]
+    }
+  },
+  "planner_check": [
+    {
+      "graph": "gold",
+      "mode": "naive",
+      "trajectories": 30,
+      "events": 90,
+      "matches": 90
+    },
+    {
+      "graph": "gold",
+      "mode": "explicit",
+      "trajectories": 30,
+      "events": 90,
+      "matches": 90
+    },
+    {
+      "graph": "spurious30",
+      "mode": "naive",
+      "trajectories": 30,
+      "events": 90,
+      "matches": 79
+    },
+    {
+      "graph": "spurious30",
+      "mode": "explicit",
+      "trajectories": 30,
+      "events": 90,
+      "matches": 90
+    }
+  ]
+}
